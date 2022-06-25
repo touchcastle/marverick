@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "530686204261",
+    "project_id": "marverick-353411",
+    "storage_bucket": "marverick-353411.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530686204261:android:de23af53ee3833928b298c",
+        "android_client_info": {
+          "package_name": "place.tjo.marverick"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "530686204261-1cn1bekirpcl9irv0ftr4ntfj84sgaol.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5yHzgp-TJvJywW3plCxPce3BeemlWRD8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "530686204261-1cn1bekirpcl9irv0ftr4ntfj84sgaol.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "530686204261-tmsuipokup6qiinfpe459f821nuthikg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "place.tjo.marverick"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
