@@ -188,7 +188,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
-            noInternet
+            noInternet & !widget.fromInside
                 ? TextButton(
                     child: Text(
                       'Offline Mode',
