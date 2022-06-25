@@ -3,10 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
-import 'package:marverick/ui/views/main_menu.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/utils/constants.dart';
 import 'package:marverick/utils/utils.dart';
@@ -19,35 +17,17 @@ class Landing extends StatefulWidget {
 }
 
 class _LandingState extends State<Landing> {
-  ///In case of no internet connection. User can continue using app.
-  ///App will required login again when trying to submit form.
-  bool needLogin = false;
-  Future<bool> requiredLogin() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult != ConnectivityResult.none && Authen.user == null) {
-      print(connectivityResult);
-      print(Authen.user);
-      print('1');
-      return true;
-    } else {
-      print('2');
-      return false;
-    }
-  }
-
   ///Initialize app's variables
   void _appInitialize() async {
     //Query stored form from database
     await context.read<FormService>().loadFromDatabase();
     Authen.getCurrentUser();
-    needLogin = await requiredLogin();
     await Future.delayed(const Duration(milliseconds: 1500));
     Navigator.of(context).pushReplacement(PageRouteBuilder(
-        settings:
-            RouteSettings(name: needLogin ? kLoginPageName : kMainPageName),
+        settings: RouteSettings(name: kLoginPageName),
         transitionDuration: kLandingTransitionDur,
         transitionsBuilder: kPageTransition,
-        pageBuilder: (_, __, ___) => needLogin ? Login() : MainMenu()));
+        pageBuilder: (_, __, ___) => Login()));
   }
 
   @override

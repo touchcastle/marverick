@@ -13,7 +13,8 @@ import 'package:marverick/utils/constants.dart';
 class MainMenu extends StatefulWidget {
   static const id = kMainMenuId; //for route.
   int selectedIndex = 0;
-  MainMenu({this.selectedIndex = 0});
+  bool isOfflineMode;
+  MainMenu({this.selectedIndex = 0, this.isOfflineMode = false});
 
   @override
   _MainMenuState createState() => _MainMenuState();
@@ -21,80 +22,46 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   late StreamSubscription<ConnectivityResult> subscription;
-  ConnectivityResult? lastState;
 
   void _screenInit() async {
-    ConnectivityResult connecticity = await Connectivity().checkConnectivity();
-    print('>> $connecticity');
-    subscription = await Connectivity()
+    print('main menu init fx');
+    print(await Connectivity().checkConnectivity());
+    subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) async {
+      print(result);
+
       if (result == ConnectivityResult.none &&
           (await Connectivity().checkConnectivity() ==
               ConnectivityResult.none)) {
+        showOfflineSnackbar();
+      } else if (result != ConnectivityResult.none &&
+          (await Connectivity().checkConnectivity() !=
+              ConnectivityResult.none)) {
         Snackbar.show(context,
-            text:
-                'NO INTERNET CONNECTION: You can create or edit form while offline.',
+            text: 'Connection restored',
             type: Type.info,
             isFixed: true,
-            duration: 10);
-      } else {}
+            duration: 5);
+      }
     });
+  }
+
+  void showOfflineSnackbar() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    Snackbar.show(context,
+        text:
+            'NO INTERNET CONNECTION: You can create or edit form while offline.',
+        type: Type.info,
+        isFixed: true,
+        duration: 10);
   }
 
   @override
   void initState() {
     _screenInit();
+    widget.isOfflineMode ? showOfflineSnackbar() : null;
     super.initState();
-  }
-
-  AlertDialog _logOutWithConfirm() {
-    return AlertDialog(
-      // title: Text(widget.form.fields[index].label, style: label()),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      content: Container(
-        width: 400,
-        padding: EdgeInsets.symmetric(vertical: 20),
-        // height: 400,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(15)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Confirm Logout?',
-                style: TextStyle(
-                  color: kPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                )),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () async {
-                    await Authen.logOut();
-                    Navigator.of(context).pushReplacement(PageRouteBuilder(
-                        settings: RouteSettings(name: kMainPageName),
-                        pageBuilder: (_, __, ___) => Login()));
-                  },
-                  icon: Icon(Icons.check, size: 30, color: kPrimary),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.clear, size: 30, color: kPenColor),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -181,6 +148,55 @@ class _MainMenuState extends State<MainMenu> {
                 .read<FormService>()
                 .newForm(context, FormService.initLineCheck());
           }),
+    );
+  }
+
+  AlertDialog _logOutWithConfirm() {
+    return AlertDialog(
+      // title: Text(widget.form.fields[index].label, style: label()),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Container(
+        width: 400,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        // height: 400,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Confirm Logout?',
+                style: TextStyle(
+                  color: kPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                )),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    await Authen.logOut();
+                    Navigator.of(context).pushReplacement(PageRouteBuilder(
+                        settings: RouteSettings(name: kMainPageName),
+                        pageBuilder: (_, __, ___) => Login()));
+                  },
+                  icon: Icon(Icons.check, size: 30, color: kPrimary),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                  },
+                  icon: Icon(Icons.clear, size: 30, color: kPenColor),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 

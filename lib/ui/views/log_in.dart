@@ -25,6 +25,7 @@ class _LoginState extends State<Login> {
   String password = '';
   final double inputAreaWidth = 400;
   late StreamSubscription<ConnectivityResult> subscription;
+  bool noInternet = false;
 
   void connectivity() async {
     subscription = Connectivity()
@@ -33,15 +34,14 @@ class _LoginState extends State<Login> {
       if (result == ConnectivityResult.none) {
         if (await Connectivity().checkConnectivity() ==
             ConnectivityResult.none) {
-          print('login -> menu due to no internet');
-          if (!widget.fromInside) {
-            Navigator.of(context).pushReplacement(PageRouteBuilder(
-                settings: RouteSettings(name: kMainPageName),
-                transitionDuration: kLandingTransitionDur,
-                transitionsBuilder: kPageTransition,
-                pageBuilder: (_, __, ___) => MainMenu()));
-          }
-        } else {}
+          setState(() {
+            noInternet = true;
+          });
+        } else {
+          setState(() {
+            noInternet = false;
+          });
+        }
       }
     });
   }
@@ -122,66 +122,93 @@ class _LoginState extends State<Login> {
       backgroundColor: kPrimary,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Hero(
-                tag: kHeroLogo,
-                child: SizedBox(
-                  width: width * 0.6,
-                  child: Image(
-                    image: AssetImage(kLogoImage),
-                  ),
-                ),
-              ),
-              SizedBox(height: 60),
-              Container(
-                width: inputAreaWidth,
-                // height: 400,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) => email = value,
-                        decoration: decor('e-mail'),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        obscureText: true,
-                        onChanged: (value) => password = value,
-                        decoration: decor('password'),
-                      ),
-                      SizedBox(height: 30),
-                      Container(
-                        width: inputAreaWidth,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: kSecondary,
-                          borderRadius: BorderRadius.all(Radius.circular(25)),
-                        ),
-                        child: TextButton(
-                          onPressed: () async {
-                            loginAndNavigate();
-                          },
-                          child: Text(
-                            'Log In',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 20),
-                          ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Hero(
+                      tag: kHeroLogo,
+                      child: SizedBox(
+                        width: width * 0.6,
+                        child: Image(
+                          image: AssetImage(kLogoImage),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 60),
+                    Container(
+                      width: inputAreaWidth,
+                      // height: 400,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextField(
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (value) => email = value,
+                              decoration: decor('e-mail'),
+                            ),
+                            SizedBox(height: 10),
+                            TextField(
+                              obscureText: true,
+                              onChanged: (value) => password = value,
+                              decoration: decor('password'),
+                            ),
+                            SizedBox(height: 30),
+                            Container(
+                              width: inputAreaWidth,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                color: kSecondary,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(25)),
+                              ),
+                              child: TextButton(
+                                onPressed: () async {
+                                  loginAndNavigate();
+                                },
+                                child: Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            noInternet
+                ? TextButton(
+                    child: Text(
+                      'Offline Mode',
+                      style: TextStyle(
+                        color: kSecondary,
+                        // fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(PageRouteBuilder(
+                          settings: RouteSettings(name: kMainPageName),
+                          transitionDuration: kLandingTransitionDur,
+                          transitionsBuilder: kPageTransition,
+                          pageBuilder: (_, __, ___) =>
+                              MainMenu(isOfflineMode: true)));
+                    },
+                  )
+                : SizedBox.shrink(),
+            SizedBox(height: 10),
+          ],
         ),
       ),
     );
