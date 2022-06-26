@@ -22,6 +22,7 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   late StreamSubscription<ConnectivityResult> subscription;
+  bool wasDisconnected = false;
 
   void _screenInit() async {
     print('main menu init fx');
@@ -34,10 +35,13 @@ class _MainMenuState extends State<MainMenu> {
       if (result == ConnectivityResult.none &&
           (await Connectivity().checkConnectivity() ==
               ConnectivityResult.none)) {
+        wasDisconnected = true;
         showOfflineSnackbar();
       } else if (result != ConnectivityResult.none &&
           (await Connectivity().checkConnectivity() !=
-              ConnectivityResult.none)) {
+              ConnectivityResult.none) &&
+          wasDisconnected) {
+        wasDisconnected = false;
         Snackbar.show(context,
             text: 'Connection restored',
             type: Type.info,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:marverick/ui/views/main_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
@@ -24,10 +25,12 @@ class _LandingState extends State<Landing> {
     Authen.getCurrentUser();
     await Future.delayed(const Duration(milliseconds: 1500));
     Navigator.of(context).pushReplacement(PageRouteBuilder(
-        settings: RouteSettings(name: kLoginPageName),
+        settings: RouteSettings(
+            name: Authen.user != null ? kMainPageName : kLoginPageName),
         transitionDuration: kLandingTransitionDur,
         transitionsBuilder: kPageTransition,
-        pageBuilder: (_, __, ___) => Login()));
+        pageBuilder: (_, __, ___) =>
+            Authen.user != null ? MainMenu() : Login()));
   }
 
   @override
