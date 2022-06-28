@@ -31,8 +31,12 @@ class Authen {
     if (!email.contains('@vietjetair.com') && !email.contains('@vietjetair')) {
       email += '@vietjetair.com';
     }
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    user = auth.currentUser;
+    try {
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+      if (auth.currentUser != null) {
+        user = auth.currentUser;
+      }
+    } catch (e) {}
   }
 
   static Future logOut() async {
