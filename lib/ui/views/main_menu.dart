@@ -25,7 +25,6 @@ class _MainMenuState extends State<MainMenu> {
   bool wasDisconnected = false;
 
   void _screenInit() async {
-    print('main menu init fx');
     print(await Connectivity().checkConnectivity());
     subscription = Connectivity()
         .onConnectivityChanged
@@ -64,6 +63,7 @@ class _MainMenuState extends State<MainMenu> {
   @override
   void initState() {
     _screenInit();
+    // if (Authen.isSample) context.read<FormService>().forms.clear();
     widget.isOfflineMode ? showOfflineSnackbar() : null;
     super.initState();
   }
@@ -77,12 +77,14 @@ class _MainMenuState extends State<MainMenu> {
   @override
   Widget build(BuildContext context) {
     context.read<FormService>().countPending();
-    String _pendingLabel = context.watch<FormService>().pendingCount > 0
+    String _pendingLabel = context.watch<FormService>().pendingCount > 0 &&
+            !Authen.isSample
         ? 'Pending (${context.watch<FormService>().pendingCount.toString()})'
         : 'Pending';
-    String _draftLabel = context.watch<FormService>().draftCount > 0
-        ? 'Draft (${context.watch<FormService>().draftCount.toString()})'
-        : 'Draft';
+    String _draftLabel =
+        context.watch<FormService>().draftCount > 0 && !Authen.isSample
+            ? 'Draft (${context.watch<FormService>().draftCount.toString()})'
+            : 'Draft';
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -148,9 +150,15 @@ class _MainMenuState extends State<MainMenu> {
           child: Icon(Icons.add),
           backgroundColor: kPrimaryAccent,
           onPressed: () {
-            context
-                .read<FormService>()
-                .newForm(context, FormService.initLineCheck());
+            if (Authen.isSample) {
+              context
+                  .read<FormService>()
+                  .newForm(context, FormService.initSample());
+            } else {
+              context
+                  .read<FormService>()
+                  .newForm(context, FormService.initLineCheck());
+            }
           }),
     );
   }

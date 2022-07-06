@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:marverick/utils/constants.dart';
 import 'package:marverick/services/pdf.dart';
 
 // class User {
@@ -20,6 +21,7 @@ import 'package:marverick/services/pdf.dart';
 class Authen {
   static final auth = FirebaseAuth.instance;
   static var user;
+  static bool isSample = false;
 
   static void getCurrentUser() {
     if (auth.currentUser != null) {
@@ -28,15 +30,22 @@ class Authen {
   }
 
   static Future signIn(String email, String password) async {
-    if (!email.contains('@vietjetair.com') && !email.contains('@vietjetair')) {
-      email += '@vietjetair.com';
-    }
-    try {
-      await auth.signInWithEmailAndPassword(email: email, password: password);
-      if (auth.currentUser != null) {
-        user = auth.currentUser;
+    if (email == kSampleMail && password == kSamplePassword) {
+      isSample = true;
+      user = 'sample';
+    } else {
+      isSample = false;
+      if (!email.contains('@vietjetair.com') &&
+          !email.contains('@vietjetair')) {
+        email += '@vietjetair.com';
       }
-    } catch (e) {}
+      try {
+        await auth.signInWithEmailAndPassword(email: email, password: password);
+        if (auth.currentUser != null) {
+          user = auth.currentUser;
+        }
+      } catch (e) {}
+    }
   }
 
   static Future logOut() async {

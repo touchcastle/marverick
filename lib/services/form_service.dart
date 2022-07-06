@@ -119,65 +119,71 @@ class FormService extends ChangeNotifier {
     downloadUrl = null;
     DateTime submitDate = DateTime.now();
     double percentCompleted;
-    Utils.isAdmin() ? percentCompleted = 1 : percentCompleted = 99.5;
-    await save(form);
-    if (form.percentFilled() > percentCompleted) {
-      if (await (Connectivity().checkConnectivity()) ==
-          ConnectivityResult.none) {
-        callback('No internet connection: Form moved to pending',
-            ErrorType.noInternet);
-        moveToPending(form);
-      } else {
-        try {
-          Utils.showInProgress(true);
-
-          //UPLOAD PDF TO GOOGLE STORAGE
-          form.validate();
-          String name = pdfName(form, submitDate);
-          List<int> pdfAsBytes = await pdf.gen(form);
-          final Directory directory =
-              await path_provider.getApplicationSupportDirectory();
-          String path = directory.path;
-          final File file = File('$path/$name');
-          await file.writeAsBytes(pdfAsBytes, flush: true);
-          TaskSnapshot snapshot = await storage
-              .ref()
-              .child("${formName(form.type)}/${pdfName(form, submitDate)}")
-              .putFile(file);
-          if (snapshot.state == TaskState.success) {
-            downloadUrl = await snapshot.ref.getDownloadURL();
-            form.pdfUrl = downloadUrl;
-          } else {
-            form.pdfUrl = 'error';
-          }
-
-          //UPLOAD JSON TO GOOGLE SHEET
-          await http
-              .post(Uri.parse(formUrl(form.type)), body: form.lineCheckToMap())
-              .then((response) async {
-            if (response.statusCode == 302) {
-              var _url = response.headers['location'];
-              await http.get(Uri.parse(_url!)).then((response) {
-                forms[forms.indexWhere((e) => e.id == form.id)].submitDateTime =
-                    submitDate;
-                moveToComplted(form);
-                callback(kStatusSuccess, ErrorType.success);
-              });
-            } else {
-              moveToPending(form);
-              callback('ERROR', ErrorType.other);
-            }
-          });
-        } catch (e) {
+    if (!Authen.isSample) {
+      Utils.isAdmin() ? percentCompleted = 1 : percentCompleted = 99.5;
+      await save(form);
+      if (form.percentFilled() > percentCompleted) {
+        if (await (Connectivity().checkConnectivity()) ==
+            ConnectivityResult.none) {
+          callback('No internet connection: Form moved to pending',
+              ErrorType.noInternet);
           moveToPending(form);
-          Utils.showInProgress(false);
-          callback('ERROR: $e', ErrorType.other);
+        } else {
+          try {
+            Utils.showInProgress(true);
+
+            //UPLOAD PDF TO GOOGLE STORAGE
+            form.validate();
+            String name = pdfName(form, submitDate);
+            List<int> pdfAsBytes = await pdf.gen(form);
+            final Directory directory =
+                await path_provider.getApplicationSupportDirectory();
+            String path = directory.path;
+            final File file = File('$path/$name');
+            await file.writeAsBytes(pdfAsBytes, flush: true);
+            TaskSnapshot snapshot = await storage
+                .ref()
+                .child("${formName(form.type)}/${pdfName(form, submitDate)}")
+                .putFile(file);
+            if (snapshot.state == TaskState.success) {
+              downloadUrl = await snapshot.ref.getDownloadURL();
+              form.pdfUrl = downloadUrl;
+            } else {
+              form.pdfUrl = 'error';
+            }
+
+            //UPLOAD JSON TO GOOGLE SHEET
+            await http
+                .post(Uri.parse(formUrl(form.type)),
+                    body: form.lineCheckToMap())
+                .then((response) async {
+              if (response.statusCode == 302) {
+                var _url = response.headers['location'];
+                await http.get(Uri.parse(_url!)).then((response) {
+                  forms[forms.indexWhere((e) => e.id == form.id)]
+                      .submitDateTime = submitDate;
+                  moveToComplted(form);
+                  callback(kStatusSuccess, ErrorType.success);
+                });
+              } else {
+                moveToPending(form);
+                callback('ERROR', ErrorType.other);
+              }
+            });
+          } catch (e) {
+            moveToPending(form);
+            Utils.showInProgress(false);
+            callback('ERROR: $e', ErrorType.other);
+          }
         }
+      } else {
+        Utils.showInProgress(false);
+        callback(
+            'ERROR: Please fill all required field', ErrorType.missingRequired);
       }
     } else {
-      Utils.showInProgress(false);
-      callback(
-          'ERROR: Please fill all required field', ErrorType.missingRequired);
+      ///Mockup success message
+      callback(kStatusSuccess, ErrorType.success);
     }
     Utils.showInProgress(false);
   }
@@ -223,21 +229,23 @@ class FormService extends ChangeNotifier {
   }
 
   Future save(f.Form form, {bool showLoad = false}) async {
-    showLoad ? Utils.showInProgress(true) : null;
-    if (form.type == f.FormType.lineCheck) {
-      await LineCheckDatabase.dbLineCheckInsert(form);
-    }
-    for (int i = 0; i < form.fields.length; i++) {
-      if (form.fields[i].type == FieldType.signature) {
-        await form.fields[i].convertSignature((String response) {});
-        if (form.fields[i].signature != null) {
-          await _saveSigToDevice(
-              '${form.id}${form.fields[i].name}', form.fields[i].signature!);
+    if (!Authen.isSample) {
+      showLoad ? Utils.showInProgress(true) : null;
+      if (form.type == f.FormType.lineCheck) {
+        await LineCheckDatabase.dbLineCheckInsert(form);
+      }
+      for (int i = 0; i < form.fields.length; i++) {
+        if (form.fields[i].type == FieldType.signature) {
+          await form.fields[i].convertSignature((String response) {});
+          if (form.fields[i].signature != null) {
+            await _saveSigToDevice(
+                '${form.id}${form.fields[i].name}', form.fields[i].signature!);
+          }
         }
       }
+      showLoad ? Utils.showInProgress(false) : null;
+      notifyListeners();
     }
-    showLoad ? Utils.showInProgress(false) : null;
-    notifyListeners();
   }
 
   void delete(f.Form form, void Function(String) callback) async {
@@ -251,6 +259,73 @@ class FormService extends ChangeNotifier {
     } catch (e) {
       callback('$e');
     }
+  }
+
+  ///-------------------------------------------------------------------------
+  ///SAMPLE FORM
+  ///-------------------------------------------------------------------------
+  static f.Form initSample() {
+    DateTime timeStamp = DateTime.now();
+    return f.Form(
+      type: f.FormType.sample,
+      formName: 'Signature Verification',
+      createDateTime: timeStamp,
+      createBy: 'sample',
+      id: uuid.v1(),
+      // id: '${DateFormat('yyyyMMddHHmmss').format(timeStamp)}${Authen.user.id ?? ''}',
+      filePath: 'forms/sample.pdf',
+      fontSize: 13,
+      formLabel: 'Signature Verification',
+      formLabelInfoField1: 'name',
+      fields: [
+        Field(
+            name: 'name',
+            label: 'Applicant Full Name',
+            type: FieldType.string,
+            posX: 210,
+            posY: 265),
+        Field(
+            name: 'gender',
+            label: 'Gender',
+            type: FieldType.string,
+            posX: 150,
+            posY: 288),
+        Field(
+            name: 'dob',
+            label: 'Date of birth',
+            // type: FieldType.string,
+            type: FieldType.date,
+            keyboardType: TextInputType.datetime,
+            stringValue: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+            dateTimeValue: DateTime.now(),
+            posX: 292,
+            posY: 310),
+        Field(
+            name: 'email',
+            label: 'Email',
+            type: FieldType.string,
+            posX: 140,
+            posY: 333),
+        Field(
+            name: 'sig',
+            label: 'Signature',
+            type: FieldType.signature,
+            sigWidth: 100,
+            sigMaxHeight: 40,
+            posX: 180,
+            posY: 390),
+        Field(
+            name: 'sig_date',
+            label: 'Date',
+            // input: false,
+            type: FieldType.date,
+            keyboardType: TextInputType.datetime,
+            dateTimeValue: DateTime.now(),
+            stringValue: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+            posX: 230,
+            posY: 410),
+      ],
+    );
   }
 
   ///-------------------------------------------------------------------------

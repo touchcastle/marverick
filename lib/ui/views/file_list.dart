@@ -140,6 +140,18 @@ class _FormListState extends State<FormList> {
     }
   }
 
+  bool sampleCheck(FormType type) {
+    if (!Authen.isSample) {
+      return true;
+    } else {
+      if (type == FormType.sample) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isEmpty() => context
@@ -160,7 +172,8 @@ class _FormListState extends State<FormList> {
                 itemCount: context.watch<FormService>().forms.length,
                 itemBuilder: (BuildContext context, int _index) {
                   f.Form _form = context.watch<FormService>().forms[_index];
-                  if (_form.status == widget.status) {
+                  if (_form.status == widget.status &&
+                      sampleCheck(_form.type)) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 25, vertical: 10),
@@ -232,8 +245,8 @@ class _FormListState extends State<FormList> {
                 Row(
                   children: [
                     formStatus(form),
-                    const SizedBox(width: 5),
-                    formPercentCompleted(form, index),
+                    // const SizedBox(width: 5),
+                    // formPercentCompleted(form, index),
                   ],
                 ),
               ],

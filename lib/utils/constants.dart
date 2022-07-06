@@ -61,6 +61,8 @@ const String kStatusError = 'ERROR';
 const String kAdminMail = 'admin@vietjetair.com';
 const String kLineChekSheetUrl =
     "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
+const String kSampleMail = 'sample';
+const String kSamplePassword = 'qwerty';
 
 ///Decoration
 BoxDecoration fileBoxDecor(FormStatus status) {

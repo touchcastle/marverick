@@ -28,7 +28,10 @@ class _SignaturePadState extends State<SignaturePad> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         widget.field.signature != null
-            ? Image.memory(Uint8List.fromList(widget.field.signature!))
+            ? Image.memory(
+                Uint8List.fromList(widget.field.signature!),
+                gaplessPlayback: true,
+              )
             : SizedBox.shrink(),
         ClipRRect(
           child: SizedBox(

@@ -43,20 +43,21 @@ class _LandingState extends State<Landing> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: kPrimary,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Center(
-          child: Hero(
-            tag: kHeroLogo,
-            child: SizedBox(
-              width: width * 0.75,
-              child: const Image(
-                image: AssetImage(kLogoImage),
-              ),
-            ),
-          ),
+          child: SizedBox.shrink(),
+          // child: Hero(
+          //   tag: kHeroLogo,
+          //   child: SizedBox(
+          //     width: width * 0.75,
+          //     child: const Image(
+          //       image: AssetImage(kLogoImage),
+          //     ),
+          //   ),
+          // ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 enum FormType {
   loe,
   lineCheck,
+  sample,
 }
 
 enum FormStatus { working, completed, pending }

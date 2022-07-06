@@ -129,16 +129,16 @@ class _LoginState extends State<Login> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Hero(
-                      tag: kHeroLogo,
-                      child: SizedBox(
-                        width: width * 0.6,
-                        child: Image(
-                          image: AssetImage(kLogoImage),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 60),
+                    // Hero(
+                    //   tag: kHeroLogo,
+                    //   child: SizedBox(
+                    //     width: width * 0.6,
+                    //     child: Image(
+                    //       image: AssetImage(kLogoImage),
+                    //     ),
+                    //   ),
+                    // ),
+                    // SizedBox(height: 60),
                     Container(
                       width: inputAreaWidth,
                       // height: 400,
@@ -150,7 +150,7 @@ class _LoginState extends State<Login> {
                             TextField(
                               keyboardType: TextInputType.emailAddress,
                               onChanged: (value) => email = value,
-                              decoration: decor('e-mail'),
+                              decoration: decor('username'),
                             ),
                             SizedBox(height: 10),
                             TextField(
