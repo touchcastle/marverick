@@ -24,7 +24,9 @@ import 'package:marverick/utils/utils.dart';
 class InputScreen extends StatefulWidget {
   static const id = kInputId; //for route.
   final f.Form form;
+
   InputScreen({required this.form});
+
   @override
   _InputScreenState createState() => _InputScreenState();
 }
@@ -97,11 +99,20 @@ class _InputScreenState extends State<InputScreen> {
   TextStyle label() =>
       TextStyle(color: Colors.black54, fontWeight: FontWeight.w500);
 
+  TextStyle subLabel() => TextStyle(
+      fontSize: 12,
+      color: Colors.black54,
+      fontWeight: FontWeight.w400,
+      fontStyle: FontStyle.italic);
+
   TextStyle value() =>
       TextStyle(color: Colors.black, fontWeight: FontWeight.bold);
 
   TextStyle header() => TextStyle(
       color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
+
+  TextStyle subHeader() => TextStyle(
+      color: kSecondaryDarker, fontWeight: FontWeight.bold, fontSize: 16);
 
   Widget boxContainer(
       {required FieldType fieldType, required List<Widget> children}) {
@@ -151,6 +162,7 @@ class _InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     bool writeHeader = false;
+    bool writeGradeSecHeader = false;
     bool writeSpace = false;
     return GestureDetector(
       onTap: () {
@@ -160,14 +172,24 @@ class _InputScreenState extends State<InputScreen> {
         onWillPop: _onWillPop,
         child: Scaffold(
           appBar: AppBar(
+            leading: BackButton(color: Colors.white),
             elevation: 0,
             backgroundColor: kPrimary,
-            title: Text(widget.form.formName),
+            title: Text(
+              widget.form.formName,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             actions: [
               TextButton(
                 child: const Text(
                   'Preview',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () async {
                   // _submitForm();
@@ -179,7 +201,10 @@ class _InputScreenState extends State<InputScreen> {
               TextButton(
                 child: const Text(
                   'Submit',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () async {
                   await _submitForm(context);
@@ -230,6 +255,13 @@ class _InputScreenState extends State<InputScreen> {
                                       writeSpace = false;
                                     }
                                   }
+                                  if (index > 0 &&
+                                      field.gradeSection >
+                                          previousField.gradeSection) {
+                                    writeGradeSecHeader = true;
+                                  } else {
+                                    writeGradeSecHeader = false;
+                                  }
                                   return Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -240,6 +272,11 @@ class _InputScreenState extends State<InputScreen> {
                                           : SizedBox.shrink(),
                                       writeSpace
                                           ? subSectionDivide()
+                                          : SizedBox.shrink(),
+                                      writeGradeSecHeader &&
+                                              widget.form.gradeSectionLabel !=
+                                                  null
+                                          ? gradeSectionLabel(field)
                                           : SizedBox.shrink(),
                                       formField(index, field, context),
                                       SizedBox(height: 8),
@@ -318,10 +355,21 @@ class _InputScreenState extends State<InputScreen> {
       child: boxContainer(
         fieldType: field.type,
         children: [
-          Text(
-            field.label,
-            style: label(),
-            overflow: TextOverflow.fade,
+          Row(
+            children: [
+              Text(
+                field.label,
+                style: label(),
+                overflow: TextOverflow.fade,
+              ),
+              field.type == FieldType.checkbox
+                  ? Text(
+                      '   (you can select more than 1 answer)',
+                      style: subLabel(),
+                      overflow: TextOverflow.fade,
+                    )
+                  : SizedBox.shrink()
+            ],
           ),
           spacer(fieldType: field.type),
           valueContainer(
@@ -336,11 +384,13 @@ class _InputScreenState extends State<InputScreen> {
                   )
                 : field.type == FieldType.radio
                     ? radioButtonChoices(index)
-                    : field.type == FieldType.date
-                        ? dateInput(index, context)
-                        : field.maxLength != null && field.maxLength! > 100
-                            ? textForm(index)
-                            : textField(index),
+                    : field.type == FieldType.checkbox
+                        ? checkBoxChoices(index)
+                        : field.type == FieldType.date
+                            ? dateInput(index, context)
+                            : field.maxLength != null && field.maxLength! > 100
+                                ? textForm(index)
+                                : textField(index),
           ),
           // SizedBox(height: 10),
         ],
@@ -371,6 +421,24 @@ class _InputScreenState extends State<InputScreen> {
           style: header(),
         ),
         SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Column gradeSectionLabel(Field field) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        field.gradeSection > 1
+            ? Column(
+                children: [SizedBox(height: 20)],
+              )
+            : SizedBox.shrink(),
+        Text(
+          '  ${widget.form.gradeSectionLabel![field.gradeSection - 1]}',
+          style: subHeader(),
+        ),
+        SizedBox(height: 6),
       ],
     );
   }
@@ -414,6 +482,15 @@ class _InputScreenState extends State<InputScreen> {
         ),
         child: Center(
           child: SfDateRangePicker(
+            selectionTextStyle: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.w900,
+              fontSize: 24,
+            ),
+
+            selectionRadius: 0,
+            // selectionShape: DateRangePickerSelectionShape.rectangle,
+            // selectionColor: Colors.transparent,
             onSelectionChanged: (args) {
               setState(() {
                 widget.form.fields[index].dateTimeValue = args.value;
@@ -421,11 +498,10 @@ class _InputScreenState extends State<InputScreen> {
                     DateFormat('dd/MM/yyyy').format(args.value);
               });
             },
-            selectionMode: DateRangePickerSelectionMode.single,
             initialSelectedDate: widget.form.fields[index].dateTimeValue,
-            initialSelectedRange: PickerDateRange(
-                DateTime.now().subtract(const Duration(days: 4)),
-                DateTime.now().add(const Duration(days: 3))),
+            // initialSelectedRange: PickerDateRange(
+            //     DateTime.now().subtract(const Duration(days: 4)),
+            //     DateTime.now().add(const Duration(days: 3))),
           ),
         ),
       ),
@@ -498,9 +574,14 @@ class _InputScreenState extends State<InputScreen> {
                   ),
                   onTap: () {
                     setState(() {
-                      widget.form.fields[index].intValue = radio;
-                      widget.form.fields[index].stringValue =
-                          widget.form.fields[index].listValue[radio];
+                      if (widget.form.fields[index].intValue != radio) {
+                        widget.form.fields[index].intValue = radio;
+                        widget.form.fields[index].stringValue =
+                            widget.form.fields[index].listValue[radio];
+                      } else {
+                        widget.form.fields[index].intValue = -1;
+                        widget.form.fields[index].stringValue = '';
+                      }
                       _autoSave();
                     });
                   },
@@ -513,87 +594,158 @@ class _InputScreenState extends State<InputScreen> {
     );
   }
 
-  // Widget signaturePad(int index) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       // Text(widget.form.fields[_index].label),
-  //       //SIGNATURE CANVAS
-  //       widget.form.fields[index].signature != null
-  //           ? Image.memory(
-  //               Uint8List.fromList(widget.form.fields[index].signature!))
-  //           : SizedBox.shrink(),
-  //       ClipRRect(
-  //         child: SizedBox(
-  //           // height: 180,
-  //           child: Signature(
-  //             controller: widget.form.fields[index].controller,
-  //             height: 180,
-  //             // width: 390,
-  //             backgroundColor: Color(0xffeeeeee),
-  //           ),
-  //         ),
-  //       ),
-  //       //OK AND CLEAR BUTTONS
-  //       Container(
-  //         decoration: const BoxDecoration(color: kPrimaryDarker),
-  //         child: Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //           mainAxisSize: MainAxisSize.max,
-  //           children: <Widget>[
-  //             //SHOW EXPORTED IMAGE IN NEW ROUTE
-  //             IconButton(
-  //               icon: const Icon(Icons.save),
-  //               color: kSecondary,
-  //               onPressed: () async {
-  //                 await widget.form.fields[index]
-  //                     .convertSignature((String response) async {
-  //                   if (response == kStatusSuccess) {
-  //                     await _autoSave();
-  //                   } else {
-  //                     Snackbar.show(context,
-  //                         text: 'Please sign your signature',
-  //                         type: Type.error,
-  //                         isFixed: false);
-  //                   }
-  //                 });
-  //                 setState(() {});
-  //               },
-  //             ),
-  //             IconButton(
-  //               icon: const Icon(Icons.undo),
-  //               color: kSecondary,
-  //               onPressed: () async {
-  //                 setState(() => widget.form.fields[index].controller.undo());
-  //                 // widget.form.fields[index].sigStore();
-  //                 // await _autoSave();
-  //               },
-  //             ),
-  //             IconButton(
-  //               icon: const Icon(Icons.redo),
-  //               color: kSecondary,
-  //               onPressed: () async {
-  //                 setState(() => widget.form.fields[index].controller.redo());
-  //                 // widget.form.fields[index].sigStore();
-  //                 // await _autoSave();
-  //               },
-  //             ),
-  //             //CLEAR CANVAS
-  //             IconButton(
-  //               icon: const Icon(Icons.delete),
-  //               color: kSecondary,
-  //               onPressed: () {
-  //                 setState(() {
-  //                   widget.form.fields[index].controller.clear();
-  //                   // widget.form.fields[index].signature = null;
-  //                 });
-  //                 _autoSave();
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
+  Widget checkBoxChoices(int index) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      reverse: true,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          for (int checkIndex = 0;
+              checkIndex < widget.form.fields[index].checkBoxValue.length;
+              checkIndex++)
+            Row(
+              children: [
+                GestureDetector(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: widget
+                                  .form.fields[index].checkBoxValue[checkIndex]
+                              ? kSecondaryDarker
+                              : Colors.black12,
+                          width: 1.3),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      color: widget.form.fields[index].checkBoxValue[checkIndex]
+                          ? kSecondary
+                          : Colors.transparent,
+                    ),
+                    child: Text(widget.form.fields[index].listValue[checkIndex],
+                        style: value()),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      widget.form.fields[index].checkBoxValue[checkIndex] =
+                          !widget.form.fields[index].checkBoxValue[checkIndex];
+                      String _name = widget.form.fields[index].name +
+                          '_' +
+                          checkIndex.toString();
+                      print(_name);
+                      widget
+                              .form
+                              .fields[widget.form.fields
+                                  .indexWhere((e) => e.name == _name)]
+                              .stringValue =
+                          widget.form.fields[index].checkBoxValue[checkIndex]
+                              .toString();
+                      print(widget
+                          .form
+                          .fields[widget.form.fields
+                              .indexWhere((e) => e.name == _name)]
+                          .stringValue);
+
+                      // if (widget.form.fields[index].intValue != checkIndex) {
+                      //   widget.form.fields[index].intValue = checkIndex;
+                      //   widget.form.fields[index].stringValue =
+                      //       widget.form.fields[index].listValue[checkIndex];
+                      // } else {
+                      //   widget.form.fields[index].intValue = -1;
+                      //   widget.form.fields[index].stringValue = '';
+                      // }
+                      _autoSave();
+                    });
+                  },
+                ),
+                SizedBox(width: 5),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+// Widget signaturePad(int index) {
+//   return Column(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     children: [
+//       // Text(widget.form.fields[_index].label),
+//       //SIGNATURE CANVAS
+//       widget.form.fields[index].signature != null
+//           ? Image.memory(
+//               Uint8List.fromList(widget.form.fields[index].signature!))
+//           : SizedBox.shrink(),
+//       ClipRRect(
+//         child: SizedBox(
+//           // height: 180,
+//           child: Signature(
+//             controller: widget.form.fields[index].controller,
+//             height: 180,
+//             // width: 390,
+//             backgroundColor: Color(0xffeeeeee),
+//           ),
+//         ),
+//       ),
+//       //OK AND CLEAR BUTTONS
+//       Container(
+//         decoration: const BoxDecoration(color: kPrimaryDarker),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//           mainAxisSize: MainAxisSize.max,
+//           children: <Widget>[
+//             //SHOW EXPORTED IMAGE IN NEW ROUTE
+//             IconButton(
+//               icon: const Icon(Icons.save),
+//               color: kSecondary,
+//               onPressed: () async {
+//                 await widget.form.fields[index]
+//                     .convertSignature((String response) async {
+//                   if (response == kStatusSuccess) {
+//                     await _autoSave();
+//                   } else {
+//                     Snackbar.show(context,
+//                         text: 'Please sign your signature',
+//                         type: Type.error,
+//                         isFixed: false);
+//                   }
+//                 });
+//                 setState(() {});
+//               },
+//             ),
+//             IconButton(
+//               icon: const Icon(Icons.undo),
+//               color: kSecondary,
+//               onPressed: () async {
+//                 setState(() => widget.form.fields[index].controller.undo());
+//                 // widget.form.fields[index].sigStore();
+//                 // await _autoSave();
+//               },
+//             ),
+//             IconButton(
+//               icon: const Icon(Icons.redo),
+//               color: kSecondary,
+//               onPressed: () async {
+//                 setState(() => widget.form.fields[index].controller.redo());
+//                 // widget.form.fields[index].sigStore();
+//                 // await _autoSave();
+//               },
+//             ),
+//             //CLEAR CANVAS
+//             IconButton(
+//               icon: const Icon(Icons.delete),
+//               color: kSecondary,
+//               onPressed: () {
+//                 setState(() {
+//                   widget.form.fields[index].controller.clear();
+//                   // widget.form.fields[index].signature = null;
+//                 });
+//                 _autoSave();
+//               },
+//             ),
+//           ],
+//         ),
+//       ),
+//     ],
+//   );
+// }
 }

@@ -33,6 +33,9 @@ class Authen {
     if (email == kSampleMail && password == kSamplePassword) {
       isSample = true;
       user = 'sample';
+    } else if (email == kBeamMail && password == kBeamPassword) {
+      isSample = false;
+      user = 'beamtjo';
     } else {
       isSample = false;
       if (!email.contains('@vietjetair.com') &&

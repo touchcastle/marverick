@@ -13,6 +13,7 @@ enum FieldType {
   signature,
   dropdown,
   radio,
+  checkbox,
 }
 
 class Field extends ChangeNotifier {
@@ -50,6 +51,7 @@ class Field extends ChangeNotifier {
   int? maxLine;
   int section;
   int subSection;
+  int gradeSection;
   bool mandatory;
   bool input;
   double page;
@@ -64,6 +66,7 @@ class Field extends ChangeNotifier {
   double? fontSize;
   TextInputType? keyboardType;
   TextCapitalization textCapitalization;
+  bool writePdf;
 
   ///data
   String stringValue;
@@ -71,6 +74,7 @@ class Field extends ChangeNotifier {
   bool boolValue;
   DateTime? dateTimeValue;
   List<String> listValue;
+  List<bool> checkBoxValue;
 
   Field({
     this.name = '',
@@ -85,13 +89,15 @@ class Field extends ChangeNotifier {
     this.stringValue = '',
     this.dateTimeValue,
     this.listValue = const [],
+    this.checkBoxValue = const [],
     this.posXList = const [],
     this.posYList = const [],
-    this.intValue = 0,
+    this.intValue = -1,
     this.boolValue = false,
     this.page = 1,
     this.section = 1,
     this.subSection = 1,
+    this.gradeSection = 0,
     this.posX = 20,
     this.posY = 20,
     this.width,
@@ -101,5 +107,6 @@ class Field extends ChangeNotifier {
     this.fontSize,
     this.textCapitalization = TextCapitalization.characters,
     this.keyboardType,
+    this.writePdf = true,
   });
 }

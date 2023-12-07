@@ -4,7 +4,9 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/services.dart';
-import 'package:open_file/open_file.dart' as open_file;
+
+// import 'package:open_file/open_file.dart' as open_file;
+import 'package:open_file_safe/open_file_safe.dart' as open_file;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
@@ -28,7 +30,7 @@ class Pdf {
         layoutType: PdfLayoutType.paginate,
         breakType: PdfLayoutBreakType.fitPage);
     PdfStringFormat stringFormat = PdfStringFormat(
-      lineSpacing: 4,
+      lineSpacing: 0,
     );
     // drawFormat.WordWrap = PdfWordWrapType.Word;
     // drawFormat.Alignment = PdfTextAlignment.Justify;
@@ -39,96 +41,90 @@ class Pdf {
     for (int page = 1; page <= pageCount; page++) {
       for (int i = 0; i < form.fields.length; i++) {
         Field _field = form.fields[i];
-        if (_field.duplicateFrom != null) {
-          final _ref = form.fields
-              .firstWhere((element) => element.name == _field.duplicateFrom);
-          _field.stringValue = _ref.stringValue;
-          _field.intValue = _ref.intValue;
-        }
-        if (page == _field.page) {
-          // if (_field.type == FieldType.signature && _field.signature != null) {
-          if (_field.type == FieldType.signature && _field.signature != null) {
-            await _field.convertSignature((String response) {});
-            final PdfBitmap image = PdfBitmap(_field.signature!);
-            var _decodedImage = await decodeImageFromList(_field.signature!);
-            var _width = _field.sigWidth;
-            var _height =
-                _field.sigWidth * (_decodedImage.height / _decodedImage.width);
-            if (_height > _field.sigMaxHeight) {
-              _width = _field.sigWidth * (_field.sigMaxHeight / _height);
-              _height = _field.sigMaxHeight;
+        if (_field.writePdf) {
+          if (_field.duplicateFrom != null) {
+            final _ref = form.fields
+                .firstWhere((element) => element.name == _field.duplicateFrom);
+            _field.stringValue = _ref.stringValue;
+            _field.intValue = _ref.intValue;
+          }
+          if (page == _field.page) {
+            // if (_field.type == FieldType.signature && _field.signature != null) {
+            if (_field.type == FieldType.signature &&
+                _field.signature != null) {
+              await _field.convertSignature((String response) {});
+              final PdfBitmap image = PdfBitmap(_field.signature!);
+              var _decodedImage = await decodeImageFromList(_field.signature!);
+              var _width = _field.sigWidth;
+              var _height = _field.sigWidth *
+                  (_decodedImage.height / _decodedImage.width);
+              if (_height > _field.sigMaxHeight) {
+                _width = _field.sigWidth * (_field.sigMaxHeight / _height);
+                _height = _field.sigMaxHeight;
+              }
+              document.pages[page - 1].graphics.drawImage(
+                  image,
+                  Rect.fromLTWH(
+                    _field.posX,
+                    _field.posY - _height,
+                    _width,
+                    _height,
+                  ));
+            } else if ((_field.type == FieldType.radio ||
+                    _field.type == FieldType.dropdown) &&
+                _field.intValue >= 0) {
+              /// as png
+              // final PdfBitmap image = PdfBitmap(markPng);
+              document.pages[page - 1].graphics.drawImage(
+                  mark,
+                  Rect.fromLTWH(
+                      _field.posXList[_field.intValue] - 2,
+                      _field.posYList[_field.intValue] + 3,
+                      // _field.width ??
+                      //     document.pages[page - 1].getClientSize().width / 1.3,
+                      // _field.height ??
+                      //     document.pages[page - 1].getClientSize().height / 2));
+                      8,
+                      8));
+            } else if (_field.type == FieldType.checkbox) {
+              for (int _i = 0; _i < _field.checkBoxValue.length; _i++) {
+                if (_field.checkBoxValue[_i]) {
+                  document.pages[page - 1].graphics.drawImage(
+                      mark,
+                      Rect.fromLTWH(_field.posXList[_i] - 2,
+                          _field.posYList[_i] + 3, 8, 8));
+                }
+              }
+            } else {
+              // if (form.fields[i].name == 'NARRATIVE') {
+              //Create a text element with the text and font
+              //Draw the text in the first column
+              PdfTextElement(
+                      text: _field.stringValue,
+                      font: PdfStandardFont(PdfFontFamily.helvetica,
+                          _field.fontSize ?? form.fontSize),
+                      format: stringFormat)
+                  .draw(
+                      page: document.pages[page - 1],
+                      bounds: Rect.fromLTWH(
+                          _field.posX,
+                          _field.posY,
+                          _field.width ??
+                              document.pages[page - 1].getClientSize().width /
+                                  1.3,
+                          // 100,
+                          _field.height ??
+                              document.pages[page - 1].getClientSize().height /
+                                  2));
+              // 100));
+              // } else {
+              //   document.pages[page - 1].graphics.drawString(
+              //       '${form.fields[i].stringValue}', font,
+              //       bounds:
+              //           Rect.fromLTWH(form.fields[i].posX, form.fields[i].posY, 0, 0),
+              //       brush: PdfBrushes.black);
+              // }
             }
-            document.pages[page - 1].graphics.drawImage(
-                image,
-                Rect.fromLTWH(
-                  _field.posX,
-                  _field.posY - _height,
-                  _width,
-                  _height,
-                ));
-          } else if ((_field.type == FieldType.radio ||
-                  _field.type == FieldType.dropdown) &&
-              _field.intValue >= 0) {
-            /// as png
-            // final PdfBitmap image = PdfBitmap(markPng);
-            document.pages[page - 1].graphics.drawImage(
-                mark,
-                Rect.fromLTWH(
-                    _field.posXList[_field.intValue] - 2,
-                    _field.posYList[_field.intValue] + 3,
-                    // _field.width ??
-                    //     document.pages[page - 1].getClientSize().width / 1.3,
-                    // _field.height ??
-                    //     document.pages[page - 1].getClientSize().height / 2));
-                    8,
-                    8));
-
-            /// as '/'
-            // PdfTextElement(
-            //         text: '/',
-            //         font:
-            //             PdfStandardFont(PdfFontFamily.helvetica, form.fontSize),
-            //         format: stringFormat)
-            //     .draw(
-            //         page: document.pages[page - 1],
-            //         bounds: Rect.fromLTWH(
-            //             _field.posXList[_field.intValue],
-            //             _field.posYList[_field.intValue],
-            //             _field.width ??
-            //                 document.pages[page - 1].getClientSize().width /
-            //                     1.3,
-            //             _field.height ??
-            //                 document.pages[page - 1].getClientSize().height /
-            //                     2));
-          } else {
-            // if (form.fields[i].name == 'NARRATIVE') {
-            //Create a text element with the text and font
-            //Draw the text in the first column
-            PdfTextElement(
-                    text: _field.stringValue,
-                    font: PdfStandardFont(PdfFontFamily.helvetica,
-                        _field.fontSize ?? form.fontSize),
-                    format: stringFormat)
-                .draw(
-                    page: document.pages[page - 1],
-                    bounds: Rect.fromLTWH(
-                        _field.posX,
-                        _field.posY,
-                        _field.width ??
-                            document.pages[page - 1].getClientSize().width /
-                                1.3,
-                        // 100,
-                        _field.height ??
-                            document.pages[page - 1].getClientSize().height /
-                                2));
-            // 100));
-            // } else {
-            //   document.pages[page - 1].graphics.drawString(
-            //       '${form.fields[i].stringValue}', font,
-            //       bounds:
-            //           Rect.fromLTWH(form.fields[i].posX, form.fields[i].posY, 0, 0),
-            //       brush: PdfBrushes.black);
-            // }
           }
         }
       }
@@ -164,7 +160,7 @@ class Pdf {
     //       bounds: Rect.fromLTWH(390, 107, 0, 0), brush: PdfBrushes.black);
     // }
     //Save the document
-    List<int> bytes = document.save();
+    List<int> bytes = await document.save();
     //Dispose the document
     document.dispose();
     return bytes;

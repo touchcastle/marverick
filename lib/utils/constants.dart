@@ -17,8 +17,9 @@ const String kLoginPageName = '/loin_page';
 const String kInputPageName = '/input_page';
 
 /// Database name and Table name.
-const String kDbName = 'database_test11.db'; //Database name
-const String kDbLineCheck = 'line_check_table_test11';
+const String kDbName = 'formServeDb.db'; //Database name
+const String kLineCheckTable = 'line_check_table';
+const String kPPCTable = 'ppc_table';
 
 List<Widget> widgetOptions = <Widget>[
   FormList(status: FormStatus.completed),
@@ -61,8 +62,13 @@ const String kStatusError = 'ERROR';
 const String kAdminMail = 'admin@vietjetair.com';
 const String kLineChekSheetUrl =
     "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
+const String kPPCSheetUrl =
+    "https://script.google.com/macros/s/AKfycbxaga97_teWQLx8V7gX1wFZC8ef0F-Z8jqGC-oMGIl7n3DT6YalowBpxikECJ7mwkCm/exec";
+
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
+const String kBeamMail = 'beamtjo';
+const String kBeamPassword = 'qwerty';
 
 ///Decoration
 BoxDecoration fileBoxDecor(FormStatus status) {

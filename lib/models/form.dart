@@ -6,6 +6,7 @@ enum FormType {
   loe,
   lineCheck,
   sample,
+  ppc, //1.1.0+
 }
 
 enum FormStatus { working, completed, pending }
@@ -22,10 +23,12 @@ class Form extends ChangeNotifier {
   String filePath;
   double fontSize;
   List<String>? sectionLabel;
+  List<String>? gradeSectionLabel;
   String formLabel;
   String? formLabelInfoField1;
   String? formLabelInfoField2;
   String? pdfUrl;
+
   Form({
     this.status = FormStatus.working,
     required this.type,
@@ -38,11 +41,13 @@ class Form extends ChangeNotifier {
     required this.fontSize,
     required this.formLabel,
     this.sectionLabel,
+    this.gradeSectionLabel,
     this.formLabelInfoField1,
     this.formLabelInfoField2,
   });
 
   int allRequired() => fields.where((c) => c.mandatory).toList().length;
+
   int filledRequired() => fields
       .where(
         (c) =>
@@ -88,7 +93,10 @@ class Form extends ChangeNotifier {
   // }
 
   // Method to make GET parameters.
-  Map<String, dynamic> lineCheckToMap() => {
+  // Map<String, dynamic> lineCheckToMap() {
+  Map<String, dynamic> formMap() {
+    if (type == FormType.lineCheck) {
+      return {
         //----------------------------------------------------------------------
         //HEADER
         //----------------------------------------------------------------------
@@ -270,6 +278,456 @@ class Form extends ChangeNotifier {
             fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
                 .stringValue,
       };
+    } else if (type == FormType.ppc) {
+      return {
+        //----------------------------------------------------------------------
+        //HEADER
+        //----------------------------------------------------------------------
+        //Form info.
+        'status': status.toString(),
+        'type': type.toString(),
+        'form_name': formName,
+        'create_at': createDateTime.toString(),
+        'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+        'create_by': createBy,
+        'file_path': filePath,
+        'id': id,
+        'font_size': fontSize.round().toString(),
+        'pdf_url': pdfUrl ?? '',
+        //----------------------------------------------------------------------
+        //ITEM
+        //----------------------------------------------------------------------
+        //Pilot info.
+        'pilot_rank': fields[fields.indexWhere((e) => e.name == 'pilot_rank')]
+            .stringValue,
+        'pilot_id':
+            fields[fields.indexWhere((e) => e.name == 'pilot_id')].stringValue,
+        'pilot_license_no':
+            fields[fields.indexWhere((e) => e.name == 'pilot_license_no')]
+                .stringValue,
+        'pilot_name': fields[fields.indexWhere((e) => e.name == 'pilot_name')]
+            .stringValue,
+
+        //Instructor info.
+        'instructor_rank':
+            fields[fields.indexWhere((e) => e.name == 'instructor_rank')]
+                .stringValue,
+        'instructor_id':
+            fields[fields.indexWhere((e) => e.name == 'instructor_id')]
+                .stringValue,
+        'instructor_cert_no':
+            fields[fields.indexWhere((e) => e.name == 'instructor_cert_no')]
+                .stringValue,
+        'instructor_name':
+            fields[fields.indexWhere((e) => e.name == 'instructor_name')]
+                .stringValue,
+
+        //Examiner info.
+        'examiner_type':
+            fields[fields.indexWhere((e) => e.name == 'examiner_type')]
+                .stringValue,
+        'examiner_id': fields[fields.indexWhere((e) => e.name == 'examiner_id')]
+            .stringValue,
+        'examiner_pel_no':
+            fields[fields.indexWhere((e) => e.name == 'examiner_pel_no')]
+                .stringValue,
+        'examiner_name':
+            fields[fields.indexWhere((e) => e.name == 'examiner_name')]
+                .stringValue,
+
+        //Check details
+        'check_date': fields[fields.indexWhere((e) => e.name == 'check_date')]
+            .stringValue,
+        'block_time': fields[fields.indexWhere((e) => e.name == 'block_time')]
+            .stringValue,
+        'fstd_no':
+            fields[fields.indexWhere((e) => e.name == 'fstd_no')].stringValue,
+        'route':
+            fields[fields.indexWhere((e) => e.name == 'route')].stringValue,
+        'check_course':
+            fields[fields.indexWhere((e) => e.name == 'check_course')]
+                .stringValue,
+        // 'check_type': fields[fields.indexWhere((e) => e.name == 'check_type')]
+        //     .stringValue,
+        'check_type_0': fields[fields.indexWhere((e) => e.name == 'check_type_0')]
+            .stringValue,
+        'check_type_1': fields[fields.indexWhere((e) => e.name == 'check_type_1')]
+            .stringValue,
+        'check_type_2': fields[fields.indexWhere((e) => e.name == 'check_type_2')]
+            .stringValue,
+
+        //Grading & Comment
+        //A
+        'a_1': fields[fields.indexWhere((e) => e.name == 'a_1')].stringValue,
+        'a_2_detail': fields[fields.indexWhere((e) => e.name == 'a_2_detail')]
+            .stringValue,
+        'a_2': fields[fields.indexWhere((e) => e.name == 'a_2')].stringValue,
+        'a_3': fields[fields.indexWhere((e) => e.name == 'a_3')].stringValue,
+        'a_comment':
+            fields[fields.indexWhere((e) => e.name == 'a_comment')].stringValue,
+        //B
+        'b_4': fields[fields.indexWhere((e) => e.name == 'b_4')].stringValue,
+        'b_5': fields[fields.indexWhere((e) => e.name == 'b_5')].stringValue,
+        'b_6': fields[fields.indexWhere((e) => e.name == 'b_6')].stringValue,
+        'b_7': fields[fields.indexWhere((e) => e.name == 'b_7')].stringValue,
+        'b_8': fields[fields.indexWhere((e) => e.name == 'b_8')].stringValue,
+        'b_comment':
+            fields[fields.indexWhere((e) => e.name == 'b_comment')].stringValue,
+        //C
+        'c_9': fields[fields.indexWhere((e) => e.name == 'c_9')].stringValue,
+        'c_10': fields[fields.indexWhere((e) => e.name == 'c_10')].stringValue,
+        'c_11': fields[fields.indexWhere((e) => e.name == 'c_11')].stringValue,
+        'c_12': fields[fields.indexWhere((e) => e.name == 'c_12')].stringValue,
+        // 'c_13_detail': fields[fields.indexWhere((e) => e.name == 'c_13_detail')]
+        //     .stringValue,
+        'c_13_check_0': fields[fields.indexWhere((e) => e.name == 'c_13_check_0')].stringValue,
+        'c_13_check_1': fields[fields.indexWhere((e) => e.name == 'c_13_check_1')].stringValue,
+        'c_13_check_2': fields[fields.indexWhere((e) => e.name == 'c_13_check_2')].stringValue,
+        'c_13': fields[fields.indexWhere((e) => e.name == 'c_13')].stringValue,
+        'c_14': fields[fields.indexWhere((e) => e.name == 'c_14')].stringValue,
+        'c_15': fields[fields.indexWhere((e) => e.name == 'c_15')].stringValue,
+        'c_16': fields[fields.indexWhere((e) => e.name == 'c_16')].stringValue,
+        'c_comment':
+            fields[fields.indexWhere((e) => e.name == 'c_comment')].stringValue,
+        //D
+        'd_17': fields[fields.indexWhere((e) => e.name == 'd_17')].stringValue,
+        // 'd_18_check': fields[fields.indexWhere((e) => e.name == 'd_18_check')]
+        //     .stringValue,
+        'd_18_check_0': fields[fields.indexWhere((e) => e.name == 'd_18_check_0')].stringValue,
+        'd_18_check_1': fields[fields.indexWhere((e) => e.name == 'd_18_check_1')].stringValue,
+        'd_18': fields[fields.indexWhere((e) => e.name == 'd_18')].stringValue,
+        'd_19': fields[fields.indexWhere((e) => e.name == 'd_19')].stringValue,
+        'd_comment':
+            fields[fields.indexWhere((e) => e.name == 'd_comment')].stringValue,
+        //E
+        // 'e_20_check': fields[fields.indexWhere((e) => e.name == 'e_20_check')]
+        //     .stringValue,
+        'e_20_check_0': fields[fields.indexWhere((e) => e.name == 'e_20_check_0')]
+            .stringValue,
+        'e_20_check_1': fields[fields.indexWhere((e) => e.name == 'e_20_check_1')]
+            .stringValue,
+        'e_20': fields[fields.indexWhere((e) => e.name == 'e_20')].stringValue,
+        'e_21': fields[fields.indexWhere((e) => e.name == 'e_21')].stringValue,
+        'e_22': fields[fields.indexWhere((e) => e.name == 'e_22')].stringValue,
+        'e_23': fields[fields.indexWhere((e) => e.name == 'e_23')].stringValue,
+        'e_24': fields[fields.indexWhere((e) => e.name == 'e_24')].stringValue,
+        'e_25': fields[fields.indexWhere((e) => e.name == 'e_25')].stringValue,
+        'e_comment':
+            fields[fields.indexWhere((e) => e.name == 'e_comment')].stringValue,
+        //F
+        'f_26': fields[fields.indexWhere((e) => e.name == 'f_26')].stringValue,
+        'f_27': fields[fields.indexWhere((e) => e.name == 'f_27')].stringValue,
+        'f_comment':
+            fields[fields.indexWhere((e) => e.name == 'f_comment')].stringValue,
+        //G
+        // 'g_28_check': fields[fields.indexWhere((e) => e.name == 'g_28_check')]
+        //     .stringValue,
+        'g_28_check_0': fields[fields.indexWhere((e) => e.name == 'g_28_check_0')]
+            .stringValue,
+        'g_28_check_1': fields[fields.indexWhere((e) => e.name == 'g_28_check_1')]
+            .stringValue,
+        'g_28_check_2': fields[fields.indexWhere((e) => e.name == 'g_28_check_2')]
+            .stringValue,
+        'g_28_check_3': fields[fields.indexWhere((e) => e.name == 'g_28_check_3')]
+            .stringValue,
+        'g_28_check_4': fields[fields.indexWhere((e) => e.name == 'g_28_check_4')]
+            .stringValue,
+        'g_28': fields[fields.indexWhere((e) => e.name == 'g_28')].stringValue,
+        'g_29': fields[fields.indexWhere((e) => e.name == 'g_29')].stringValue,
+        'g_30': fields[fields.indexWhere((e) => e.name == 'g_30')].stringValue,
+        'g_31': fields[fields.indexWhere((e) => e.name == 'g_31')].stringValue,
+        'g_32': fields[fields.indexWhere((e) => e.name == 'g_32')].stringValue,
+        'g_comment':
+            fields[fields.indexWhere((e) => e.name == 'g_comment')].stringValue,
+        //H
+        'h_33': fields[fields.indexWhere((e) => e.name == 'h_33')].stringValue,
+        'h_34': fields[fields.indexWhere((e) => e.name == 'h_34')].stringValue,
+        'h_35': fields[fields.indexWhere((e) => e.name == 'h_35')].stringValue,
+        'h_36': fields[fields.indexWhere((e) => e.name == 'h_36')].stringValue,
+        'h_comment':
+            fields[fields.indexWhere((e) => e.name == 'h_comment')].stringValue,
+        //I
+        'i_37': fields[fields.indexWhere((e) => e.name == 'i_37')].stringValue,
+        'i_38': fields[fields.indexWhere((e) => e.name == 'i_38')].stringValue,
+        'i_39': fields[fields.indexWhere((e) => e.name == 'i_39')].stringValue,
+        'i_40': fields[fields.indexWhere((e) => e.name == 'i_40')].stringValue,
+        'i_41': fields[fields.indexWhere((e) => e.name == 'i_41')].stringValue,
+        'i_comment':
+            fields[fields.indexWhere((e) => e.name == 'i_comment')].stringValue,
+        //J
+        'j_42': fields[fields.indexWhere((e) => e.name == 'j_42')].stringValue,
+        'j_43': fields[fields.indexWhere((e) => e.name == 'j_43')].stringValue,
+        'j_44_detail': fields[fields.indexWhere((e) => e.name == 'j_44_detail')]
+            .stringValue,
+        'j_44': fields[fields.indexWhere((e) => e.name == 'j_44')].stringValue,
+        'j_45_detail': fields[fields.indexWhere((e) => e.name == 'j_45_detail')]
+            .stringValue,
+        'j_45': fields[fields.indexWhere((e) => e.name == 'j_45')].stringValue,
+        'j_46_detail': fields[fields.indexWhere((e) => e.name == 'j_46_detail')]
+            .stringValue,
+        'j_46': fields[fields.indexWhere((e) => e.name == 'j_46')].stringValue,
+        'j_47_detail': fields[fields.indexWhere((e) => e.name == 'j_47_detail')]
+            .stringValue,
+        'j_47': fields[fields.indexWhere((e) => e.name == 'j_47')].stringValue,
+        'j_48_detail': fields[fields.indexWhere((e) => e.name == 'j_48_detail')]
+            .stringValue,
+        'j_48': fields[fields.indexWhere((e) => e.name == 'j_48')].stringValue,
+        'j_comment':
+            fields[fields.indexWhere((e) => e.name == 'j_comment')].stringValue,
+        //LANDING AND GO-AROUND
+        'no_landing': fields[fields.indexWhere((e) => e.name == 'no_landing')]
+            .stringValue,
+        'no_goaround': fields[fields.indexWhere((e) => e.name == 'no_goaround')]
+            .stringValue,
+
+        //COMPETENCY
+        'comp_kno':
+            fields[fields.indexWhere((e) => e.name == 'comp_kno')].stringValue,
+        'comp_pro':
+            fields[fields.indexWhere((e) => e.name == 'comp_pro')].stringValue,
+        'comp_com':
+            fields[fields.indexWhere((e) => e.name == 'comp_com')].stringValue,
+        'comp_fpa':
+            fields[fields.indexWhere((e) => e.name == 'comp_fpa')].stringValue,
+        'comp_fpm':
+            fields[fields.indexWhere((e) => e.name == 'comp_fpm')].stringValue,
+        'comp_ltw':
+            fields[fields.indexWhere((e) => e.name == 'comp_ltw')].stringValue,
+        'comp_psd':
+            fields[fields.indexWhere((e) => e.name == 'comp_psd')].stringValue,
+        'comp_saw':
+            fields[fields.indexWhere((e) => e.name == 'comp_saw')].stringValue,
+        'comp_wlm':
+            fields[fields.indexWhere((e) => e.name == 'comp_wlm')].stringValue,
+        'general_comment':
+            fields[fields.indexWhere((e) => e.name == 'general_comment')]
+                .stringValue,
+        //RESULT
+        'result':
+            fields[fields.indexWhere((e) => e.name == 'result')].stringValue,
+
+        'pilot_sig_date':
+            fields[fields.indexWhere((e) => e.name == 'pilot_sig_date')]
+                .stringValue,
+        'examiner_sig_date':
+            fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
+                .stringValue,
+      };
+    } else {
+      return {};
+    }
+    // };
+  }
+
+  // Map<String, dynamic> ppcToMap() => {
+  //       //----------------------------------------------------------------------
+  //       //HEADER
+  //       //----------------------------------------------------------------------
+  //       //Form info.
+  //       'status': status.toString(),
+  //       'type': type.toString(),
+  //       'form_name': formName,
+  //       'create_at': createDateTime.toString(),
+  //       'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+  //       'create_by': createBy,
+  //       'file_path': filePath,
+  //       'id': id,
+  //       'font_size': fontSize.round().toString(),
+  //       'pdf_url': pdfUrl ?? '',
+  //       //----------------------------------------------------------------------
+  //       //ITEM
+  //       //----------------------------------------------------------------------
+  //       //Pilot info.
+  //       'pilot_rank': fields[fields.indexWhere((e) => e.name == 'pilot_rank')]
+  //           .stringValue,
+  //       'pilot_id':
+  //           fields[fields.indexWhere((e) => e.name == 'pilot_id')].stringValue,
+  //       'pilot_license_no':
+  //           fields[fields.indexWhere((e) => e.name == 'pilot_license_no')]
+  //               .stringValue,
+  //       'pilot_name': fields[fields.indexWhere((e) => e.name == 'pilot_name')]
+  //           .stringValue,
+  //
+  //       //Instructor info.
+  //       'instructor_rank':
+  //           fields[fields.indexWhere((e) => e.name == 'instructor_rank')]
+  //               .stringValue,
+  //       'instructor_id':
+  //           fields[fields.indexWhere((e) => e.name == 'instructor_id')]
+  //               .stringValue,
+  //       'instructor_cert_no':
+  //           fields[fields.indexWhere((e) => e.name == 'instructor_cert_no')]
+  //               .stringValue,
+  //       'instructor_name':
+  //           fields[fields.indexWhere((e) => e.name == 'instructor_name')]
+  //               .stringValue,
+  //
+  //       //Examiner info.
+  //       'examiner_type':
+  //           fields[fields.indexWhere((e) => e.name == 'examiner_type')]
+  //               .stringValue,
+  //       'examiner_id': fields[fields.indexWhere((e) => e.name == 'examiner_id')]
+  //           .stringValue,
+  //       'examiner_pel_no':
+  //           fields[fields.indexWhere((e) => e.name == 'examiner_pel_no')]
+  //               .stringValue,
+  //       'examiner_name':
+  //           fields[fields.indexWhere((e) => e.name == 'examiner_name')]
+  //               .stringValue,
+  //
+  //       //Check details
+  //       'check_date': fields[fields.indexWhere((e) => e.name == 'check_date')]
+  //           .stringValue,
+  //       'block_time': fields[fields.indexWhere((e) => e.name == 'block_time')]
+  //           .stringValue,
+  //       'fstd_no':
+  //           fields[fields.indexWhere((e) => e.name == 'fstd_no')].stringValue,
+  //       'route':
+  //           fields[fields.indexWhere((e) => e.name == 'route')].stringValue,
+  //       'check_course':
+  //           fields[fields.indexWhere((e) => e.name == 'check_course')]
+  //               .stringValue,
+  //       'check_type': fields[fields.indexWhere((e) => e.name == 'check_type')]
+  //           .stringValue,
+  //
+  //       //Grading & Comment
+  //       //A
+  //       'a_1': fields[fields.indexWhere((e) => e.name == 'a_1')].stringValue,
+  //       'a_2_detail': fields[fields.indexWhere((e) => e.name == 'a_2_detail')]
+  //           .stringValue,
+  //       'a_2': fields[fields.indexWhere((e) => e.name == 'a_2')].stringValue,
+  //       'a_3': fields[fields.indexWhere((e) => e.name == 'a_3')].stringValue,
+  //       'a_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'a_comment')].stringValue,
+  //       //B
+  //       'b_4': fields[fields.indexWhere((e) => e.name == 'b_4')].stringValue,
+  //       'b_5': fields[fields.indexWhere((e) => e.name == 'b_5')].stringValue,
+  //       'b_6': fields[fields.indexWhere((e) => e.name == 'b_6')].stringValue,
+  //       'b_7': fields[fields.indexWhere((e) => e.name == 'b_7')].stringValue,
+  //       'b_8': fields[fields.indexWhere((e) => e.name == 'b_8')].stringValue,
+  //       'b_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'b_comment')].stringValue,
+  //       //C
+  //       'c_9': fields[fields.indexWhere((e) => e.name == 'c_9')].stringValue,
+  //       'c_10': fields[fields.indexWhere((e) => e.name == 'c_10')].stringValue,
+  //       'c_11': fields[fields.indexWhere((e) => e.name == 'c_11')].stringValue,
+  //       'c_12': fields[fields.indexWhere((e) => e.name == 'c_12')].stringValue,
+  //       'c_13_detail': fields[fields.indexWhere((e) => e.name == 'c_13_detail')]
+  //           .stringValue,
+  //       'c_13': fields[fields.indexWhere((e) => e.name == 'c_13')].stringValue,
+  //       'c_14': fields[fields.indexWhere((e) => e.name == 'c_14')].stringValue,
+  //       'c_15': fields[fields.indexWhere((e) => e.name == 'c_15')].stringValue,
+  //       'c_16': fields[fields.indexWhere((e) => e.name == 'c_16')].stringValue,
+  //       'c_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'c_comment')].stringValue,
+  //       //D
+  //       'd_17': fields[fields.indexWhere((e) => e.name == 'd_17')].stringValue,
+  //       'd_18_detail': fields[fields.indexWhere((e) => e.name == 'd_18_detail')]
+  //           .stringValue,
+  //       'd_18': fields[fields.indexWhere((e) => e.name == 'd_18')].stringValue,
+  //       'd_19': fields[fields.indexWhere((e) => e.name == 'd_19')].stringValue,
+  //       'd_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'd_comment')].stringValue,
+  //       //E
+  //       'e_20_detail': fields[fields.indexWhere((e) => e.name == 'e_20_detail')]
+  //           .stringValue,
+  //       'e_20': fields[fields.indexWhere((e) => e.name == 'e_20')].stringValue,
+  //       'e_21': fields[fields.indexWhere((e) => e.name == 'e_21')].stringValue,
+  //       'e_22': fields[fields.indexWhere((e) => e.name == 'e_22')].stringValue,
+  //       'e_23': fields[fields.indexWhere((e) => e.name == 'e_23')].stringValue,
+  //       'e_24': fields[fields.indexWhere((e) => e.name == 'e_24')].stringValue,
+  //       'e_25': fields[fields.indexWhere((e) => e.name == 'e_25')].stringValue,
+  //       'e_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'e_comment')].stringValue,
+  //       //F
+  //       'f_26': fields[fields.indexWhere((e) => e.name == 'f_26')].stringValue,
+  //       'f_27': fields[fields.indexWhere((e) => e.name == 'f_27')].stringValue,
+  //       'f_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'f_comment')].stringValue,
+  //       //G
+  //       'g_28_detail': fields[fields.indexWhere((e) => e.name == 'g_28_detail')]
+  //           .stringValue,
+  //       'g_28': fields[fields.indexWhere((e) => e.name == 'g_28')].stringValue,
+  //       'g_29': fields[fields.indexWhere((e) => e.name == 'g_29')].stringValue,
+  //       'g_30': fields[fields.indexWhere((e) => e.name == 'g_30')].stringValue,
+  //       'g_31': fields[fields.indexWhere((e) => e.name == 'g_31')].stringValue,
+  //       'g_32': fields[fields.indexWhere((e) => e.name == 'g_32')].stringValue,
+  //       'g_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'g_comment')].stringValue,
+  //       //H
+  //       'h_33': fields[fields.indexWhere((e) => e.name == 'h_33')].stringValue,
+  //       'h_34': fields[fields.indexWhere((e) => e.name == 'h_34')].stringValue,
+  //       'h_35': fields[fields.indexWhere((e) => e.name == 'h_35')].stringValue,
+  //       'h_36': fields[fields.indexWhere((e) => e.name == 'h_36')].stringValue,
+  //       'h_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'h_comment')].stringValue,
+  //       //I
+  //       'i_37': fields[fields.indexWhere((e) => e.name == 'i_37')].stringValue,
+  //       'i_38': fields[fields.indexWhere((e) => e.name == 'i_38')].stringValue,
+  //       'i_39': fields[fields.indexWhere((e) => e.name == 'i_39')].stringValue,
+  //       'i_40': fields[fields.indexWhere((e) => e.name == 'i_40')].stringValue,
+  //       'i_41': fields[fields.indexWhere((e) => e.name == 'i_41')].stringValue,
+  //       'i_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'i_comment')].stringValue,
+  //       //J
+  //       'j_42': fields[fields.indexWhere((e) => e.name == 'j_42')].stringValue,
+  //       'j_43': fields[fields.indexWhere((e) => e.name == 'j_43')].stringValue,
+  //       'j_44_detail': fields[fields.indexWhere((e) => e.name == 'j_44_detail')]
+  //           .stringValue,
+  //       'j_44': fields[fields.indexWhere((e) => e.name == 'j_44')].stringValue,
+  //       'j_45_detail': fields[fields.indexWhere((e) => e.name == 'j_45_detail')]
+  //           .stringValue,
+  //       'j_45': fields[fields.indexWhere((e) => e.name == 'j_45')].stringValue,
+  //       'j_46_detail': fields[fields.indexWhere((e) => e.name == 'j_46_detail')]
+  //           .stringValue,
+  //       'j_46': fields[fields.indexWhere((e) => e.name == 'j_46')].stringValue,
+  //       'j_47_detail': fields[fields.indexWhere((e) => e.name == 'j_47_detail')]
+  //           .stringValue,
+  //       'j_47': fields[fields.indexWhere((e) => e.name == 'j_47')].stringValue,
+  //       'j_48_detail': fields[fields.indexWhere((e) => e.name == 'j_48_detail')]
+  //           .stringValue,
+  //       'j_48': fields[fields.indexWhere((e) => e.name == 'j_48')].stringValue,
+  //       'j_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'j_comment')].stringValue,
+  //       //LANDING AND GO-AROUND
+  //       'no_landing': fields[fields.indexWhere((e) => e.name == 'no_landing')]
+  //           .stringValue,
+  //       'no_goaround': fields[fields.indexWhere((e) => e.name == 'no_goaround')]
+  //           .stringValue,
+  //
+  //       //COMPETENCY
+  //       'comp_kno':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_kno')].stringValue,
+  //       'comp_pro':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_pro')].stringValue,
+  //       'comp_com':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_com')].stringValue,
+  //       'comp_fpa':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_fpa')].stringValue,
+  //       'comp_fpm':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_fpm')].stringValue,
+  //       'comp_ltw':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_ltw')].stringValue,
+  //       'comp_psd':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_psd')].stringValue,
+  //       'comp_saw':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_saw')].stringValue,
+  //       'comp_wlm':
+  //           fields[fields.indexWhere((e) => e.name == 'comp_wlm')].stringValue,
+  //       'general_comment':
+  //           fields[fields.indexWhere((e) => e.name == 'general_comment')]
+  //               .stringValue,
+  //       //RESULT
+  //       'result':
+  //           fields[fields.indexWhere((e) => e.name == 'result')].stringValue,
+  //
+  //       'pilot_sig_date':
+  //           fields[fields.indexWhere((e) => e.name == 'pilot_sig_date')]
+  //               .stringValue,
+  //       'examiner_sig_date':
+  //           fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
+  //               .stringValue,
+  //     };
 
   void validate() {
     if (type == FormType.lineCheck) {

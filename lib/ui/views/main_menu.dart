@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
 import 'package:marverick/ui/views/log_in.dart';
@@ -14,6 +15,7 @@ class MainMenu extends StatefulWidget {
   static const id = kMainMenuId; //for route.
   int selectedIndex = 0;
   bool isOfflineMode;
+
   MainMenu({this.selectedIndex = 0, this.isOfflineMode = false});
 
   @override
@@ -76,6 +78,12 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   Widget build(BuildContext context) {
+
+
+
+    TextStyle _header() => TextStyle(
+        color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
+
     context.read<FormService>().countPending();
     String _pendingLabel = context.watch<FormService>().pendingCount > 0 &&
             !Authen.isSample
@@ -145,21 +153,51 @@ class _MainMenuState extends State<MainMenu> {
         unselectedItemColor: Colors.white,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: FloatingActionButton(
-          elevation: 3,
-          child: Icon(Icons.add),
-          backgroundColor: kPrimaryAccent,
-          onPressed: () {
-            if (Authen.isSample) {
-              context
-                  .read<FormService>()
-                  .newForm(context, FormService.initSample());
-            } else {
-              context
-                  .read<FormService>()
-                  .newForm(context, FormService.initLineCheck());
-            }
-          }),
+      floatingActionButton: Authen.isSample
+          ? FloatingActionButton(
+              elevation: 3,
+              child: Icon(Icons.add),
+              backgroundColor: kPrimaryAccent,
+              onPressed: () {
+                if (Authen.isSample) {
+                  context
+                      .read<FormService>()
+                      .newForm(context, FormService.initSample());
+                } else {
+                  context
+                      .read<FormService>()
+                      .newForm(context, FormService.initLineCheck());
+                }
+              })
+          : SpeedDial(
+              elevation: 3,
+              child: Icon(Icons.add, color: Colors.white),
+              backgroundColor: kPrimaryAccent,
+              spacing: 10,
+              spaceBetweenChildren: 5,
+              children: [
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'LINE CHECK (rev.04)',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initLineCheck());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.04)',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initPpcCheck());
+                  },
+                ),
+              ],
+            ),
     );
   }
 
