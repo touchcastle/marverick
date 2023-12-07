@@ -48,7 +48,7 @@ RouteTransitionsBuilder kPageTransition =
   );
 };
 
-///Setting
+///Setting 
 const double kTabletStartWidth = 600.0;
 const int kInitChoice = -1;
 const Color kPrimary = Color(0xffe4232a);
