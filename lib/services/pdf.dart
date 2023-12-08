@@ -6,7 +6,8 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 // import 'package:open_file/open_file.dart' as open_file;
-import 'package:open_file_safe/open_file_safe.dart' as open_file;
+// import 'package:open_file_safe/open_file_safe.dart' as open_file;
+import 'package:open_file_plus/open_file_plus.dart'as open_file;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
@@ -199,8 +200,6 @@ class Pdf {
     await file.writeAsBytes(bytes, flush: true);
     Utils.showInProgress(false);
     if (Platform.isAndroid || Platform.isIOS) {
-      //Launch the file (used open_file package)
-      print('$path/$name');
       await open_file.OpenFile.open('$path/$name');
     } else if (Platform.isWindows) {
       await Process.run('start', <String>['$path\\$name'], runInShell: true);

@@ -84,6 +84,7 @@ class FormService extends ChangeNotifier {
   var storage = FirebaseStorage.instance;
   String? downloadUrl;
 
+  ///TODO: New form (4): Add new form name
   String formName(f.FormType type) {
     if (type == f.FormType.lineCheck) {
       return 'line_check';
@@ -94,6 +95,7 @@ class FormService extends ChangeNotifier {
     }
   }
 
+  ///TODO: New form (5): Add new form url
   String formUrl(f.FormType type) {
     if (type == f.FormType.lineCheck) {
       return kLineChekSheetUrl;
@@ -261,6 +263,7 @@ class FormService extends ChangeNotifier {
     }
   }
 
+  ///TODO: New form (7): Add new form delete db
   void delete(f.Form form, void Function(String) callback) async {
     try {
       forms.removeWhere((e) => e.id == form.id);
@@ -343,6 +346,7 @@ class FormService extends ChangeNotifier {
     );
   }
 
+  ///TODO: New form (2): Add new form initiator
   ///-------------------------------------------------------------------------
   ///LINE CHECK FORM
   ///-------------------------------------------------------------------------

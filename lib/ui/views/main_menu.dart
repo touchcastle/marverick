@@ -10,6 +10,7 @@ import 'package:marverick/services/authen.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
+import 'package:upgrader/upgrader.dart';
 
 class MainMenu extends StatefulWidget {
   static const id = kMainMenuId; //for route.
@@ -125,12 +126,15 @@ class _MainMenuState extends State<MainMenu> {
         ],
         // title: const Text('Choose PDF to create'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: IndexedStack(
-              index: widget.selectedIndex, children: widgetOptions),
-        ),
+      body: UpgradeAlert(
+        upgrader: Upgrader(dialogStyle: UpgradeDialogStyle.cupertino),
+        child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: IndexedStack(
+                  index: widget.selectedIndex, children: widgetOptions),
+            ),
+          ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[

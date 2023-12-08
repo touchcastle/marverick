@@ -9,11 +9,14 @@ import 'package:marverick/services/database.dart';
 import 'package:marverick/ui/views/landing.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/utils/constants.dart';
+import 'package:upgrader/upgrader.dart';
 
 void main() async {
   /// Database initialization and query.
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // await Upgrader.clearSavedSettings();
 
   Pdf pdf = Pdf();
   Authen authen = Authen();

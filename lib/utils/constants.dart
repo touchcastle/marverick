@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
+///Version
+const String kVersion = '1.2.1';
+
 ///PageID
 const String kLandingId = 'landing_screen';
 const String kMainMenuId = 'main_menu';
@@ -48,7 +51,7 @@ RouteTransitionsBuilder kPageTransition =
   );
 };
 
-///Setting 
+///Setting
 const double kTabletStartWidth = 600.0;
 const int kInitChoice = -1;
 const Color kPrimary = Color(0xffe4232a);
@@ -74,11 +77,12 @@ const String kBeamPassword = 'qwerty';
 BoxDecoration fileBoxDecor(FormStatus status) {
   return BoxDecoration(
     color: status == FormStatus.working
-        ? Color(0xfffce19d)
+        ? Color(0xfffce19d).withOpacity(1)
         : status == FormStatus.completed
             ? Colors.black12
             : Color(0xfff7b7b7),
     borderRadius: BorderRadius.all(Radius.circular(8)),
+    // backgroundBlendMode: ,
     boxShadow: [
       BoxShadow(
         color: Colors.grey.withOpacity(0.1),

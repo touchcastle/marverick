@@ -11,6 +11,7 @@ class DatabaseService {
         onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 1);
   }
 
+  ///TODO: New form (9): Add new database version
   static Future onCreateTable(Database db, int version) async {
     print('Crate new table>> linecheck');
     await db
@@ -300,10 +301,25 @@ class databaseService {
     );
   }
 
+  ///TODO: New form (6): Add new form query db
   //Query Device Database
   static Future<List<Form>> dbQuery() async {
     final Database db = await database();
     List<Form> _dbList = [];
+
+    Field _replaceItemValue(
+        Field field, List<Map<String, dynamic>> map, int i) {
+      Field _result = field;
+      String _name = field.name;
+      if (map[i][_name] != null && map[i][_name] != '') {
+        _result.stringValue = map[i][_name];
+        if (_result.type == FieldType.radio) {
+          _result.intValue =
+              _result.listValue.indexWhere((e) => e == map[i][_name]);
+        }
+      }
+      return _result;
+    }
 
     //LINE CHECK
     final List<Map<String, dynamic>> lineCheckMaps =
@@ -312,19 +328,20 @@ class databaseService {
       Form _new = FormService.initLineCheck();
 
       //To get item value from database.
-      Field _replaceItemValue(Field field) {
-        Field _result = field;
-        String _name = field.name;
-        if (lineCheckMaps[i][_name] != null && lineCheckMaps[i][_name] != '') {
-          _result.stringValue = lineCheckMaps[i][_name];
-          if (_result.type == FieldType.radio) {
-            _result.intValue = _result.listValue
-                .indexWhere((e) => e == lineCheckMaps[i][_name]);
-          }
-        }
-        return _result;
-      }
+      // Field _replaceItemValue(Field field) {
+      //   Field _result = field;
+      //   String _name = field.name;
+      //   if (lineCheckMaps[i][_name] != null && lineCheckMaps[i][_name] != '') {
+      //     _result.stringValue = lineCheckMaps[i][_name];
+      //     if (_result.type == FieldType.radio) {
+      //       _result.intValue = _result.listValue
+      //           .indexWhere((e) => e == lineCheckMaps[i][_name]);
+      //     }
+      //   }
+      //   return _result;
+      // }
 
+      ///Move data from database mapping into list
       _new.status = FormStatus.values
           .firstWhere((e) => e.toString() == lineCheckMaps[i]['status']);
       _new.type = FormType.lineCheck;
@@ -340,7 +357,7 @@ class databaseService {
       _new.fontSize = double.parse(lineCheckMaps[i]['font_size']);
 
       for (int _i = 0; _i < _new.fields.length; _i++) {
-        _new.fields[_i] = _replaceItemValue(_new.fields[_i]);
+        _new.fields[_i] = _replaceItemValue(_new.fields[_i], lineCheckMaps, i);
       }
 
       _dbList.add(_new);
@@ -352,19 +369,20 @@ class databaseService {
       Form _new = FormService.initPpcCheck();
 
       //To get item value from database.
-      Field _replaceItemValue(Field field) {
-        Field _result = field;
-        String _name = field.name;
-        if (ppcMaps[i][_name] != null && ppcMaps[i][_name] != '') {
-          _result.stringValue = ppcMaps[i][_name];
-          if (_result.type == FieldType.radio) {
-            _result.intValue =
-                _result.listValue.indexWhere((e) => e == ppcMaps[i][_name]);
-          }
-        }
-        return _result;
-      }
+      // Field _replaceItemValue(Field field) {
+      //   Field _result = field;
+      //   String _name = field.name;
+      //   if (ppcMaps[i][_name] != null && ppcMaps[i][_name] != '') {
+      //     _result.stringValue = ppcMaps[i][_name];
+      //     if (_result.type == FieldType.radio) {
+      //       _result.intValue =
+      //           _result.listValue.indexWhere((e) => e == ppcMaps[i][_name]);
+      //     }
+      //   }
+      //   return _result;
+      // }
 
+      ///Move data from database mapping into list
       _new.status = FormStatus.values
           .firstWhere((e) => e.toString() == ppcMaps[i]['status']);
       _new.type = FormType.ppc;
@@ -379,7 +397,9 @@ class databaseService {
       _new.fontSize = double.parse(ppcMaps[i]['font_size']);
 
       for (int _i = 0; _i < _new.fields.length; _i++) {
-        _new.fields[_i] = _replaceItemValue(_new.fields[_i]);
+        _new.fields[_i] = _replaceItemValue(_new.fields[_i], ppcMaps, i);
+
+        ///Add case for transfer checkbox data
         if (_new.fields[_i].type == FieldType.checkbox) {
           for (int _c = 0; _c < _new.fields[_i].checkBoxValue.length; _c++) {
             String _name = _new.fields[_i].name + '_' + _c.toString();
@@ -393,59 +413,4 @@ class databaseService {
     });
     return _dbList;
   }
-
-//
-// //Update Device
-// Future<void> dbLineCheckUpdate(
-//     {required String id, required String name}) async {
-//   DatabaseDeviceName _updateData =
-//   DatabaseDeviceName(id: id, deviceName: name);
-//   final db = await _database();
-//   await db.update(
-//     kDbDeviceName,
-//     _updateData.toMap(),
-//     where: "id = ?",
-//     whereArgs: [_updateData.id],
-//   );
-// }
-//
-// //Delete Device
-// Future<void> dbLineCheckDelete({required String id}) async {
-//   final Future<Database> database = openDatabase(
-//     join(await getDatabasesPath(), kDbName),
-//   );
-//   final db = await database;
-//
-//   await db.delete(
-//     kDbDeviceName,
-//     where: "id = ?",
-//     whereArgs: [id],
-//   );
-// }
-
-// /// Get displayName from [databaseDeviceName] and return.
-// ///
-// /// If not found, return old same [name].
-// String getStoredName({required String id, required String name}) {
-//   String _deviceName = name;
-//   if (databaseDeviceName != null) {
-//     int _i =
-//     databaseDeviceName!.indexWhere((d) => d.id == id);
-//     if (_i >= 0) {
-//       _deviceName = databaseDeviceName![_i].deviceName;
-//     }
-//   }
-//   return _deviceName;
-// }
-
-// Future updateName({required String id, required String name}) async {
-//   if (databaseDeviceName!.indexWhere((d) => d.id == id) < 0) {
-//     dbInsertDevice(id: id, name: name);
-//     databaseDeviceName?.add(DatabaseDeviceName(id: id, deviceName: name));
-//   } else {
-//     dbUpdateDevice(id: id, name: name);
-//     int _i = databaseDeviceName!.indexWhere((d) => d.id == id);
-//     databaseDeviceName![_i].deviceName = name;
-//   }
-// }
 }

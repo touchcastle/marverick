@@ -161,62 +161,76 @@ class _FormListState extends State<FormList> {
         .toList()
         .isEmpty;
     return Scaffold(
-      body: Center(
-        child: isEmpty()
-            ? SizedBox(
-                width: 300,
-                child: SvgPicture.asset('assets/images/aircraft.svg',
-                    color: Colors.black12),
-              )
-            : ListView.builder(
-                itemCount: context.watch<FormService>().forms.length,
-                itemBuilder: (BuildContext context, int _index) {
-                  f.Form _form = context.watch<FormService>().forms[_index];
-                  if (_form.status == widget.status &&
-                      sampleCheck(_form.type)) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 25, vertical: 10),
-                      child: Dismissible(
-                        key: Key(_form.id),
-                        onDismissed: (direction) =>
-                            onDismissed(direction, _form),
-                        background: dismissBackground(),
-                        child: Container(
-                          decoration: fileBoxDecor(_form.status),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: fileBox(_form, context, _index),
-                              ),
-                              _form.status == FormStatus.pending
-                                  ? Container(
-                                      padding: EdgeInsets.only(right: 10),
-                                      color: Colors.transparent,
-                                      child: IconButton(
-                                        onPressed: () async {
-                                          _submitForm(context, _form);
-                                        },
-                                        icon: Icon(Icons.file_upload),
-                                        iconSize: 40,
-                                      ),
-                                    )
-                                  : SizedBox.shrink(),
-                            ],
+      body: Stack(
+        children: [
+          const Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Center(
+                  child: Text(kVersion,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.black38,
+                        fontWeight: FontWeight.w600,
+                      )))
+            ],
+          ),
+          Center(
+            child: SizedBox(
+              width: 300,
+              child: SvgPicture.asset('assets/images/aircraft.svg',
+                  color: Colors.black12),
+            ),
+          ),
+          ListView.builder(
+            itemCount: context.watch<FormService>().forms.length,
+            itemBuilder: (BuildContext context, int _index) {
+              f.Form _form = context.watch<FormService>().forms[_index];
+              if (_form.status == widget.status && sampleCheck(_form.type)) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                  child: Dismissible(
+                    key: Key(_form.id),
+                    onDismissed: (direction) => onDismissed(direction, _form),
+                    background: dismissBackground(),
+                    child: Container(
+                      decoration: fileBoxDecor(_form.status),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: fileBox(_form, context, _index),
                           ),
-                        ),
+                          _form.status == FormStatus.pending
+                              ? Container(
+                                  padding: EdgeInsets.only(right: 10),
+                                  color: Colors.transparent,
+                                  child: IconButton(
+                                    onPressed: () async {
+                                      _submitForm(context, _form);
+                                    },
+                                    icon: Icon(Icons.file_upload),
+                                    iconSize: 40,
+                                  ),
+                                )
+                              : SizedBox.shrink(),
+                        ],
                       ),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
+                    ),
+                  ),
+                );
+              } else {
+                return SizedBox.shrink();
+              }
+            },
+          ),
+        ],
       ),
     );
   }
 
   Text formName(f.Form form) => Text(form.formLabel, style: header());
+
   Text formStatus(f.Form form) =>
       Text(displayStatus(form.status), style: label());
 
