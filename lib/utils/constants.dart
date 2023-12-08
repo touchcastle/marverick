@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
-///Version
+///Version number
 const String kVersion = '1.2.1';
 
 ///PageID
