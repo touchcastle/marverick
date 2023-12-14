@@ -1,0 +1,222 @@
+// Deploy as webapp (execute as me, for everyone) and copy url
+
+function doPost(request){
+  // Open Google Sheet using ID
+  var sheet = SpreadsheetApp.openById("15Fi2IjwwAHFpLDodSJpuzQgRuNSahW6SJybHhI48cys");
+  var result = {"status": "SUCCESS"};
+  try{
+   
+    //------------------------------------------------------
+    // Create all Parameters
+    // Identical name with mapping in app.
+    //------------------------------------------------------
+    //Form info
+    var create_at= Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm:ss");
+    var create_by = request.parameter.create_by ;
+    var id = request.parameter.id;
+    var pdf_url = request.parameter.pdf_url;
+    
+    //Pilot info
+    var pilot_rank= request.parameter.pilot_rank;
+    var pilot_id = request.parameter.pilot_id;
+    var pilot_name = request.parameter.pilot_name;
+    var pilot_license_no = request.parameter.pilot_license_no;
+    
+    //Examiner info
+    var examiner_rank= request.parameter.examiner_rank;
+    var examiner_id = request.parameter.examiner_id;
+    var examiner_name = request.parameter.examiner_name;
+    var examiner_license_no = request.parameter.examiner_license_no;
+    
+    
+    //Check type
+    var type_of_check = request.parameter.type_of_check;
+    var other_type = request.parameter.other_type;
+    
+    //#1 Sector
+    var date_1 = request.parameter.date_1;
+    var ac_type_1 = request.parameter.ac_type_1;
+    var ac_reg_1 = request.parameter.ac_reg_1;
+    var flt_no_1 = request.parameter.flt_no_1;
+    var from_1 = request.parameter.from_1;
+    var to_1 = request.parameter.to_1;
+    var duty_1 = request.parameter.duty_1;
+    
+    //#2 Sector
+    var date_2 = request.parameter.date_2;
+    var ac_type_2 = request.parameter.ac_type_2;
+    var ac_reg_2 = request.parameter.ac_reg_2;
+    var flt_no_2 = request.parameter.flt_no_2;
+    var from_2 = request.parameter.from_2;
+    var to_2 = request.parameter.to_2;
+    var duty_2 = request.parameter.duty_2;
+    
+    //Grading & Comment
+    //A
+    var a_1 = request.parameter.a_1;
+    var a_2 = request.parameter.a_2;
+    var a_3 = request.parameter.a_3;
+    var a_4 = request.parameter.a_4;
+    var a_5 = request.parameter.a_5;
+    var a_6 = request.parameter.a_6;
+    var a_7 = request.parameter.a_7;
+    var a_comment = request.parameter.a_comment;
+    //B
+    var b_8 = request.parameter.b_8;
+    var b_9 = request.parameter.b_9;
+    var b_10 = request.parameter.b_10;
+    var b_11 = request.parameter.b_11;
+    var b_12 = request.parameter.b_12;
+    var b_13 = request.parameter.b_13;
+    var b_comment = request.parameter.b_comment;
+    //C
+    var c_14 = request.parameter.c_14;
+    var c_15 = request.parameter.c_15;
+    var c_16 = request.parameter.c_16;
+    var c_17 = request.parameter.c_17;
+    var c_18 = request.parameter.c_18;
+    var c_comment = request.parameter.c_comment;
+    //D
+    var d_19 = request.parameter.d_19;
+    var d_20 = request.parameter.d_20;
+    var d_21 = request.parameter.d_21;
+    var d_22 = request.parameter.d_22;
+    var d_23 = request.parameter.d_23;
+    var d_24 = request.parameter.d_24;
+    var d_25 = request.parameter.d_25;
+    var d_26 = request.parameter.d_26;
+    var d_27 = request.parameter.d_27;
+    var d_28 = request.parameter.d_28;
+    var d_comment = request.parameter.d_comment;
+    //E
+    var e_29 = request.parameter.e_29;
+    var e_30 = request.parameter.e_30;
+    var e_31 = request.parameter.e_31;
+    var e_32 = request.parameter.e_32;
+    var e_33 = request.parameter.e_33;
+    var e_34 = request.parameter.e_34;
+    var e_comment = request.parameter.e_comment;
+    //BRIEFING
+    var brief_1 = request.parameter.brief_1;
+    var brief_2 = request.parameter.brief_2;
+    var brief_3 = request.parameter.brief_3;
+    var brief_4 = request.parameter.brief_4;
+    var brief_5 = request.parameter.brief_5;
+    var brief_comment = request.parameter.brief_comment;
+    //COMPETENCY
+    var comp_pro = request.parameter.comp_pro;
+    var comp_com = request.parameter.comp_com;
+    var comp_fpa = request.parameter.comp_fpa;
+    var comp_fpm = request.parameter.comp_fpm;
+    var comp_kno = request.parameter.comp_kno;
+    var comp_ltw = request.parameter.comp_ltw;
+    var comp_psd = request.parameter.comp_psd;
+    var comp_saw = request.parameter.comp_saw;
+    var comp_wlm = request.parameter.comp_wlm;
+    var general_comment = request.parameter.general_comment;
+    //COMPETENCY
+    var result = request.parameter.result;
+    var competent_level = request.parameter.competent_level;
+    var result_comment = request.parameter.result_comment;
+    
+    //------------------------------------------------------
+    // Append data on Google Sheet
+    // Sequence as actual data column
+    //------------------------------------------------------
+    var rowData = sheet.appendRow([create_at,
+                                   create_by,
+                                   id,
+                                   pdf_url,
+                                   pilot_rank, 
+                                   pilot_id, 
+                                   pilot_name,
+                                   pilot_license_no,
+                                   examiner_rank, 
+                                   examiner_id, 
+                                   examiner_name, 
+                                   examiner_license_no, 
+                                   type_of_check, 
+                                   other_type,
+                                   date_1,
+                                   ac_type_1,
+                                   ac_reg_1,
+                                   flt_no_1,
+                                   from_1,
+                                   to_1,
+                                   duty_1,
+                                   date_2,
+                                   ac_type_2,
+                                   ac_reg_2,
+                                   flt_no_2,
+                                   from_2,
+                                   to_2,
+                                   duty_2,
+                                   a_1,
+                                   a_2,
+                                   a_3,
+                                   a_4,
+                                   a_5,
+                                   a_6,
+                                   a_7,
+                                   a_comment,
+                                   b_8,
+                                   b_9,
+                                   b_10,
+                                   b_11,
+                                   b_12,
+                                   b_13,
+                                   b_comment,
+                                   c_14,
+                                   c_15,
+                                   c_16,
+                                   c_17,
+                                   c_18,
+                                   c_comment,
+                                   d_19,
+                                   d_20,
+                                   d_21,
+                                   d_22,
+                                   d_23,
+                                   d_24,
+                                   d_25,
+                                   d_26,
+                                   d_27,
+                                   d_28,
+                                   d_comment,
+                                   e_29,
+                                   e_30,
+                                   e_31,
+                                   e_32,
+                                   e_33,
+                                   e_34,
+                                   e_comment,
+                                   brief_1,
+                                   brief_2,
+                                   brief_3,
+                                   brief_4,
+                                   brief_5,
+                                   brief_comment,
+                                   comp_pro,
+                                   comp_com,
+                                   comp_fpa,
+                                   comp_fpm,
+                                   comp_kno,
+                                   comp_ltw,
+                                   comp_psd,
+                                   comp_saw,
+                                   comp_wlm,
+                                   general_comment,
+                                   result,
+                                   competent_level,
+                                   result_comment]);
+
+  }catch(exc){
+    // If error occurs, throw exception
+    result = {"status": "FAILED", "message": exc};
+  }
+
+  // Return result
+  return ContentService
+  .createTextOutput(JSON.stringify(result))
+  .setMimeType(ContentService.MimeType.JSON);
+}

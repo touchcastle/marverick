@@ -23,7 +23,7 @@ class Field extends ChangeNotifier {
   ///Field's label
   String label;
 
-  ///Copy value from other field but display on different place.
+  ///Copy value from other field but display on different position in PDF.
   String? duplicateFrom;
 
   Uint8List? signature;
@@ -49,23 +49,35 @@ class Field extends ChangeNotifier {
   int minLength;
   int? maxLength;
   int? maxLine;
+
+  /// Main section in form
   int section;
+
+  /// Sub-section in form
   int subSection;
+
+  /// Sub-section in grading area (A, B, C, D ...)
   int gradeSection;
   bool mandatory;
+
+  /// Show field in input screen
   bool input;
+
+  /// Display in PDF page...
   double page;
   double posX;
   double posY;
-  double? width;
-  double? height;
   List<double> posXList;
   List<double> posYList;
+  double? width;
+  double? height;
   double sigWidth;
   double sigMaxHeight;
   double? fontSize;
   TextInputType? keyboardType;
   TextCapitalization textCapitalization;
+
+  /// Write this field in PDF
   bool writePdf;
 
   ///data

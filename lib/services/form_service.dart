@@ -240,15 +240,18 @@ class FormService extends ChangeNotifier {
   Future save(f.Form form, {bool showLoad = false}) async {
     if (!Authen.isSample) {
       showLoad ? Utils.showInProgress(true) : null;
-      if (form.type == f.FormType.lineCheck) {
-        await databaseService.dbInsert(
-            // form.lineCheckToMap(), kLineCheckTable);
-            form.formMap(),
-            kLineCheckTable);
-      } else if (form.type == f.FormType.ppc) {
-        await databaseService.dbInsert(form.formMap(), kPPCTable);
-        // await LineCheckDatabase.dbInsert(form.ppcToMap(), kPPCTable);
-      }
+      await databaseService.dbInsert(form.formMap(), form.dbTable);
+      // if (form.type == f.FormType.lineCheck) {
+      //   await databaseService.dbInsert(
+      //       // form.lineCheckToMap(), kLineCheckTable);
+      //       form.formMap(),
+      //       kLineCheckTable);
+      // } else if (form.type == f.FormType.ppc) {
+      //   await databaseService.dbInsert(form.formMap(), kPPCTable);
+      //   // await LineCheckDatabase.dbInsert(form.ppcToMap(), kPPCTable);
+      // }
+
+      ///Save signature
       for (int i = 0; i < form.fields.length; i++) {
         if (form.fields[i].type == FieldType.signature) {
           await form.fields[i].convertSignature((String response) {});
@@ -295,6 +298,7 @@ class FormService extends ChangeNotifier {
       fontSize: 13,
       formLabel: 'Signature Verification',
       formLabelInfoField1: 'name',
+      dbTable: '',
       fields: [
         Field(
             name: 'name',
@@ -363,10 +367,9 @@ class FormService extends ChangeNotifier {
       formName: 'Line Check',
       createDateTime: timeStamp,
       createBy: Authen.user != null ? Authen.user.email : '',
-
       id: uuid.v1(),
-      // id: '${DateFormat('yyyyMMddHHmmss').format(timeStamp)}${Authen.user.id ?? ''}',
       filePath: 'forms/linecheck.pdf',
+      dbTable: kLineCheckTable,
       fontSize: 10,
       sectionLabel: [
         'Personal Detail',
@@ -1478,6 +1481,7 @@ class FormService extends ChangeNotifier {
       createBy: Authen.user != null ? Authen.user.email : '',
       id: uuid.v1(),
       filePath: 'forms/ppc.pdf',
+      dbTable: kPPCTable,
       fontSize: 9,
       sectionLabel: [
         'Personal Detail',

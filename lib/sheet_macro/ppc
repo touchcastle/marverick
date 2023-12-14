@@ -1,0 +1,289 @@
+// Deploy as webapp (execute as me, for everyone) and copy url
+
+function doPost(request){
+  // Open Google Sheet using ID
+  var sheet = SpreadsheetApp.openById("11ZOyyo_s2LZ5cZEFR3LOlrNf6KXWeu2rpoj4kG56YLQ");
+  var result = {"status": "SUCCESS"};
+  try{
+
+    //------------------------------------------------------
+    // Create all Parameters
+    // Identical name with mapping in app.
+    //------------------------------------------------------
+    //Form info
+    var create_at= Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm:ss");
+    var create_by = request.parameter.create_by ;
+    var id = request.parameter.id;
+    var pdf_url = request.parameter.pdf_url;
+
+    //Pilot info
+    var pilot_rank= request.parameter.pilot_rank;
+    var pilot_id = request.parameter.pilot_id;
+    var pilot_name = request.parameter.pilot_name;
+    var pilot_license_no = request.parameter.pilot_license_no;
+
+    //Instructor info
+    var instructor_rank= request.parameter.instructor_rank;
+    var instructor_id = request.parameter.instructor_id;
+    var instructor_name = request.parameter.instructor_name;
+    var instructor_cert_no = request.parameter.instructor_cert_no;
+
+    //Examiner info
+    var examiner_type= request.parameter.examiner_type;
+    var examiner_id = request.parameter.examiner_id;
+    var examiner_name = request.parameter.examiner_name;
+    var examiner_pel_no = request.parameter.examiner_pel_no;
+
+
+    //Check type
+    var check_date = request.parameter.check_date;
+    var block_time = request.parameter.block_time;
+    var fstd_no = request.parameter.fstd_no;
+    var route = request.parameter.route;
+    var check_course = request.parameter.check_course;
+    // var check_type = request.parameter.check_type;
+    var check_type_0 = request.parameter.check_type_0;
+    var check_type_1 = request.parameter.check_type_1;
+    var check_type_2 = request.parameter.check_type_2;
+
+    //Grading & Comment
+    //A
+    var a_1 = request.parameter.a_1;
+    var a_2_detail = request.parameter.a_2_detail;
+    var a_2 = request.parameter.a_2;
+    var a_3 = request.parameter.a_3;
+    var a_comment = request.parameter.a_comment;
+    //B
+    var b_4 = request.parameter.b_4;
+    var b_5 = request.parameter.b_5;
+    var b_6 = request.parameter.b_6;
+    var b_7 = request.parameter.b_7;
+    var b_8 = request.parameter.b_8;
+    var b_comment = request.parameter.b_comment;
+    //C
+    var c_9 = request.parameter.c_9;
+    var c_10 = request.parameter.c_10;
+    var c_11 = request.parameter.c_11;
+    var c_12 = request.parameter.c_12;
+    // var c_13_detail = request.parameter.c_13_detail;
+    var c_13_check_0 = request.parameter.c_13_check_0;
+    var c_13_check_1 = request.parameter.c_13_check_1;
+    var c_13_check_2 = request.parameter.c_13_check_2;
+    var c_13 = request.parameter.c_13;
+    var c_14 = request.parameter.c_14;
+    var c_15 = request.parameter.c_15;
+    var c_16 = request.parameter.c_16;
+    var c_comment = request.parameter.c_comment;
+    //D
+    var d_17 = request.parameter.d_17;
+    // var d_18_detail = request.parameter.d_18_detail;
+    var d_18_check_0 = request.parameter.d_18_check_0;
+    var d_18_check_1 = request.parameter.d_18_check_1;
+    var d_18 = request.parameter.d_18;
+    var d_19 = request.parameter.d_19;
+    var d_comment = request.parameter.d_comment;
+    //E
+    // var e_20_detail = request.parameter.e_20_detail;
+    var e_20_check_0 = request.parameter.e_20_check_0;
+    var e_20_check_1 = request.parameter.e_20_check_1;
+    var e_20 = request.parameter.e_20;
+    var e_21 = request.parameter.e_20;
+    var e_22 = request.parameter.e_22;
+    var e_23 = request.parameter.e_23;
+    var e_24 = request.parameter.e_24;
+    var e_25 = request.parameter.e_25;
+    var e_comment = request.parameter.e_comment;
+    //F
+    var f_26 = request.parameter.f_26;
+    var f_27 = request.parameter.f_27;
+    var f_comment = request.parameter.f_comment;
+    //G
+    // var g_28_detail = request.parameter.g_28_detail;
+    var g_28_check_0 = request.parameter.g_28_check_0;
+    var g_28_check_1 = request.parameter.g_28_check_1;
+    var g_28_check_2 = request.parameter.g_28_check_2;
+    var g_28_check_3 = request.parameter.g_28_check_3;
+    var g_28_check_4 = request.parameter.g_28_check_4;
+    var g_28 = request.parameter.g_28;
+    var g_29 = request.parameter.g_29;
+    var g_30 = request.parameter.g_30;
+    var g_31 = request.parameter.g_31;
+    var g_32 = request.parameter.g_32;
+    var g_comment = request.parameter.g_comment;
+    //H
+    var h_33 = request.parameter.h_33;
+    var h_34 = request.parameter.h_34;
+    var h_35 = request.parameter.h_35;
+    var h_36 = request.parameter.h_36;
+    var h_comment = request.parameter.h_comment;
+    //I
+    var i_37 = request.parameter.i_37;
+    var i_38 = request.parameter.i_38;
+    var i_39 = request.parameter.i_39;
+    var i_40 = request.parameter.i_40;
+    var i_41 = request.parameter.i_41;
+    var i_comment = request.parameter.i_comment;
+    //J
+    var j_42 = request.parameter.j_42;
+    var j_43 = request.parameter.j_43;
+    var j_44_detail = request.parameter.j_44_detail;
+    var j_44 = request.parameter.j_44;
+    var j_45_detail = request.parameter.j_45_detail;
+    var j_45 = request.parameter.j_45;
+    var j_46_detail = request.parameter.j_46_detail;
+    var j_46 = request.parameter.j_46;
+    var j_47_detail = request.parameter.j_47_detail;
+    var j_47 = request.parameter.j_47;
+    var j_48_detail = request.parameter.j_48_detail;
+    var j_48 = request.parameter.j_48;
+    var j_comment = request.parameter.j_comment;
+    //NO OF LANDING AND GO-AROUND
+    var no_landing = request.parameter.no_landing;
+    var no_goaround = request.parameter.no_goaround;
+    //COMPETENCY
+    var comp_kno = request.parameter.comp_kno;
+    var comp_pro = request.parameter.comp_pro;
+    var comp_com = request.parameter.comp_com;
+    var comp_fpa = request.parameter.comp_fpa;
+    var comp_fpm = request.parameter.comp_fpm;
+    var comp_ltw = request.parameter.comp_ltw;
+    var comp_psd = request.parameter.comp_psd;
+    var comp_saw = request.parameter.comp_saw;
+    var comp_wlm = request.parameter.comp_wlm;
+    var general_comment = request.parameter.general_comment;
+    //COMPETENCY
+    var result = request.parameter.result;
+
+    //------------------------------------------------------
+    // Append data on Google Sheet
+    // Sequence as actual data column
+    //------------------------------------------------------
+    var rowData = sheet.appendRow([create_at,
+                                   create_by,
+                                   id,
+                                   pdf_url,
+                                   pilot_rank,
+                                   pilot_id,
+                                   pilot_name,
+                                   pilot_license_no,
+                                   instructor_rank,
+                                   instructor_id,
+                                   instructor_name,
+                                   instructor_cert_no,
+                                   examiner_type,
+                                   examiner_id,
+                                   examiner_name,
+                                   examiner_pel_no,
+                                   check_date,
+                                   block_time,
+                                   fstd_no,
+                                   route,
+                                   check_course,
+                                  //  check_type,
+                                   check_type_0,
+                                   check_type_1,
+                                   check_type_2,
+                                   a_1,
+                                   a_2_detail,
+                                   a_2,
+                                   a_3,
+                                   a_comment,
+                                   b_4,
+                                   b_5,
+                                   b_6,
+                                   b_7,
+                                   b_8,
+                                   b_comment,
+                                   c_9,
+                                   c_10,
+                                   c_11,
+                                   c_12,
+                                  //  c_13_detail,
+                                   c_13_check_0,
+                                   c_13_check_1,
+                                   c_13_check_2,
+                                   c_13,
+                                   c_14,
+                                   c_15,
+                                   c_16,
+                                   c_comment,
+                                   d_17,
+                                  //  d_18_detail,
+                                   d_18_check_0,
+                                   d_18_check_1,
+                                   d_18,
+                                   d_19,
+                                   d_comment,
+                                  //  e_20_detail,
+                                   e_20_check_0,
+                                   e_20_check_1,
+                                   e_20,
+                                   e_21,
+                                   e_22,
+                                   e_23,
+                                   e_24,
+                                   e_25,
+                                   e_comment,
+                                   f_26,
+                                   f_27,
+                                   f_comment,
+                                  //  g_28_detail,
+                                   g_28_check_0,
+                                   g_28_check_1,
+                                   g_28_check_2,
+                                   g_28_check_3,
+                                   g_28_check_4,
+                                   g_28,
+                                   g_29,
+                                   g_30,
+                                   g_31,
+                                   g_32,
+                                   g_comment,
+                                   h_33,
+                                   h_34,
+                                   h_35,
+                                   h_36,
+                                   h_comment,
+                                   i_37,
+                                   i_38,
+                                   i_39,
+                                   i_40,
+                                   i_41,
+                                   i_comment,
+                                   j_42,
+                                   j_43,
+                                   j_44_detail,
+                                   j_44,
+                                   j_45_detail,
+                                   j_45,
+                                   j_46_detail,
+                                   j_46,
+                                   j_47_detail,
+                                   j_47,
+                                   j_48_detail,
+                                   j_48,
+                                   j_comment,
+                                   no_landing,
+                                   no_goaround,
+                                   comp_kno,
+                                   comp_pro,
+                                   comp_com,
+                                   comp_fpa,
+                                   comp_fpm,
+                                   comp_ltw,
+                                   comp_psd,
+                                   comp_saw,
+                                   comp_wlm,
+                                   general_comment,
+                                   result]);
+
+  }catch(exc){
+    // If error occurs, throw exception
+    result = {"status": "FAILED", "message": exc};
+  }
+
+  // Return result
+  return ContentService
+  .createTextOutput(JSON.stringify(result))
+  .setMimeType(ContentService.MimeType.JSON);
+}

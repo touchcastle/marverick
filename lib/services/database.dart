@@ -301,8 +301,7 @@ class databaseService {
     );
   }
 
-  ///TODO: New form (6): Add new form query db
-  //Query Device Database
+  ///Query from sql database into app's list
   static Future<List<Form>> dbQuery() async {
     final Database db = await database();
     List<Form> _dbList = [];
@@ -321,96 +320,144 @@ class databaseService {
       return _result;
     }
 
-    //LINE CHECK
-    final List<Map<String, dynamic>> lineCheckMaps =
-        await db.query(kLineCheckTable);
-    List.generate(lineCheckMaps.length, (i) {
-      Form _new = FormService.initLineCheck();
+    for (int dbIndex = 0; dbIndex < kDbTableList.length; dbIndex++){
+      final List<Map<String, dynamic>> maps =
+      await db.query(kDbTableList[dbIndex]);
+      List.generate(maps.length, (i) {
+        late Form append;
+        ///TODO: New form (6): Add new form query db
+        if(kDbTableList[dbIndex] == kLineCheckTable){
+          append = FormService.initLineCheck();
+        } else if(kDbTableList[dbIndex] == kPPCTable){
+          append = FormService.initPpcCheck();
+        }
 
-      //To get item value from database.
-      // Field _replaceItemValue(Field field) {
-      //   Field _result = field;
-      //   String _name = field.name;
-      //   if (lineCheckMaps[i][_name] != null && lineCheckMaps[i][_name] != '') {
-      //     _result.stringValue = lineCheckMaps[i][_name];
-      //     if (_result.type == FieldType.radio) {
-      //       _result.intValue = _result.listValue
-      //           .indexWhere((e) => e == lineCheckMaps[i][_name]);
-      //     }
-      //   }
-      //   return _result;
-      // }
+        ///Move data from database mapping into app's list
+        append.status = FormStatus.values
+            .firstWhere((e) => e.toString() == maps[i]['status']);
+        append.type = FormType.lineCheck;
+        append.formName = maps[i]['form_name'];
+        append.createDateTime = DateTime.parse(maps[i]['create_at']);
+        if (maps[i]['submit_at'] != null &&
+            maps[i]['submit_at'] != '') {
+          append.submitDateTime = DateTime.parse(maps[i]['submit_at']);
+        }
+        append.createBy = maps[i]['create_by'];
+        append.filePath = maps[i]['file_path'];
+        append.id = maps[i]['id'];
+        append.fontSize = double.parse(maps[i]['font_size']);
 
-      ///Move data from database mapping into list
-      _new.status = FormStatus.values
-          .firstWhere((e) => e.toString() == lineCheckMaps[i]['status']);
-      _new.type = FormType.lineCheck;
-      _new.formName = lineCheckMaps[i]['form_name'];
-      _new.createDateTime = DateTime.parse(lineCheckMaps[i]['create_at']);
-      if (lineCheckMaps[i]['submit_at'] != null &&
-          lineCheckMaps[i]['submit_at'] != '') {
-        _new.submitDateTime = DateTime.parse(lineCheckMaps[i]['submit_at']);
-      }
-      _new.createBy = lineCheckMaps[i]['create_by'];
-      _new.filePath = lineCheckMaps[i]['file_path'];
-      _new.id = lineCheckMaps[i]['id'];
-      _new.fontSize = double.parse(lineCheckMaps[i]['font_size']);
+        ///Fields as []
+        for (int _i = 0; _i < append.fields.length; _i++) {
+          ///Move data into corresponding field. (normal case)
+          append.fields[_i] = _replaceItemValue(append.fields[_i], maps, i);
 
-      for (int _i = 0; _i < _new.fields.length; _i++) {
-        _new.fields[_i] = _replaceItemValue(_new.fields[_i], lineCheckMaps, i);
-      }
 
-      _dbList.add(_new);
-    });
-
-    //PPC
-    final List<Map<String, dynamic>> ppcMaps = await db.query(kPPCTable);
-    List.generate(ppcMaps.length, (i) {
-      Form _new = FormService.initPpcCheck();
-
-      //To get item value from database.
-      // Field _replaceItemValue(Field field) {
-      //   Field _result = field;
-      //   String _name = field.name;
-      //   if (ppcMaps[i][_name] != null && ppcMaps[i][_name] != '') {
-      //     _result.stringValue = ppcMaps[i][_name];
-      //     if (_result.type == FieldType.radio) {
-      //       _result.intValue =
-      //           _result.listValue.indexWhere((e) => e == ppcMaps[i][_name]);
-      //     }
-      //   }
-      //   return _result;
-      // }
-
-      ///Move data from database mapping into list
-      _new.status = FormStatus.values
-          .firstWhere((e) => e.toString() == ppcMaps[i]['status']);
-      _new.type = FormType.ppc;
-      _new.formName = ppcMaps[i]['form_name'];
-      _new.createDateTime = DateTime.parse(ppcMaps[i]['create_at']);
-      if (ppcMaps[i]['submit_at'] != null && ppcMaps[i]['submit_at'] != '') {
-        _new.submitDateTime = DateTime.parse(ppcMaps[i]['submit_at']);
-      }
-      _new.createBy = ppcMaps[i]['create_by'];
-      _new.filePath = ppcMaps[i]['file_path'];
-      _new.id = ppcMaps[i]['id'];
-      _new.fontSize = double.parse(ppcMaps[i]['font_size']);
-
-      for (int _i = 0; _i < _new.fields.length; _i++) {
-        _new.fields[_i] = _replaceItemValue(_new.fields[_i], ppcMaps, i);
-
-        ///Add case for transfer checkbox data
-        if (_new.fields[_i].type == FieldType.checkbox) {
-          for (int _c = 0; _c < _new.fields[_i].checkBoxValue.length; _c++) {
-            String _name = _new.fields[_i].name + '_' + _c.toString();
-            _new.fields[_i].checkBoxValue[_c] =
-                bool.parse(ppcMaps[i][_name].toLowerCase());
+          ///in case of checkbox type, boolean data is stored in another field
+          ///with named as [field's name + '_' + array number]
+          if (append.fields[_i].type == FieldType.checkbox) {
+            for (int _c = 0; _c < append.fields[_i].checkBoxValue.length; _c++) {
+              String name = '${append.fields[_i].name}_$_c';
+              append.fields[_i].checkBoxValue[_c] =
+                  bool.parse(maps[i][name].toLowerCase());
+            }
           }
         }
-      }
 
-      _dbList.add(_new);
-    });
+        _dbList.add(append);
+      });
+    }
+
+    ///LINE CHECK
+    // final List<Map<String, dynamic>> lineCheckMaps =
+    //     await db.query(kLineCheckTable);
+    // List.generate(lineCheckMaps.length, (i) {
+    //   Form _new = FormService.initLineCheck();
+    //
+    //   //To get item value from database.
+    //   // Field _replaceItemValue(Field field) {
+    //   //   Field _result = field;
+    //   //   String _name = field.name;
+    //   //   if (lineCheckMaps[i][_name] != null && lineCheckMaps[i][_name] != '') {
+    //   //     _result.stringValue = lineCheckMaps[i][_name];
+    //   //     if (_result.type == FieldType.radio) {
+    //   //       _result.intValue = _result.listValue
+    //   //           .indexWhere((e) => e == lineCheckMaps[i][_name]);
+    //   //     }
+    //   //   }
+    //   //   return _result;
+    //   // }
+    //
+    //   ///Move data from database mapping into list
+    //   _new.status = FormStatus.values
+    //       .firstWhere((e) => e.toString() == lineCheckMaps[i]['status']);
+    //   _new.type = FormType.lineCheck;
+    //   _new.formName = lineCheckMaps[i]['form_name'];
+    //   _new.createDateTime = DateTime.parse(lineCheckMaps[i]['create_at']);
+    //   if (lineCheckMaps[i]['submit_at'] != null &&
+    //       lineCheckMaps[i]['submit_at'] != '') {
+    //     _new.submitDateTime = DateTime.parse(lineCheckMaps[i]['submit_at']);
+    //   }
+    //   _new.createBy = lineCheckMaps[i]['create_by'];
+    //   _new.filePath = lineCheckMaps[i]['file_path'];
+    //   _new.id = lineCheckMaps[i]['id'];
+    //   _new.fontSize = double.parse(lineCheckMaps[i]['font_size']);
+    //
+    //   for (int _i = 0; _i < _new.fields.length; _i++) {
+    //     _new.fields[_i] = _replaceItemValue(_new.fields[_i], lineCheckMaps, i);
+    //   }
+    //
+    //   _dbList.add(_new);
+    // });
+
+    ///PPC
+    // final List<Map<String, dynamic>> ppcMaps = await db.query(kPPCTable);
+    // List.generate(ppcMaps.length, (i) {
+    //   Form _new = FormService.initPpcCheck();
+    //
+    //   //To get item value from database.
+    //   // Field _replaceItemValue(Field field) {
+    //   //   Field _result = field;
+    //   //   String _name = field.name;
+    //   //   if (ppcMaps[i][_name] != null && ppcMaps[i][_name] != '') {
+    //   //     _result.stringValue = ppcMaps[i][_name];
+    //   //     if (_result.type == FieldType.radio) {
+    //   //       _result.intValue =
+    //   //           _result.listValue.indexWhere((e) => e == ppcMaps[i][_name]);
+    //   //     }
+    //   //   }
+    //   //   return _result;
+    //   // }
+    //
+    //   ///Move data from database mapping into list
+    //   _new.status = FormStatus.values
+    //       .firstWhere((e) => e.toString() == ppcMaps[i]['status']);
+    //   _new.type = FormType.ppc;
+    //   _new.formName = ppcMaps[i]['form_name'];
+    //   _new.createDateTime = DateTime.parse(ppcMaps[i]['create_at']);
+    //   if (ppcMaps[i]['submit_at'] != null && ppcMaps[i]['submit_at'] != '') {
+    //     _new.submitDateTime = DateTime.parse(ppcMaps[i]['submit_at']);
+    //   }
+    //   _new.createBy = ppcMaps[i]['create_by'];
+    //   _new.filePath = ppcMaps[i]['file_path'];
+    //   _new.id = ppcMaps[i]['id'];
+    //   _new.fontSize = double.parse(ppcMaps[i]['font_size']);
+    //
+    //   for (int _i = 0; _i < _new.fields.length; _i++) {
+    //     _new.fields[_i] = _replaceItemValue(_new.fields[_i], ppcMaps, i);
+    //
+    //     ///Add case for transfer checkbox data
+    //     if (_new.fields[_i].type == FieldType.checkbox) {
+    //       for (int _c = 0; _c < _new.fields[_i].checkBoxValue.length; _c++) {
+    //         String _name = _new.fields[_i].name + '_' + _c.toString();
+    //         _new.fields[_i].checkBoxValue[_c] =
+    //             bool.parse(ppcMaps[i][_name].toLowerCase());
+    //       }
+    //     }
+    //   }
+    //
+    //   _dbList.add(_new);
+    // });
     return _dbList;
   }
 }

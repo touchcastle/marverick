@@ -23,6 +23,7 @@ const String kInputPageName = '/input_page';
 const String kDbName = 'formServeDb.db'; //Database name
 const String kLineCheckTable = 'line_check_table';
 const String kPPCTable = 'ppc_table';
+const List<String> kDbTableList = ['line_check_table', 'ppc_table'];
 
 List<Widget> widgetOptions = <Widget>[
   FormList(status: FormStatus.completed),
@@ -66,7 +67,7 @@ const String kAdminMail = 'admin@vietjetair.com';
 const String kLineChekSheetUrl =
     "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
 const String kPPCSheetUrl =
-    "https://script.google.com/macros/s/AKfycbxaga97_teWQLx8V7gX1wFZC8ef0F-Z8jqGC-oMGIl7n3DT6YalowBpxikECJ7mwkCm/exec";
+    "https://script.google.com/macros/s/AKfycbz8y3I6TpZAEdaG0PC1IZ2HwxyqgkbNN95Qnf2QUAcKWQ_eePlY1lcTXYvu2Vne6Jgt1A/exec";
 
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';

@@ -14,6 +14,8 @@ enum FormType {
 enum FormStatus { working, completed, pending }
 
 class Form extends ChangeNotifier {
+
+  ///Auto generate UUID
   String id;
   FormStatus status;
   FormType type;
@@ -24,8 +26,15 @@ class Form extends ChangeNotifier {
   List<Field> fields;
   String filePath;
   double fontSize;
+  String dbTable;
+
+  /// Section label as in PDF
   List<String>? sectionLabel;
+
+  /// Grading section label as in PDF
   List<String>? gradeSectionLabel;
+
+  /// for display form list in main screen
   String formLabel;
   String? formLabelInfoField1;
   String? formLabelInfoField2;
@@ -46,6 +55,7 @@ class Form extends ChangeNotifier {
     this.gradeSectionLabel,
     this.formLabelInfoField1,
     this.formLabelInfoField2,
+    required this.dbTable,
   });
 
   int allRequired() => fields.where((c) => c.mandatory).toList().length;
@@ -90,6 +100,7 @@ class Form extends ChangeNotifier {
   // Method to make GET parameters.
   // Map<String, dynamic> lineCheckToMap() {
   ///TODO: New form (3): Add new mapping
+  ///Convert list into mapping table for database and google sheet
   Map<String, dynamic> formMap() {
     if (type == FormType.lineCheck) {
       return {

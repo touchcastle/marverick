@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 
 // import 'package:open_file/open_file.dart' as open_file;
 // import 'package:open_file_safe/open_file_safe.dart' as open_file;
-import 'package:open_file_plus/open_file_plus.dart'as open_file;
+import 'package:open_file_plus/open_file_plus.dart' as open_file;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
@@ -25,14 +25,14 @@ class Pdf {
     //Get the pages count
     int pageCount = document.pages.count;
     //Create the PDF standard font
-    PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 11);
+    // PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 11);
     //Create layout format
-    PdfLayoutFormat layoutFormat = PdfLayoutFormat(
-        layoutType: PdfLayoutType.paginate,
-        breakType: PdfLayoutBreakType.fitPage);
-    PdfStringFormat stringFormat = PdfStringFormat(
-      lineSpacing: 0,
-    );
+    // PdfLayoutFormat layoutFormat = PdfLayoutFormat(
+    //     layoutType: PdfLayoutType.paginate,
+    //     breakType: PdfLayoutBreakType.fitPage);
+    // PdfStringFormat stringFormat = PdfStringFormat(
+    //   lineSpacing: 0,
+    // );
     // drawFormat.WordWrap = PdfWordWrapType.Word;
     // drawFormat.Alignment = PdfTextAlignment.Justify;
     // drawFormat.LineAlignment = PdfVerticalAlignment.Top;
@@ -42,15 +42,22 @@ class Pdf {
     for (int page = 1; page <= pageCount; page++) {
       for (int i = 0; i < form.fields.length; i++) {
         Field _field = form.fields[i];
+
+        ///Some fields is not for display
         if (_field.writePdf) {
+          ///Some fields is to duplicate data from other field to display at
+          ///other place
           if (_field.duplicateFrom != null) {
             final _ref = form.fields
                 .firstWhere((element) => element.name == _field.duplicateFrom);
             _field.stringValue = _ref.stringValue;
             _field.intValue = _ref.intValue;
           }
+
           if (page == _field.page) {
             // if (_field.type == FieldType.signature && _field.signature != null) {
+
+            ///Signature
             if (_field.type == FieldType.signature &&
                 _field.signature != null) {
               await _field.convertSignature((String response) {});
@@ -71,60 +78,49 @@ class Pdf {
                     _width,
                     _height,
                   ));
-            } else if ((_field.type == FieldType.radio ||
+            }
+
+            ///Radio / Dropdown: draw a 'check' mark
+            else if ((_field.type == FieldType.radio ||
                     _field.type == FieldType.dropdown) &&
                 _field.intValue >= 0) {
-              /// as png
-              // final PdfBitmap image = PdfBitmap(markPng);
               document.pages[page - 1].graphics.drawImage(
-                  mark,
-                  Rect.fromLTWH(
-                      _field.posXList[_field.intValue] - 2,
-                      _field.posYList[_field.intValue] + 3,
-                      // _field.width ??
-                      //     document.pages[page - 1].getClientSize().width / 1.3,
-                      // _field.height ??
-                      //     document.pages[page - 1].getClientSize().height / 2));
-                      8,
-                      8));
-            } else if (_field.type == FieldType.checkbox) {
+                mark,
+                Rect.fromLTWH(_field.posXList[_field.intValue] - 2,
+                    _field.posYList[_field.intValue] + 3, 8, 8),
+              );
+            }
+
+            ///Checkbox: draw a multiple 'check' mark
+            else if (_field.type == FieldType.checkbox) {
               for (int _i = 0; _i < _field.checkBoxValue.length; _i++) {
                 if (_field.checkBoxValue[_i]) {
                   document.pages[page - 1].graphics.drawImage(
-                      mark,
-                      Rect.fromLTWH(_field.posXList[_i] - 2,
-                          _field.posYList[_i] + 3, 8, 8));
+                    mark,
+                    Rect.fromLTWH(
+                        _field.posXList[_i] - 2, _field.posYList[_i] + 3, 8, 8),
+                  );
                 }
               }
-            } else {
-              // if (form.fields[i].name == 'NARRATIVE') {
-              //Create a text element with the text and font
-              //Draw the text in the first column
+            }
+
+            ///String: Write text
+            else {
               PdfTextElement(
-                      text: _field.stringValue,
-                      font: PdfStandardFont(PdfFontFamily.helvetica,
-                          _field.fontSize ?? form.fontSize),
-                      format: stringFormat)
-                  .draw(
-                      page: document.pages[page - 1],
-                      bounds: Rect.fromLTWH(
-                          _field.posX,
-                          _field.posY,
-                          _field.width ??
-                              document.pages[page - 1].getClientSize().width /
-                                  1.3,
-                          // 100,
-                          _field.height ??
-                              document.pages[page - 1].getClientSize().height /
-                                  2));
-              // 100));
-              // } else {
-              //   document.pages[page - 1].graphics.drawString(
-              //       '${form.fields[i].stringValue}', font,
-              //       bounds:
-              //           Rect.fromLTWH(form.fields[i].posX, form.fields[i].posY, 0, 0),
-              //       brush: PdfBrushes.black);
-              // }
+                text: _field.stringValue,
+                font: PdfStandardFont(
+                    PdfFontFamily.helvetica, _field.fontSize ?? form.fontSize),
+                format: PdfStringFormat(lineSpacing: 0),
+              ).draw(
+                page: document.pages[page - 1],
+                bounds: Rect.fromLTWH(
+                    _field.posX,
+                    _field.posY,
+                    _field.width ??
+                        document.pages[page - 1].getClientSize().width / 1.3,
+                    _field.height ??
+                        document.pages[page - 1].getClientSize().height / 2),
+              );
             }
           }
         }
