@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.2.1';
+const String kVersion = '1.3.1';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -23,7 +23,12 @@ const String kInputPageName = '/input_page';
 const String kDbName = 'formServeDb.db'; //Database name
 const String kLineCheckTable = 'line_check_table';
 const String kPPCTable = 'ppc_table';
-const List<String> kDbTableList = ['line_check_table', 'ppc_table'];
+const String kRt5Table = 'rt5_table';
+const List<String> kDbTableList = [
+  'line_check_table',
+  'ppc_table',
+  'rt5_table',
+];
 
 List<Widget> widgetOptions = <Widget>[
   FormList(status: FormStatus.completed),
@@ -64,15 +69,18 @@ const Color kPenColor = Color(0xff000F55);
 const String kStatusSuccess = 'SUCCESS';
 const String kStatusError = 'ERROR';
 const String kAdminMail = 'admin@vietjetair.com';
+const String kTjoMail = 'teerachart.jo@vietjetair.com';
 const String kLineChekSheetUrl =
     "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
 const String kPPCSheetUrl =
     "https://script.google.com/macros/s/AKfycbz8y3I6TpZAEdaG0PC1IZ2HwxyqgkbNN95Qnf2QUAcKWQ_eePlY1lcTXYvu2Vne6Jgt1A/exec";
+const String kRt5SheetUrl =
+    "https://script.google.com/macros/s/AKfycbyJYqi4u1gckKSMOzDv-cAVmphX3WAPRUDfmXSYmCs1xymbdOWTK-EJb-L-Kgu1gNq2cg/exec";
 
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
-const String kBeamMail = 'beamtjo';
-const String kBeamPassword = 'qwerty';
+// const String kBeamMail = 'beamtjo';
+// const String kBeamPassword = 'qwerty';
 
 ///Decoration
 BoxDecoration fileBoxDecor(FormStatus status) {

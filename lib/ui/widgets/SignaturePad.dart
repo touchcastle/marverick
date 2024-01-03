@@ -13,8 +13,14 @@ class SignaturePad extends StatefulWidget {
   // int index;
   Field field;
   VoidCallback onSave;
+  Function callback;
 
-  SignaturePad({required this.field, required this.onSave});
+  SignaturePad({
+    required this.callback,
+    required this.field,
+    required this.onSave,
+  });
+
   // SignaturePad({required this.form, required this.index, required this.onSave});
 
   @override
@@ -56,17 +62,21 @@ class _SignaturePadState extends State<SignaturePad> {
                 icon: const Icon(Icons.save),
                 color: kSecondary,
                 onPressed: () async {
+                  this.widget.callback();
                   await widget.field.convertSignature((String response) async {
-                    if (response == kStatusSuccess) {
-                      widget.onSave;
-                    } else {
-                      Snackbar.show(context,
+                    setState(() {
+                      if (response == kStatusSuccess) {
+                        widget.onSave;
+                      } else {
+                        Snackbar.show(
+                          context,
                           text: 'Please sign your signature',
                           type: Type.error,
-                          isFixed: false);
-                    }
+                          isFixed: false,
+                        );
+                      }
+                    });
                   });
-                  setState(() {});
                 },
               ),
               IconButton(

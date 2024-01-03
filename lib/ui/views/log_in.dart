@@ -117,6 +117,7 @@ class _LoginState extends State<Login> {
         elevation: 0,
         automaticallyImplyLeading: widget.fromInside,
         backgroundColor: kPrimary,
+        actionsIconTheme: IconThemeData(color: Colors.white),
         // title: const Text('Choose PDF to create'),
       ),
       backgroundColor: kPrimary,
@@ -129,16 +130,6 @@ class _LoginState extends State<Login> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Hero(
-                    //   tag: kHeroLogo,
-                    //   child: SizedBox(
-                    //     width: width * 0.6,
-                    //     child: Image(
-                    //       image: AssetImage(kLogoImage),
-                    //     ),
-                    //   ),
-                    // ),
-                    // SizedBox(height: 60),
                     Container(
                       width: inputAreaWidth,
                       // height: 400,

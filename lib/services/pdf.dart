@@ -86,8 +86,13 @@ class Pdf {
                 _field.intValue >= 0) {
               document.pages[page - 1].graphics.drawImage(
                 mark,
-                Rect.fromLTWH(_field.posXList[_field.intValue] - 2,
-                    _field.posYList[_field.intValue] + 3, 8, 8),
+                Rect.fromLTWH(
+                    _field.posXList[_field.intValue] - 2,
+                    _field.posY != 0
+                        ? _field.posY + 3
+                        : _field.posYList[_field.intValue] + 3,
+                    8,
+                    8),
               );
             }
 
@@ -98,7 +103,12 @@ class Pdf {
                   document.pages[page - 1].graphics.drawImage(
                     mark,
                     Rect.fromLTWH(
-                        _field.posXList[_i] - 2, _field.posYList[_i] + 3, 8, 8),
+                        _field.posXList[_i] - 2,
+                        _field.posY != 0
+                            ? _field.posY + 3
+                            : _field.posYList[_i] + 3,
+                        8,
+                        8),
                   );
                 }
               }

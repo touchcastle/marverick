@@ -79,8 +79,9 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   Widget build(BuildContext context) {
-
-
+    // bool rt5Valid() =>
+    //     Authen.isAdmin() ||
+    //     DateTime.now().isAfter(DateTime.parse('2024-01-01 00:00:00.000'));
 
     TextStyle _header() => TextStyle(
         color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
@@ -99,6 +100,17 @@ class _MainMenuState extends State<MainMenu> {
         automaticallyImplyLeading: false,
         backgroundColor: kPrimary,
         actions: [
+          Container(
+            width: 100,
+            // color: Colors.white,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  Authen.forcingAdmin();
+                });
+              },
+            ),
+          ),
           Authen.user == null
               ? TextButton(
                   child: const Text(
@@ -123,18 +135,31 @@ class _MainMenuState extends State<MainMenu> {
                     );
                   },
                 ),
+          Authen.isAdmin()
+              ? TextButton(
+                  child: const Text(
+                    'ADMIN',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () async {
+                    setState(() {
+                      Authen.forceAdmin = 0;
+                    });
+                  },
+                )
+              : SizedBox.shrink(),
         ],
         // title: const Text('Choose PDF to create'),
       ),
       body: UpgradeAlert(
         upgrader: Upgrader(dialogStyle: UpgradeDialogStyle.cupertino),
         child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: IndexedStack(
-                  index: widget.selectedIndex, children: widgetOptions),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: IndexedStack(
+                index: widget.selectedIndex, children: widgetOptions),
           ),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
@@ -200,6 +225,17 @@ class _MainMenuState extends State<MainMenu> {
                         .newForm(context, FormService.initPpcCheck());
                   },
                 ),
+                if (context.read<FormService>().rt5Valid())
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    label: 'RECURRENT TRAINING RT5 (rev.00)',
+                    labelStyle: _header(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, FormService.initRt5Check());
+                    },
+                  ),
               ],
             ),
     );

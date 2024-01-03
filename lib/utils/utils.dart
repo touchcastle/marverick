@@ -18,6 +18,6 @@ class Utils {
     }
   }
 
-  static bool isAdmin() =>
-      Authen.user.email == kAdminMail || Authen.user.email == kBeamMail;
+  // static bool isAdmin() =>
+  //     Authen.user.email == kAdminMail || Authen.user.email == kBeamMail;
 }

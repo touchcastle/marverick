@@ -39,8 +39,8 @@ class Snackbar {
       duration: duration != null
           ? Duration(seconds: duration)
           : type == Type.info
-              ? const Duration(seconds: 5)
-              : const Duration(seconds: 10),
+              ? const Duration(seconds: 3)
+              : const Duration(seconds: 5),
     ));
   }
 }

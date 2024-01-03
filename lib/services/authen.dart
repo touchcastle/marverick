@@ -22,6 +22,7 @@ class Authen {
   static final auth = FirebaseAuth.instance;
   static var user;
   static bool isSample = false;
+  static int forceAdmin = 0;
 
   static void getCurrentUser() {
     if (auth.currentUser != null) {
@@ -29,13 +30,34 @@ class Authen {
     }
   }
 
+  static void forcingAdmin(){
+    forceAdmin++;
+    print(forceAdmin);
+  }
+
+  static bool isAdmin() {
+    if (user != null && user.email == kAdminMail || forceAdmin >= 5) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static bool isTjo() {
+    if (user != null && user.email == kTjoMail) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static Future signIn(String email, String password) async {
+    forceAdmin = 0;
     if (email == kSampleMail && password == kSamplePassword) {
       isSample = true;
       user = 'sample';
-    } else if (email == kBeamMail && password == kBeamPassword) {
-      isSample = false;
-      user = 'beamtjo';
+    // } else if (email == kBeamMail && password == kBeamPassword) {
+    //   isSample = false;
+    //   user = 'beamtjo';
     } else {
       isSample = false;
       if (!email.contains('@vietjetair.com') &&
@@ -52,6 +74,7 @@ class Authen {
   }
 
   static Future logOut() async {
+    forceAdmin = 0;
     await auth.signOut();
     user = null;
   }
