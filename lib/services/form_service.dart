@@ -110,8 +110,11 @@ class FormService extends ChangeNotifier {
     }
   }
 
+  ///TODO: New form (5.1): Add new pdf naming
   String pdfName(f.Form form, DateTime date) {
-    if (form.type == f.FormType.lineCheck || form.type == f.FormType.ppc) {
+    if (form.type == f.FormType.lineCheck ||
+        form.type == f.FormType.ppc ||
+        form.type == f.FormType.rt5) {
       String dateText = DateFormat('yyyyMMdd').format(date);
       String pilotName = form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
@@ -3039,7 +3042,8 @@ class FormService extends ChangeNotifier {
   ///
   bool rt5Valid() =>
       Authen.isAdmin() ||
-          DateTime.now().isAfter(DateTime.parse('2024-01-02 00:00:00.000'));
+      DateTime.now().isAfter(DateTime.parse('2024-01-02 00:00:00.000'));
+
   static f.Form initRt5Check() {
     DateTime timeStamp = DateTime.now();
 

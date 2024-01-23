@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.3.1';
+const String kVersion = '1.3.2';
 
 ///PageID
 const String kLandingId = 'landing_screen';
