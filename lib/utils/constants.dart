@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.3.2';
+const String kVersion = '1.3.3';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -35,6 +35,13 @@ List<Widget> widgetOptions = <Widget>[
   FormList(status: FormStatus.pending),
   FormList(status: FormStatus.working),
 ];
+
+enum ErrorType {
+  success,
+  missingRequired,
+  noInternet,
+  other,
+}
 
 ///animation
 const Duration kLandingTransitionDur = Duration(milliseconds: 1000);

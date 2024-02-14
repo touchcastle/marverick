@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:marverick/ui/widgets/snackbar.dart';
+import 'package:provider/provider.dart';
 
 // import 'package:open_file/open_file.dart' as open_file;
 // import 'package:open_file_safe/open_file_safe.dart' as open_file;
@@ -12,9 +14,11 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
 import 'package:marverick/utils/utils.dart';
+import 'package:marverick/utils/constants.dart';
 
 class Pdf {
-  Future<List<int>> gen(f.Form form) async {
+  Future<List<int>> gen(
+      f.Form form, void Function(String, ErrorType) callback) async {
     //Load the PDF document
     // final PdfDocument document =
     //     PdfDocument(inputBytes: await _readDocumentData('sample.pdf'));
@@ -116,21 +120,30 @@ class Pdf {
 
             ///String: Write text
             else {
-              PdfTextElement(
-                text: _field.stringValue,
-                font: PdfStandardFont(
-                    PdfFontFamily.helvetica, _field.fontSize ?? form.fontSize),
-                format: PdfStringFormat(lineSpacing: 0),
-              ).draw(
-                page: document.pages[page - 1],
-                bounds: Rect.fromLTWH(
-                    _field.posX,
-                    _field.posY,
-                    _field.width ??
-                        document.pages[page - 1].getClientSize().width / 1.3,
-                    _field.height ??
-                        document.pages[page - 1].getClientSize().height / 2),
-              );
+              print('${_field.label} length: ${_field.stringValue.length}');
+              try {
+                PdfTextElement(
+                  text: _field.stringValue,
+                  font: PdfStandardFont(PdfFontFamily.helvetica,
+                      _field.fontSize ?? form.fontSize),
+                  format: PdfStringFormat(lineSpacing: 0),
+                ).draw(
+                  page: document.pages[page - 1],
+                  bounds: Rect.fromLTWH(
+                      _field.posX,
+                      _field.posY,
+                      _field.width ??
+                          document.pages[page - 1].getClientSize().width / 1.3,
+                      _field.height ??
+                          document.pages[page - 1].getClientSize().height / 2),
+                );
+              } catch (e) {
+                ///todo: error message
+                callback(
+                    'There is an error when writing filed: ${_field.label}',
+                    ErrorType.other);
+                print('error catch $e');
+              }
             }
           }
         }
@@ -168,6 +181,7 @@ class Pdf {
     // }
     //Save the document
     List<int> bytes = await document.save();
+    callback(kStatusSuccess, ErrorType.success);
     //Dispose the document
     document.dispose();
     return bytes;
@@ -186,11 +200,13 @@ class Pdf {
   }
 
   ///To save the pdf file in the device
-  Future<void> lunchPdf(f.Form form) async {
+  Future<void> lunchPdf(f.Form form, void Function(String, ErrorType) callback) async {
     String name = '${form.id}.pdf';
 
     Utils.showInProgress(true);
-    List<int> bytes = await gen(form);
+    List<int> bytes = await gen(form, (String response, ErrorType type) {
+      callback(response, type);
+    });
 
     //Get the storage folder location using path_provider package.
     String? path;

@@ -20,13 +20,6 @@ import 'package:marverick/ui/views/input.dart';
 import 'package:marverick/utils/constants.dart';
 import 'package:marverick/utils/utils.dart';
 
-enum ErrorType {
-  success,
-  missingRequired,
-  noInternet,
-  other,
-}
-
 class FormService extends ChangeNotifier {
   Authen authen;
   Pdf pdf;
@@ -148,7 +141,10 @@ class FormService extends ChangeNotifier {
             //UPLOAD PDF TO GOOGLE STORAGE
             form.validate();
             String name = pdfName(form, submitDate);
-            List<int> pdfAsBytes = await pdf.gen(form);
+            List<int> pdfAsBytes =
+                await pdf.gen(form, (String response, ErrorType type) {
+              callback(response, type);
+            });
             final Directory directory =
                 await path_provider.getApplicationSupportDirectory();
             String path = directory.path;
@@ -2932,6 +2928,7 @@ class FormService extends ChangeNotifier {
             subSection: 1,
             mandatory: false,
             maxLength: 500,
+            maxLine: 6,
             posX: 42,
             posY: 520,
             width: 260,

@@ -154,12 +154,12 @@ class _FormListState extends State<FormList> {
 
   @override
   Widget build(BuildContext context) {
-    bool isEmpty() => context
-        .watch<FormService>()
-        .forms
-        .where((f) => f.status == widget.status)
-        .toList()
-        .isEmpty;
+    // bool isEmpty() => context
+    //     .watch<FormService>()
+    //     .forms
+    //     .where((f) => f.status == widget.status)
+    //     .toList()
+    //     .isEmpty;
     return Scaffold(
       body: Stack(
         children: [
@@ -192,29 +192,80 @@ class _FormListState extends State<FormList> {
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                   child: Dismissible(
                     key: Key(_form.id),
+                    confirmDismiss: (DismissDirection direction) async {
+                      return await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Confirm"),
+                            content: const Text(
+                                "Are you sure you wish to delete this form?"),
+                            actions: <Widget>[
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text("DELETE")),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text("CANCEL"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                     onDismissed: (direction) => onDismissed(direction, _form),
                     background: dismissBackground(),
                     child: Container(
                       decoration: fileBoxDecor(_form.status),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: fileBox(_form, context, _index),
-                          ),
-                          _form.status == FormStatus.pending
-                              ? Container(
-                                  padding: EdgeInsets.only(right: 10),
-                                  color: Colors.transparent,
-                                  child: IconButton(
-                                    onPressed: () async {
-                                      _submitForm(context, _form);
-                                    },
-                                    icon: Icon(Icons.file_upload),
-                                    iconSize: 40,
-                                  ),
-                                )
-                              : SizedBox.shrink(),
-                        ],
+                      child: GestureDetector(
+                        // onLongPress: () async {
+                        //   if (_form.status == FormStatus.working) {
+                        //     return await showDialog(
+                        //       context: context,
+                        //       builder: (BuildContext context) {
+                        //         return AlertDialog(
+                        //           title: const Text("Duplicate"),
+                        //           content: const Text("Duplicate form?"),
+                        //           actions: <Widget>[
+                        //             TextButton(
+                        //                 onPressed: () {
+                        //                   print('DUP DUP');
+                        //                   Navigator.of(context).pop(true);
+                        //                 },
+                        //                 child: const Text("DUPLICATE")),
+                        //             TextButton(
+                        //               onPressed: () =>
+                        //                   Navigator.of(context).pop(false),
+                        //               child: const Text("CANCEL"),
+                        //             ),
+                        //           ],
+                        //         );
+                        //       },
+                        //     );
+                        //   }
+                        // },
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: fileBox(_form, context, _index),
+                            ),
+                            _form.status == FormStatus.pending
+                                ? Container(
+                                    padding: EdgeInsets.only(right: 10),
+                                    color: Colors.transparent,
+                                    child: IconButton(
+                                      onPressed: () async {
+                                        _submitForm(context, _form);
+                                      },
+                                      icon: Icon(Icons.file_upload),
+                                      iconSize: 40,
+                                    ),
+                                  )
+                                : SizedBox.shrink(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -302,7 +353,13 @@ class _FormListState extends State<FormList> {
             ),
           );
         } else {
-          await context.read<Pdf>().lunchPdf(form);
+          await context.read<Pdf>().lunchPdf(form,
+              (String response, ErrorType type) {
+            if (response != kStatusSuccess) {
+              Snackbar.show(context,
+                  text: response, type: Type.info, isFixed: true);
+            }
+          });
         }
       },
     );

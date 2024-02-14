@@ -201,7 +201,13 @@ class _InputScreenState extends State<InputScreen> {
                   // _submitForm();
                   setState(() {});
                   await _autoSave(showLoad: true);
-                  await context.read<Pdf>().lunchPdf(widget.form);
+                  await context.read<Pdf>().lunchPdf(widget.form,
+                      (String response, ErrorType type) {
+                    if (response != kStatusSuccess) {
+                      Snackbar.show(context,
+                          text: response, type: Type.info, isFixed: true);
+                    }
+                  });
                 },
               ),
               TextButton(
@@ -529,7 +535,9 @@ class _InputScreenState extends State<InputScreen> {
               setState(() {
                 widget.form.fields[index].dateTimeValue = args.value;
                 widget.form.fields[index].stringValue =
-                    DateFormat(widget.form.dateFormat).format(args.value).toUpperCase();
+                    DateFormat(widget.form.dateFormat)
+                        .format(args.value)
+                        .toUpperCase();
 
                 // if (widget.form.type == f.FormType.lineCheck) {
                 //   widget.form.fields[index].stringValue =
@@ -555,7 +563,8 @@ class _InputScreenState extends State<InputScreen> {
       enabled: widget.form.fields[index].input,
       controller: TextEditingController()
         ..text = widget.form.fields[index].stringValue,
-      maxLines: widget.form.fields[index].maxLine ?? 5,
+      maxLines: 5,
+      // maxLines: widget.form.fields[index].maxLine ?? 5,
       maxLength: widget.form.fields[index].maxLength,
       onChanged: (text) => widget.form.fields[index].stringValue = text,
       onEditingComplete: () => _autoSave(),
