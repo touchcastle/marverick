@@ -105,9 +105,23 @@ class FormService extends ChangeNotifier {
 
   ///TODO: New form (5.1): Add new pdf naming
   String pdfName(f.Form form, DateTime date) {
-    if (form.type == f.FormType.lineCheck ||
-        form.type == f.FormType.ppc ||
-        form.type == f.FormType.rt5) {
+    if (form.type == f.FormType.ppc || form.type == f.FormType.rt5) {
+      String dateText = form
+          .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
+          .stringValue
+          .replaceAll(' ', '-');
+      String id = idFormatted(form
+          .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
+          .stringValue);
+      String rank = nameFormatted(form
+          .fields[form.fields.indexWhere((e) => e.name == 'pilot_rank')]
+          .stringValue).toUpperCase();
+      String name = nameFormatted(form
+          .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
+          .stringValue).toUpperCase();
+      String type = formName(form.type).toUpperCase();
+      return '$id $rank$name - $type $dateText.pdf';
+    } else if (form.type == f.FormType.lineCheck) {
       String dateText = DateFormat('yyyyMMdd').format(date);
       String pilotName = form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
@@ -115,6 +129,27 @@ class FormService extends ChangeNotifier {
       return '${formName(form.type)}_${pilotName}_$dateText.pdf';
     } else {
       return '${form.id}.pdf';
+    }
+  }
+
+  String idFormatted(String raw) {
+    if (raw.length < 4) {
+      return raw.padLeft(4, '0');
+    } else if (raw.length > 4) {
+      return raw.substring(raw.length - 4, raw.length);
+    } else {
+      return raw;
+    }
+  }
+
+  String nameFormatted(String raw) {
+    final splitted = raw.split(' ');
+    if (splitted.length >= 2) {
+      String name = splitted[0].toUpperCase();
+      String surname = splitted[1].substring(0, 2).toUpperCase();
+      return '$name $surname.';
+    } else {
+      return raw;
     }
   }
 
@@ -141,6 +176,7 @@ class FormService extends ChangeNotifier {
             //UPLOAD PDF TO GOOGLE STORAGE
             form.validate();
             String name = pdfName(form, submitDate);
+            print(name);
             List<int> pdfAsBytes =
                 await pdf.gen(form, (String response, ErrorType type) {
               callback(response, type);
