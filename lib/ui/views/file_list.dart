@@ -25,7 +25,7 @@ class FormList extends StatefulWidget {
 
 class _FormListState extends State<FormList> {
   Widget getLabel(f.Form form, String? fieldName) {
-    if (fieldName != null) {
+    if (fieldName != null && fieldName != '') {
       int i = form.fields.indexWhere((e) => e.name == fieldName);
       if (i >= 0) {
         String text = form.fields[i].stringValue;
@@ -220,32 +220,66 @@ class _FormListState extends State<FormList> {
                     child: Container(
                       decoration: fileBoxDecor(_form.status),
                       child: GestureDetector(
-                        // onLongPress: () async {
-                        //   if (_form.status == FormStatus.working) {
-                        //     return await showDialog(
-                        //       context: context,
-                        //       builder: (BuildContext context) {
-                        //         return AlertDialog(
-                        //           title: const Text("Duplicate"),
-                        //           content: const Text("Duplicate form?"),
-                        //           actions: <Widget>[
-                        //             TextButton(
-                        //                 onPressed: () {
-                        //                   print('DUP DUP');
-                        //                   Navigator.of(context).pop(true);
-                        //                 },
-                        //                 child: const Text("DUPLICATE")),
-                        //             TextButton(
-                        //               onPressed: () =>
-                        //                   Navigator.of(context).pop(false),
-                        //               child: const Text("CANCEL"),
-                        //             ),
-                        //           ],
-                        //         );
-                        //       },
-                        //     );
-                        //   }
-                        // },
+                        onLongPress: () async {
+                          if (Authen.isAdmin() && (_form.status == FormStatus.pending ||
+                              _form.status == FormStatus.completed)) {
+                            return await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Edit"),
+                                  content: const Text("Move back to editing?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                        onPressed: () {
+                                          _form.status = FormStatus.working;
+                                          Navigator.of(context).push(PageRouteBuilder(
+                                              settings: RouteSettings(name: kInputPageName),
+                                              pageBuilder: (_, __, ___) => InputScreen(
+                                                form: context.read<FormService>().forms[_index],
+                                              )));
+                                        },
+                                        child: const Text("EDIT")),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text("CANCEL"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          // if (_form.status == FormStatus.working) {
+                          //   return await showDialog(
+                          //     context: context,
+                          //     builder: (BuildContext context) {
+                          //       return AlertDialog(
+                          //         title: const Text("Duplicate"),
+                          //         content: const Text("Duplicate form?"),
+                          //         actions: <Widget>[
+                          //           TextButton(
+                          //               onPressed: () {
+                          //                 print('DUP DUP');
+                          //                 context.read<FormService>().duplicateForm(_form);
+                          //                 Navigator.of(context).push(PageRouteBuilder(
+                          //                     settings: RouteSettings(name: kInputPageName),
+                          //                     pageBuilder: (_, __, ___) => InputScreen(
+                          //                       form: context.read<FormService>().forms[0],
+                          //                     )));
+                          //               },
+                          //               child: const Text("DUPLICATE")),
+                          //           TextButton(
+                          //             onPressed: () =>
+                          //                 Navigator.of(context).pop(false),
+                          //             child: const Text("CANCEL"),
+                          //           ),
+                          //         ],
+                          //       );
+                          //     },
+                          //   );
+                          // }
+                        },
                         child: Row(
                           children: [
                             Expanded(

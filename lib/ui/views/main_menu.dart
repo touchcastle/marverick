@@ -207,7 +207,7 @@ class _MainMenuState extends State<MainMenu> {
               children: [
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'LINE CHECK (rev.04)',
+                  label: 'LINE CHECK (SV) (rev.04)',
                   labelStyle: _header(),
                   onTap: () {
                     context
@@ -222,7 +222,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initPpcCheck());
+                        .newForm(context, FormService.initPpc());
                   },
                 ),
                 if (context.read<FormService>().rt5Valid())
@@ -233,7 +233,18 @@ class _MainMenuState extends State<MainMenu> {
                     onTap: () {
                       context
                           .read<FormService>()
-                          .newForm(context, FormService.initRt5Check());
+                          .newForm(context, FormService.initRt5());
+                    },
+                  ),
+                if (context.read<FormService>().lineTrainValid())
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    label: 'LINE TRAIN / CHECK (rev.14)',
+                    labelStyle: _header(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, FormService.initLineTrain());
                     },
                   ),
               ],

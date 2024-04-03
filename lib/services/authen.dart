@@ -36,7 +36,9 @@ class Authen {
   }
 
   static bool isAdmin() {
-    if (user != null && user.email == kAdminMail || forceAdmin >= 5) {
+    if (user == kSampleMail) {
+      return false;
+    } else if (user != null && user.email == kAdminMail || forceAdmin >= 5) {
       return true;
     } else {
       return false;
@@ -60,7 +62,8 @@ class Authen {
     //   user = 'beamtjo';
     } else {
       isSample = false;
-      if (!email.contains('@vietjetair.com') &&
+      if (!email.contains('@') &&
+          !email.contains('@vietjetair.com') &&
           !email.contains('@vietjetair')) {
         email += '@vietjetair.com';
       }

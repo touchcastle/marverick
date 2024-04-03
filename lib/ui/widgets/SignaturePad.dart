@@ -62,12 +62,12 @@ class _SignaturePadState extends State<SignaturePad> {
                 icon: const Icon(Icons.save),
                 color: kSecondary,
                 onPressed: () async {
-                  this.widget.callback();
                   await widget.field.convertSignature((String response) async {
                     setState(() {
                       if (response == kStatusSuccess) {
                         widget.onSave;
                       } else {
+                        print(response);
                         Snackbar.show(
                           context,
                           text: 'Please sign your signature',
@@ -76,7 +76,12 @@ class _SignaturePadState extends State<SignaturePad> {
                         );
                       }
                     });
-                  });
+                  }, true);
+                  widget.callback();
+                  // Future.delayed(Duration(milliseconds: 500), () {
+                  //   print('lasdjkf;lkjasf;lkajsdf');
+                  //   widget.callback();
+                  // });
                 },
               ),
               IconButton(
@@ -106,7 +111,7 @@ class _SignaturePadState extends State<SignaturePad> {
                     widget.field.controller.clear();
                     // widget.form.fields[index].signature = null;
                   });
-                  widget.onSave;
+                  // widget.onSave;
                 },
               ),
             ],

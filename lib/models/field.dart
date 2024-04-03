@@ -34,14 +34,17 @@ class Field extends ChangeNotifier {
     onDrawEnd: () {},
   );
 
-  Future convertSignature(void Function(String) callback) async {
+  Future convertSignature(void Function(String) callback, bool allowDelete) async {
     final Uint8List? data = await controller.toPngBytes();
-    if (data != null) {
+    // signature = data;
+    // callback(kStatusSuccess);
+    if (data != null || allowDelete) {
       signature = data;
       callback(kStatusSuccess);
-    } else {
-      callback(kStatusError);
     }
+    // else {
+    //   callback(kStatusError);
+    // }
   }
 
   ///True type of field's value
@@ -58,7 +61,7 @@ class Field extends ChangeNotifier {
 
   /// Sub-section in grading area (A, B, C, D ...)
   int gradeSection;
-  bool mandatory;
+  bool isMandatory;
 
   /// Show field in input screen
   bool input;
@@ -96,7 +99,7 @@ class Field extends ChangeNotifier {
     this.minLength = 0,
     this.maxLength,
     this.maxLine,
-    this.mandatory = true,
+    this.isMandatory = true,
     this.input = true,
     this.stringValue = '',
     this.dateTimeValue,

@@ -85,14 +85,18 @@ class _InputScreenState extends State<InputScreen> {
               : errorType == ErrorType.success
                   ? true
                   : false);
-      if (errorType != ErrorType.missingRequired) {
-        Navigator.of(context).pushReplacement(PageRouteBuilder(
-            settings: const RouteSettings(name: kMainPageName),
-            pageBuilder: (_, __, ___) => MainMenu(selectedIndex: indexPage)));
+      if (errorType == ErrorType.validate) {
+        // Navigator.of(context).pushReplacement(PageRouteBuilder(
+        //     settings: const RouteSettings(name: kMainPageName),
+        //     pageBuilder: (_, __, ___) => MainMenu(selectedIndex: indexPage)));
       } else if (errorType == ErrorType.missingRequired) {
         setState(() {
           toggleMandatory = true;
         });
+      } else if (errorType != ErrorType.missingRequired) {
+        Navigator.of(context).pushReplacement(PageRouteBuilder(
+            settings: const RouteSettings(name: kMainPageName),
+            pageBuilder: (_, __, ___) => MainMenu(selectedIndex: indexPage)));
       }
     }
   }
@@ -149,16 +153,24 @@ class _InputScreenState extends State<InputScreen> {
     }
   }
 
-  bool isMandatoryEmpty(int index) =>
-      widget.form.fields[index].mandatory &&
-          ((widget.form.fields[index].type == FieldType.string ||
+  bool isMandatoryEmpty(int index, String name) {
+    if (widget.form.fields[index].isMandatory) {
+      return ((widget.form.fields[index].type == FieldType.string ||
                   widget.form.fields[index].type == FieldType.radio) &&
               widget.form.fields[index].stringValue == '' &&
               widget.form.fields[index].intValue < 0) ||
-      (widget.form.fields[index].type == FieldType.signature &&
-          widget.form.fields[index].controller.isEmpty) ||
-      (widget.form.fields[index].type == FieldType.int &&
-          widget.form.fields[index].intValue >= 0);
+          (widget.form.fields[index].type == FieldType.signature &&
+              ((widget.form.fields[index].signature != null &&
+                      widget.form.fields[index].signature!.isEmpty) ||
+                  widget.form.fields[index].signature == null)) ||
+          (widget.form.fields[index].type == FieldType.int &&
+              widget.form.fields[index].intValue < 0) ||
+          (widget.form.fields[index].type == FieldType.checkbox &&
+              !widget.form.fields[index].checkBoxValue.contains(true));
+    } else {
+      return false;
+    }
+  }
 
   Future<bool> _onWillPop() async {
     _autoSave();
@@ -174,8 +186,16 @@ class _InputScreenState extends State<InputScreen> {
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
       },
-      child: WillPopScope(
-        onWillPop: _onWillPop,
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          // logic
+          _autoSave();
+          Navigator.of(context).pushReplacement(PageRouteBuilder(
+              settings: const RouteSettings(name: kMainPageName),
+              pageBuilder: (_, __, ___) => MainMenu(selectedIndex: 2)));
+        },
+        // onWillPop: _onWillPop,
         child: Scaffold(
           appBar: AppBar(
             leading: BackButton(color: Colors.white),
@@ -201,6 +221,7 @@ class _InputScreenState extends State<InputScreen> {
                   // _submitForm();
                   setState(() {});
                   await _autoSave(showLoad: true);
+
                   await context.read<Pdf>().lunchPdf(widget.form,
                       (String response, ErrorType type) {
                     if (response != kStatusSuccess) {
@@ -353,24 +374,24 @@ class _InputScreenState extends State<InputScreen> {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
-          widget.form.filledRequired() < widget.form.allRequired()
-              ? Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    icon: Icon(toggleMandatory
-                        ? Icons.pageview
-                        : Icons.pageview_outlined),
-                    iconSize: 30,
-                    onPressed: () {
-                      setState(() {
-                        toggleMandatory = !toggleMandatory;
-                      });
-                    },
-                  ),
-                )
-              : SizedBox.shrink(),
+          // widget.form.filledRequired() < widget.form.allRequired()
+          //     ?
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(),
+              icon: Icon(
+                  toggleMandatory ? Icons.pageview : Icons.pageview_outlined),
+              iconSize: 30,
+              onPressed: () {
+                setState(() {
+                  toggleMandatory = !toggleMandatory;
+                });
+              },
+            ),
+          )
+          // : SizedBox.shrink(),
         ],
       ),
     );
@@ -382,13 +403,13 @@ class _InputScreenState extends State<InputScreen> {
       decoration: BoxDecoration(
         color: !toggleMandatory
             ? Colors.transparent
-            : isMandatoryEmpty(index)
+            : isMandatoryEmpty(index, field.name)
                 ? Colors.redAccent
                 : Colors.transparent,
         border: Border.all(
             color: !toggleMandatory
                 ? Colors.black26
-                : isMandatoryEmpty(index)
+                : isMandatoryEmpty(index, field.name)
                     ? Colors.red
                     : Colors.black26),
         borderRadius: BorderRadius.all(Radius.circular(5.0)),
@@ -607,21 +628,24 @@ class _InputScreenState extends State<InputScreen> {
             Row(
               children: [
                 GestureDetector(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: widget.form.fields[index].intValue == radio
-                              ? kSecondaryDarker
-                              : Colors.black12,
-                          width: 1.3),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      color: widget.form.fields[index].intValue == radio
-                          ? kSecondary
-                          : Colors.transparent,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: widget.form.fields[index].intValue == radio
+                                ? kSecondaryDarker
+                                : Colors.black12,
+                            width: 1.3),
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: widget.form.fields[index].intValue == radio
+                            ? kSecondary
+                            : Colors.transparent,
+                      ),
+                      child: Text(widget.form.fields[index].listValue[radio],
+                          style: value()),
                     ),
-                    child: Text(widget.form.fields[index].listValue[radio],
-                        style: value()),
                   ),
                   onTap: () {
                     setState(() {

@@ -8,7 +8,7 @@ import 'package:marverick/models/field.dart';
 class DatabaseService {
   static Future openDB() async {
     openDatabase(join(await getDatabasesPath(), kDbName),
-        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 2);
+        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 3);
   }
 
   static Future createLineCheck(Database db) async {
@@ -110,7 +110,6 @@ class DatabaseService {
             "examiner_sig_date TEXT"
             ")");
   }
-
   static Future createPpc(Database db) async {
     print('Crate new table>> ppc');
     await db.execute("CREATE TABLE $kPPCTable(id TEXT PRIMARY KEY , "
@@ -242,7 +241,6 @@ class DatabaseService {
         ")");
     print('create ppc complete');
   }
-
   static Future createRt5(Database db) async {
     print('Crate new table>> rt5');
     await db.execute("CREATE TABLE $kRt5Table(id TEXT PRIMARY KEY , "
@@ -366,18 +364,140 @@ class DatabaseService {
         ")");
     print('create rt5 complete');
   }
+  static Future createLineTrain(Database db) async {
+    print('Crate new table>> lineTrain');
+    await db.execute("CREATE TABLE $klineTrainTable(id TEXT PRIMARY KEY , "
+        "status TEXT NOT NULL, "
+        "type TEXT NOT NULL, "
+        "form_name TEXT NOT NULL, "
+        "create_at TEXT NOT NULL, "
+        "submit_at TEXT NOT NULL, "
+        "create_by TEXT NOT NULL, "
+        "file_path TEXT NOT NULL, "
+        "font_size TEXT, "
+        "pdf_url TEXT, "
+        "pilot_name TEXT, "
+        "pilot_license_no TEXT, "
+        "pilot_id TEXT, "
+        "instructor_name TEXT, "
+        "instructor_cert_no TEXT, "
+        "instructor_id TEXT, "
+        "examiner_name TEXT, "
+        "examiner_license_no TEXT, "
+        "examiner_id TEXT, "
+        "course TEXT, "
+        "other_course TEXT, "
+        // "check_type TEXT, "
+        "check_type_0 TEXT, "
+        "check_type_1 TEXT, "
+        "check_type_2 TEXT, "
+        "check_type_3 TEXT, "
+        "check_type_4 TEXT, "
+        "check_type_5 TEXT, "
+        "check_type_6 TEXT, "
+        "check_type_7 TEXT, "
+        "other_type TEXT, "
+        "date_1 TEXT, "
+        "ac_type_1 TEXT, "
+        "ac_reg_1 TEXT, "
+        "flt_no_1 TEXT, "
+        "route_1 TEXT, "
+        "duty_1 TEXT, "
+        "date_2 TEXT, "
+        "ac_type_2 TEXT, "
+        "ac_reg_2 TEXT, "
+        "flt_no_2 TEXT, "
+        "route_2 TEXT, "
+        "duty_2 TEXT, "
+        "accum_pf TEXT, "
+        "accum_pm TEXT, "
+        "q1 TEXT, "
+        "q2 TEXT, "
+        "q3 TEXT, "
+        "q4 TEXT, "
+        "qb TEXT, "
+        "q5 TEXT, "
+        "q6 TEXT, "
+        "q7 TEXT, "
+        "q8 TEXT, "
+        "q9 TEXT, "
+        "qa_comment TEXT, "
+        "q10 TEXT, "
+        "q11 TEXT, "
+        "q12 TEXT, "
+        "qb_comment TEXT, "
+        "q13 TEXT, "
+        "q14 TEXT, "
+        "q15 TEXT, "
+        "q16 TEXT, "
+        "q17 TEXT, "
+        "q18 TEXT, "
+        "q19 TEXT, "
+        "q20 TEXT, "
+        "qc_comment TEXT, "
+        "q21 TEXT, "
+        "q22 TEXT, "
+        "q23 TEXT, "
+        "q24 TEXT, "
+        "q25 TEXT, "
+        "q26 TEXT, "
+        "qd_comment TEXT, "
+        "q27 TEXT, "
+        "q28 TEXT, "
+        "q29 TEXT, "
+        "qe_comment TEXT, "
+        "q30 TEXT, "
+        "q31 TEXT, "
+        "q32 TEXT, "
+        "q33 TEXT, "
+        "q34 TEXT, "
+        "q35 TEXT, "
+        "qf_comment TEXT, "
+        "q36 TEXT, "
+        "q37_detail TEXT, "
+        "q37 TEXT, "
+        "q38_detail TEXT, "
+        "q38 TEXT, "
+        "q39_detail TEXT, "
+        "q39 TEXT, "
+        "q40_detail TEXT, "
+        "q40 TEXT, "
+        "qg_comment TEXT, "
+        "comp_kno TEXT, "
+        "comp_pro TEXT, "
+        "comp_com TEXT, "
+        "comp_fpa TEXT, "
+        "comp_fpm TEXT, "
+        "comp_ltw TEXT, "
+        "comp_psd TEXT, "
+        "comp_saw TEXT, "
+        "comp_wlm TEXT, "
+        "general_comment TEXT, "
+        "additional_note TEXT, "
+        "result TEXT, "
+        "examiner_result TEXT, "
+        "pilot_sig_date TEXT,"
+        "instructor_sig_date TEXT,"
+        "examiner_sig_date TEXT"
+        ")");
+    print('create rt5 complete');
+  }
 
   ///TODO: New form (9): Add new database version
   static Future onCreateTable(Database db, int version) async {
     await createLineCheck(db);
     await createPpc(db);
     await createRt5(db);
+    await createLineTrain(db);
   }
 
   static Future onUpdateTable(
       Database db, int oldVersion, int newVersion) async {
     if (oldVersion == 1) {
       await createRt5(db);
+      await createLineTrain(db);
+    } else if (oldVersion == 2) {
+      await createLineTrain(db);
     }
   }
 }
@@ -437,9 +557,11 @@ class databaseService {
         if (kDbTableList[dbIndex] == kLineCheckTable) {
           append = FormService.initLineCheck();
         } else if (kDbTableList[dbIndex] == kPPCTable) {
-          append = FormService.initPpcCheck();
+          append = FormService.initPpc();
         } else if (kDbTableList[dbIndex] == kRt5Table) {
-          append = FormService.initRt5Check();
+          append = FormService.initRt5();
+        } else if (kDbTableList[dbIndex] == klineTrainTable) {
+          append = FormService.initLineTrain();
         }
 
         ///Move data from database mapping into app's list
@@ -478,7 +600,7 @@ class databaseService {
       });
     }
 
-    _dbList.sort((a, b) => a.createDateTime.compareTo(b.createDateTime));
+    _dbList.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
 
     ///LINE CHECK
     // final List<Map<String, dynamic>> lineCheckMaps =

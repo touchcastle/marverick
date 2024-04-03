@@ -34,15 +34,28 @@ class FormService extends ChangeNotifier {
   int draftCount = 0;
 
   void newForm(BuildContext c, f.Form form) {
-    forms.add(form);
+    // forms.add(form);
+    forms.insert(0, form);
     countPending();
     notifyListeners();
     Navigator.of(c).push(PageRouteBuilder(
         settings: RouteSettings(name: kInputPageName),
         pageBuilder: (_, __, ___) => InputScreen(
-              form: forms[forms.length - 1],
+              form: forms[0],
+              // form: forms[forms.length - 1],
             )));
   }
+
+  // void duplicateForm(f.Form origin) {
+  //   f.Form appending = origin.copyWith(
+  //     createDateTime: DateTime.now(),
+  //     createBy: Authen.user != null ? Authen.user.email : '',
+  //     id: uuid.v1(),
+  //   );
+  //   forms.insert(0, appending);
+  //   countPending();
+  //   notifyListeners();
+  // }
 
   void moveToComplted(f.Form form) {
     int _i = forms.indexWhere((e) => e.id == form.id);
@@ -85,6 +98,22 @@ class FormService extends ChangeNotifier {
       return 'ppc';
     } else if (type == f.FormType.rt5) {
       return 'rt5';
+    } else if (type == f.FormType.lineTrain) {
+      return 'LINE TRN';
+    } else {
+      return 'untitled';
+    }
+  }
+  ///TODO: New form (4.2): Add new form name
+  String folderName(f.FormType type) {
+    if (type == f.FormType.lineCheck) {
+      return 'line_check';
+    } else if (type == f.FormType.ppc) {
+      return 'ppc';
+    } else if (type == f.FormType.rt5) {
+      return 'rt5';
+    } else if (type == f.FormType.lineTrain) {
+      return 'line_train';
     } else {
       return 'untitled';
     }
@@ -98,6 +127,8 @@ class FormService extends ChangeNotifier {
       return kPPCSheetUrl;
     } else if (type == f.FormType.rt5) {
       return kRt5SheetUrl;
+    } else if (type == f.FormType.lineTrain) {
+      return kLineTrainSheetUrl;
     } else {
       return '';
     }
@@ -114,13 +145,28 @@ class FormService extends ChangeNotifier {
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
           .stringValue);
       String rank = nameFormatted(form
-          .fields[form.fields.indexWhere((e) => e.name == 'pilot_rank')]
-          .stringValue).toUpperCase();
+              .fields[form.fields.indexWhere((e) => e.name == 'pilot_rank')]
+              .stringValue)
+          .toUpperCase();
       String name = nameFormatted(form
-          .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
-          .stringValue).toUpperCase();
+              .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
+              .stringValue)
+          .toUpperCase();
       String type = formName(form.type).toUpperCase();
       return '$id $rank$name - $type $dateText.pdf';
+    } else if (form.type == f.FormType.lineTrain) {
+      String dateText = form
+          .fields[form.fields.indexWhere((e) => e.name == 'date_1')].stringValue
+          .replaceAll(' ', '-');
+      String id = idFormatted(form
+          .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
+          .stringValue);
+      String name = form
+          .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
+          .stringValue
+          .toUpperCase();
+      String type = formName(form.type).toUpperCase();
+      return '$id $name - $type $dateText.pdf';
     } else if (form.type == f.FormType.lineCheck) {
       String dateText = DateFormat('yyyyMMdd').format(date);
       String pilotName = form
@@ -160,10 +206,11 @@ class FormService extends ChangeNotifier {
     downloadUrl = null;
     DateTime submitDate = DateTime.now();
     double percentCompleted;
+    String validateResult = '';
     if (!Authen.isSample) {
       Authen.isAdmin() ? percentCompleted = 1 : percentCompleted = 99.5;
       await save(form);
-      if (form.percentFilled() > percentCompleted) {
+      if (form.percentFilled() >= percentCompleted) {
         if (await (Connectivity().checkConnectivity()) ==
             ConnectivityResult.none) {
           callback('No internet connection: Form moved to pending',
@@ -174,54 +221,58 @@ class FormService extends ChangeNotifier {
             Utils.showInProgress(true);
             print('start pdf');
             //UPLOAD PDF TO GOOGLE STORAGE
-            form.validate();
-            String name = pdfName(form, submitDate);
-            print(name);
-            List<int> pdfAsBytes =
-                await pdf.gen(form, (String response, ErrorType type) {
-              callback(response, type);
-            });
-            final Directory directory =
-                await path_provider.getApplicationSupportDirectory();
-            String path = directory.path;
-            final File file = File('$path/$name');
-            await file.writeAsBytes(pdfAsBytes, flush: true);
-            TaskSnapshot snapshot = await storage
-                .ref()
-                .child("${formName(form.type)}/${pdfName(form, submitDate)}")
-                .putFile(file);
-            if (snapshot.state == TaskState.success) {
-              downloadUrl = await snapshot.ref.getDownloadURL();
-              form.pdfUrl = downloadUrl;
-            } else {
-              form.pdfUrl = 'error';
-            }
-            print('PDF UPLOADED.');
-            print('START APPEND GOOGLE SHEET');
-            //UPLOAD JSON TO GOOGLE SHEET
-            await http
-                .post(Uri.parse(formUrl(form.type)), body: form.formMap())
-                // body: form.lineCheckToMap())
-                .then((response) async {
-              print(response.statusCode);
-              if (response.statusCode == 302) {
-                var _url = response.headers['location'];
-                await http.get(Uri.parse(_url!)).then((response) {
-                  forms[forms.indexWhere((e) => e.id == form.id)]
-                      .submitDateTime = submitDate;
-                  moveToComplted(form);
-                  callback(kStatusSuccess, ErrorType.success);
-                  print('APPEND GOOGLE SHEET SUCCESS');
-                });
+            validateResult = form.validate();
+            if (validateResult == '') {
+              String name = pdfName(form, submitDate);
+              print(name);
+              List<int> pdfAsBytes =
+                  await pdf.gen(form, (String response, ErrorType type) {
+                callback(response, type);
+              });
+              final Directory directory =
+                  await path_provider.getApplicationSupportDirectory();
+              String path = directory.path;
+              final File file = File('$path/$name');
+              await file.writeAsBytes(pdfAsBytes, flush: true);
+              TaskSnapshot snapshot = await storage
+                  .ref()
+                  .child("${folderName(form.type)}/${pdfName(form, submitDate)}")
+                  .putFile(file);
+              if (snapshot.state == TaskState.success) {
+                downloadUrl = await snapshot.ref.getDownloadURL();
+                form.pdfUrl = downloadUrl;
               } else {
-                moveToPending(form);
-                callback('ERROR 1', ErrorType.other);
+                form.pdfUrl = 'error';
               }
-            });
+              print('PDF UPLOADED.');
+              print('START APPEND GOOGLE SHEET');
+              //UPLOAD JSON TO GOOGLE SHEET
+              await http
+                  .post(Uri.parse(formUrl(form.type)), body: form.formMap())
+                  // body: form.lineCheckToMap())
+                  .then((response) async {
+                print(response.statusCode);
+                if (response.statusCode == 302) {
+                  var _url = response.headers['location'];
+                  await http.get(Uri.parse(_url!)).then((response) {
+                    forms[forms.indexWhere((e) => e.id == form.id)]
+                        .submitDateTime = submitDate;
+                    moveToComplted(form);
+                    callback(kStatusSuccess, ErrorType.success);
+                    print('APPEND GOOGLE SHEET SUCCESS');
+                  });
+                } else {
+                  moveToPending(form);
+                  callback('ERROR 1', ErrorType.other);
+                }
+              });
+            } else {
+              callback('ERROR: $validateResult', ErrorType.validate);
+            }
           } catch (e) {
             moveToPending(form);
             Utils.showInProgress(false);
-            callback('ERROR 2: $e', ErrorType.other);
+            callback('ERROR: $e', ErrorType.other);
           }
         }
       } else {
@@ -293,7 +344,7 @@ class FormService extends ChangeNotifier {
       ///Save signature
       for (int i = 0; i < form.fields.length; i++) {
         if (form.fields[i].type == FieldType.signature) {
-          await form.fields[i].convertSignature((String response) {});
+          await form.fields[i].convertSignature((String response) {}, false);
           if (form.fields[i].signature != null) {
             await _saveSigToDevice(
                 '${form.id}${form.fields[i].name}', form.fields[i].signature!);
@@ -315,6 +366,8 @@ class FormService extends ChangeNotifier {
         await databaseService.dbDelete(form, kPPCTable);
       } else if (form.type == f.FormType.rt5) {
         await databaseService.dbDelete(form, kRt5Table);
+      } else if (form.type == f.FormType.lineTrain) {
+        await databaseService.dbDelete(form, klineTrainTable);
       }
       notifyListeners();
       callback(kStatusSuccess);
@@ -545,7 +598,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             section: 2,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             posX: 78,
             posY: 262),
         Field(
@@ -590,6 +643,7 @@ class FormService extends ChangeNotifier {
             page: 1,
             section: 2,
             subSection: 2,
+            maxLength: 4,
             keyboardType: TextInputType.number,
             posX: 363,
             posY: 212),
@@ -668,6 +722,7 @@ class FormService extends ChangeNotifier {
             page: 1,
             section: 2,
             subSection: 3,
+            maxLength: 4,
             keyboardType: TextInputType.number,
             posX: 486,
             posY: 212),
@@ -802,7 +857,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 1,
             gradeSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             posX: 410,
             posY: 360,
@@ -889,7 +944,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 2,
             gradeSection: 2,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             posX: 410,
             posY: 466,
@@ -964,7 +1019,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 3,
             gradeSection: 3,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             posX: 410,
             posY: 559,
@@ -1101,7 +1156,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 4,
             gradeSection: 4,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             posX: 410,
             posY: 639,
@@ -1188,7 +1243,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             posX: 410,
             posY: 114,
@@ -1261,7 +1316,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 4,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: 300,
             posX: 342,
             posY: 264,
@@ -1378,7 +1433,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 5,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: 500,
             posX: 280,
             posY: 401,
@@ -1423,7 +1478,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 6,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: 300,
             posX: 324,
             posY: 552,
@@ -1434,7 +1489,6 @@ class FormService extends ChangeNotifier {
             name: 'pilot_sig',
             label: 'Pilot\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 100,
             sigMaxHeight: 60,
             page: 2,
@@ -1445,7 +1499,7 @@ class FormService extends ChangeNotifier {
             // name: 'PILOT_NAME',
             // label: 'Pilot Name',
             duplicateFrom: 'pilot_name',
-            mandatory: false,
+            isMandatory: false,
             input: false,
             type: FieldType.string,
             page: 2,
@@ -1471,7 +1525,6 @@ class FormService extends ChangeNotifier {
             name: 'examiner_sig',
             label: 'Examiner\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 100,
             sigMaxHeight: 60,
             page: 2,
@@ -1483,7 +1536,7 @@ class FormService extends ChangeNotifier {
             // label: 'Pilot Name',
             duplicateFrom: 'examiner_name',
             input: false,
-            mandatory: false,
+            isMandatory: false,
             type: FieldType.string,
             page: 2,
             section: 7,
@@ -1509,7 +1562,7 @@ class FormService extends ChangeNotifier {
   ///-------------------------------------------------------------------------
   ///PPC FORM
   ///-------------------------------------------------------------------------
-  static f.Form initPpcCheck() {
+  static f.Form initPpc() {
     DateTime timeStamp = DateTime.now();
 
     List<String> _gradeList = ['1', '2', '3', '4', '5', 'N/O'];
@@ -1588,6 +1641,7 @@ class FormService extends ChangeNotifier {
             section: 1,
             subSection: 1,
             keyboardType: TextInputType.number,
+            maxLength: 4,
             // stringValue: '1234',
             posX: 380,
             posY: 103),
@@ -1631,6 +1685,7 @@ class FormService extends ChangeNotifier {
             section: 1,
             subSection: 2,
             keyboardType: TextInputType.number,
+            maxLength: 4,
             // stringValue: '1123',
             posX: 380,
             posY: 136),
@@ -1674,6 +1729,7 @@ class FormService extends ChangeNotifier {
             section: 1,
             subSection: 3,
             keyboardType: TextInputType.number,
+            maxLength: 4,
             // stringValue: '0055',
             posX: 380,
             posY: 169),
@@ -1752,7 +1808,7 @@ class FormService extends ChangeNotifier {
               'Right Hand Seat (RHS)',
             ],
             checkBoxValue: [false, false, false],
-            mandatory: false,
+            isMandatory: false,
             // intValue: 0,
             section: 2,
             subSection: 2,
@@ -1764,7 +1820,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 2,
             subSection: 2,
             stringValue: 'FALSE'),
@@ -1773,7 +1829,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 2,
             subSection: 2,
             stringValue: 'FALSE'),
@@ -1782,7 +1838,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 2,
             subSection: 2,
             stringValue: 'FALSE'),
@@ -1845,7 +1901,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 1,
             gradeSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -1924,7 +1980,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 2,
             gradeSection: 2,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -1993,7 +2049,7 @@ class FormService extends ChangeNotifier {
               'LOC',
             ],
             checkBoxValue: [false, false, false],
-            mandatory: false,
+            isMandatory: false,
             // intValue: kInitChoice,
             page: 1,
             section: 3,
@@ -2006,7 +2062,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 3,
             gradeSection: 3,
@@ -2016,7 +2072,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 3,
             gradeSection: 3,
@@ -2026,7 +2082,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 3,
             gradeSection: 3,
@@ -2088,7 +2144,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 3,
             gradeSection: 3,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2120,7 +2176,7 @@ class FormService extends ChangeNotifier {
               'Landing Configuration',
             ],
             checkBoxValue: [false, false],
-            mandatory: false,
+            isMandatory: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -2132,7 +2188,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -2142,7 +2198,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -2179,7 +2235,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 4,
             gradeSection: 4,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2199,7 +2255,7 @@ class FormService extends ChangeNotifier {
               'Circling Approach',
             ],
             checkBoxValue: [false, false],
-            mandatory: false,
+            isMandatory: false,
             page: 1,
             section: 3,
             subSection: 5,
@@ -2211,7 +2267,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 5,
             gradeSection: 5,
@@ -2221,7 +2277,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 5,
             gradeSection: 5,
@@ -2306,7 +2362,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2349,7 +2405,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2372,7 +2428,7 @@ class FormService extends ChangeNotifier {
               'Flight Control',
             ],
             checkBoxValue: [false, false, false, false, false],
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 7,
@@ -2384,7 +2440,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 7,
             gradeSection: 7,
@@ -2394,7 +2450,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 7,
             gradeSection: 7,
@@ -2404,7 +2460,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 7,
             gradeSection: 7,
@@ -2414,7 +2470,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 7,
             gradeSection: 7,
@@ -2424,7 +2480,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 7,
             gradeSection: 7,
@@ -2497,7 +2553,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 7,
             gradeSection: 7,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2564,7 +2620,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2643,7 +2699,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 9,
             gradeSection: 9,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2687,7 +2743,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: 'Additional 1',
             posX: 64,
@@ -2702,7 +2758,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             posXList: _gradePosX,
             posYList: [378, 378, 378, 378, 378, 378]),
         Field(
@@ -2713,7 +2769,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             posX: 64,
             posY: 393),
@@ -2727,7 +2783,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             posXList: _gradePosX,
             posYList: [392, 392, 392, 392, 392, 392]),
         Field(
@@ -2737,7 +2793,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 3,
             subSection: 10,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             posX: 64,
             posY: 407),
@@ -2751,7 +2807,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             posXList: _gradePosX,
             posYList: [406, 406, 406, 406, 406, 406]),
         Field(
@@ -2762,7 +2818,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             posX: 64,
             posY: 421),
@@ -2776,7 +2832,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             posXList: _gradePosX,
             posYList: [420, 420, 420, 420, 420, 420]),
         Field(
@@ -2787,7 +2843,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             posX: 64,
             posY: 435),
@@ -2801,7 +2857,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             posXList: _gradePosX,
             posYList: [434, 434, 434, 434, 434, 434]),
         Field(
@@ -2812,7 +2868,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -2962,7 +3018,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 5,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: 500,
             maxLine: 6,
             posX: 42,
@@ -2999,7 +3055,6 @@ class FormService extends ChangeNotifier {
             name: 'pilot_sig',
             label: 'Trainee\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 100,
             sigMaxHeight: 60,
             page: 2,
@@ -3010,7 +3065,7 @@ class FormService extends ChangeNotifier {
             // name: 'PILOT_NAME',
             // label: 'Pilot Name',
             duplicateFrom: 'pilot_name',
-            mandatory: false,
+            isMandatory: false,
             input: false,
             type: FieldType.string,
             page: 2,
@@ -3020,8 +3075,6 @@ class FormService extends ChangeNotifier {
         Field(
             name: 'pilot_sig_date',
             label: 'Date',
-            // input: false,
-            // mandatory: true,
             type: FieldType.date,
             keyboardType: TextInputType.datetime,
             page: 2,
@@ -3035,7 +3088,6 @@ class FormService extends ChangeNotifier {
             name: 'examiner_sig',
             label: 'Examiner\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 100,
             sigMaxHeight: 60,
             page: 2,
@@ -3044,7 +3096,7 @@ class FormService extends ChangeNotifier {
             posY: 732),
         Field(
             duplicateFrom: 'examiner_name',
-            mandatory: false,
+            isMandatory: false,
             input: false,
             type: FieldType.string,
             page: 2,
@@ -3054,8 +3106,6 @@ class FormService extends ChangeNotifier {
         Field(
             name: 'examiner_sig_date',
             label: 'Date',
-            // input: false,
-            // mandatory: true,
             type: FieldType.date,
             keyboardType: TextInputType.datetime,
             page: 2,
@@ -3077,7 +3127,7 @@ class FormService extends ChangeNotifier {
       Authen.isAdmin() ||
       DateTime.now().isAfter(DateTime.parse('2024-01-02 00:00:00.000'));
 
-  static f.Form initRt5Check() {
+  static f.Form initRt5() {
     DateTime timeStamp = DateTime.now();
 
     List<String> _gradeList = ['1', '2', '3', '4', '5', 'N/O'];
@@ -3159,6 +3209,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             section: 1,
             subSection: 1,
+            maxLength: 4,
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '0895' : '',
             posX: 380,
@@ -3201,6 +3252,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             section: 1,
             subSection: 2,
+            maxLength: 4,
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '9999' : '',
             posX: 380,
@@ -3294,7 +3346,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 1,
             gradeSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -3425,7 +3477,7 @@ class FormService extends ChangeNotifier {
               defaultCheck,
               defaultCheck
             ],
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3436,7 +3488,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3446,7 +3498,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3456,7 +3508,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3466,7 +3518,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3512,7 +3564,7 @@ class FormService extends ChangeNotifier {
               'Loss of communication',
               'Unreliable Airspeed',
             ],
-            mandatory: false,
+            isMandatory: false,
             checkBoxValue: [defaultCheck, defaultCheck],
             section: 3,
             subSection: 2,
@@ -3524,7 +3576,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3534,7 +3586,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3560,7 +3612,7 @@ class FormService extends ChangeNotifier {
               'ACP FAULT',
             ],
             checkBoxValue: [defaultCheck, defaultCheck],
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3571,7 +3623,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3581,7 +3633,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3608,7 +3660,7 @@ class FormService extends ChangeNotifier {
               'DC BUS FAULT',
             ],
             checkBoxValue: [defaultCheck, defaultCheck, defaultCheck],
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3619,7 +3671,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3629,7 +3681,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3639,7 +3691,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3665,7 +3717,7 @@ class FormService extends ChangeNotifier {
               'FWS FAULT',
             ],
             checkBoxValue: [defaultCheck, defaultCheck],
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3676,7 +3728,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3686,7 +3738,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 2,
             gradeSection: 2,
@@ -3709,7 +3761,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 2,
             gradeSection: 2,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct such training'
@@ -3751,7 +3803,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 3,
             gradeSection: 3,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -3805,7 +3857,7 @@ class FormService extends ChangeNotifier {
               'LOC',
             ],
             checkBoxValue: [defaultCheck, defaultCheck, defaultCheck],
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -3816,7 +3868,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -3826,7 +3878,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -3836,7 +3888,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             input: false,
             writePdf: false,
-            mandatory: false,
+            isMandatory: false,
             section: 3,
             subSection: 4,
             gradeSection: 4,
@@ -3892,7 +3944,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 4,
             gradeSection: 4,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -3953,7 +4005,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -4025,7 +4077,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -4091,7 +4143,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 7,
             gradeSection: 7,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -4133,7 +4185,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4144,7 +4196,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4159,7 +4211,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4170,7 +4222,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4185,7 +4237,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4196,7 +4248,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4210,7 +4262,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 3,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4221,7 +4273,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4236,7 +4288,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4247,7 +4299,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4262,7 +4314,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4273,7 +4325,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4288,7 +4340,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
             // stringValue: Authen.isTjo() ? 'Additional...' : '',
             posX: 64,
@@ -4299,7 +4351,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
-            mandatory: false,
+            isMandatory: false,
             page: 2,
             section: 3,
             subSection: 8,
@@ -4314,7 +4366,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            mandatory: false,
+            isMandatory: false,
             maxLength: gradeCommentMaxLen,
             // stringValue:
             //     'I am being a person authorized by TVJ and/or CAAT to conduct',
@@ -4462,7 +4514,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 5,
             subSection: 1,
-            mandatory: false,
+            isMandatory: false,
             maxLength: 500,
             posX: 42,
             posY: 380,
@@ -4498,7 +4550,6 @@ class FormService extends ChangeNotifier {
             name: 'pilot_sig',
             label: 'Trainee\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 80,
             sigMaxHeight: 50,
             page: 2,
@@ -4507,7 +4558,7 @@ class FormService extends ChangeNotifier {
             posY: 600),
         Field(
             duplicateFrom: 'pilot_name',
-            mandatory: false,
+            isMandatory: false,
             input: false,
             type: FieldType.string,
             page: 2,
@@ -4530,7 +4581,6 @@ class FormService extends ChangeNotifier {
             name: 'instructor_sig',
             label: 'Instructor\'s Signature',
             type: FieldType.signature,
-            mandatory: false,
             sigWidth: 80,
             sigMaxHeight: 50,
             page: 2,
@@ -4539,7 +4589,7 @@ class FormService extends ChangeNotifier {
             posY: 600),
         Field(
             duplicateFrom: 'instructor_name',
-            mandatory: false,
+            isMandatory: false,
             input: false,
             type: FieldType.string,
             page: 2,
@@ -4558,6 +4608,1337 @@ class FormService extends ChangeNotifier {
             dateTimeValue: DateTime.now(),
             posX: 245,
             posY: 635),
+      ],
+    );
+  }
+
+  ///-------------------------------------------------------------------------
+  ///LINE TRAINING FORM
+  ///-------------------------------------------------------------------------
+  ///
+  bool lineTrainValid() =>
+      Authen.isAdmin() ||
+      DateTime.now().isAfter(DateTime.parse('2024-04-15 00:00:00.000'));
+
+  static f.Form initLineTrain() {
+    DateTime timeStamp = DateTime.now();
+
+    List<String> _gradeList = ['1', '2', '3', '4', '5', 'N/O'];
+    List<String> _gradeList2 = ['1', '2', '3', '4', '5'];
+    List<double> _gradePosX = [360, 375, 389, 403, 417, 432];
+    List<double> _gradePosX2 = [360, 375, 389, 403, 417];
+    int gradeCommentMaxLen = 190;
+    int defaultGrade() => Authen.isTjo() ? 1 : -1;
+    bool defaultCheck() => Authen.isTjo() ? true : false;
+    // int defaultGrade() => Authen.isTjo() c? -1 : -1;
+    // bool defaultCheck = true;
+
+    return f.Form(
+      type: f.FormType.lineTrain,
+      formName: 'LINE TRAIN / CHECK',
+      createDateTime: timeStamp,
+      createBy: Authen.user != null ? Authen.user.email : '',
+      id: uuid.v1(),
+      filePath: 'forms/linetrain.pdf',
+      dbTable: klineTrainTable,
+      fontSize: 8,
+      sectionLabel: [
+        'Personal Detail',
+        'Check Detail',
+        'Grading',
+        'Competency Assessment and Comments',
+        'Result',
+        'Signature',
+      ],
+      gradeSectionLabel: [
+        'PRE-FLIGHT PREPARATION / TAXI',
+        'TAKEOFF',
+        'CLIMB / CRUISE / DESCENT',
+        'APPROACH AND LANDING',
+        'TAXI / POST-FLIGHT',
+        'NON-TECHNICAL',
+        'ADDITIONAL / OTHERS',
+      ],
+      formLabel: 'Line Train / Check',
+      formLabelInfoField1: 'pilot_name',
+      formLabelInfoField2: '',
+      fields: [
+        ///.....................................................................
+        ///TRAINEE
+        ///.....................................................................
+        Field(
+            name: 'pilot_name',
+            label: 'Trainee\'s Name',
+            type: FieldType.string,
+            section: 1,
+            subSection: 1,
+            stringValue: Authen.isTjo() ? 'FO. John Doe' : '',
+            posX: 148,
+            posY: 101),
+        Field(
+            name: 'pilot_license_no',
+            label: 'Trainee\'s License No',
+            type: FieldType.string,
+            section: 1,
+            subSection: 1,
+            stringValue: Authen.isTjo() ? 'TH.FCL.9999999' : '',
+            posX: 148,
+            posY: 117),
+        Field(
+            name: 'pilot_id',
+            label: 'Trainee\'s Staff No(xxxx)',
+            type: FieldType.string,
+            section: 1,
+            subSection: 1,
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            stringValue: Authen.isTjo() ? '0895' : '',
+            posX: 166,
+            posY: 132),
+
+        ///.....................................................................
+        ///INSTRUCTOR
+        ///.....................................................................
+        Field(
+            name: 'instructor_name',
+            label: 'Instructor\'s Name',
+            type: FieldType.string,
+            section: 1,
+            subSection: 2,
+            stringValue: Authen.isTjo() ? 'MAVERICK' : '',
+            posX: 287,
+            posY: 101),
+        Field(
+            name: 'instructor_cert_no',
+            label: 'Ins Certificate No',
+            type: FieldType.string,
+            section: 1,
+            subSection: 2,
+            stringValue: Authen.isTjo() ? 'INS MAV' : '',
+            posX: 287,
+            posY: 117),
+        Field(
+            name: 'instructor_id',
+            label: 'Instructor\'s Staff No(xxxx)',
+            type: FieldType.string,
+            section: 1,
+            subSection: 2,
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            stringValue: Authen.isTjo() ? '9999' : '',
+            posX: 305,
+            posY: 132),
+
+        ///.....................................................................
+        ///Examminer / CAAT
+        ///.....................................................................
+        Field(
+            name: 'examiner_name',
+            label: 'Examiner\'s Name (Applicable only for check flight)',
+            type: FieldType.string,
+            isMandatory: false,
+            section: 1,
+            subSection: 3,
+            stringValue: Authen.isTjo() ? 'Christopher Pike' : '',
+            posX: 426,
+            posY: 101),
+        Field(
+            name: 'examiner_license_no',
+            label: 'Examiner License No',
+            type: FieldType.string,
+            isMandatory: false,
+            section: 1,
+            subSection: 3,
+            stringValue: Authen.isTjo() ? 'NCC-1701' : '',
+            posX: 426,
+            posY: 117),
+        Field(
+            name: 'examiner_id',
+            label: 'Examiner\'s Staff No(xxxx)',
+            type: FieldType.string,
+            isMandatory: false,
+            section: 1,
+            subSection: 3,
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            stringValue: Authen.isTjo() ? '0000' : '',
+            posX: 444,
+            posY: 132),
+
+        ///.....................................................................
+        ///CHECK DETAILS
+        ///.....................................................................
+        Field(
+            name: 'course',
+            label: 'Training Course',
+            type: FieldType.radio,
+            listValue: [
+              'Initial Type Rating',
+              'Transition / Conversion',
+              'CCQ',
+              'Command Upgrade',
+              'On Type',
+              'Other'
+            ],
+            intValue: kInitChoice,
+            section: 2,
+            subSection: 1,
+            posXList: [45, 45, 45, 45, 45, 45],
+            posYList: [172, 187, 203, 218, 233, 248]),
+        Field(
+            name: 'other_course',
+            label: 'Other(if selected)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 1,
+            isMandatory: false,
+            maxLength: 12,
+            posX: 76,
+            posY: 251),
+        Field(
+            name: 'check_type',
+            label: 'Type of Training',
+            type: FieldType.checkbox,
+            listValue: [
+              'IOE',
+              'LIFUS',
+              'Aircraft Base Training',
+              'Aircraft Base Check',
+              'IOE / LIFUS Check',
+              'Base Release',
+              'Initial Line Check',
+              'Other',
+            ],
+            checkBoxValue: [
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck(),
+              defaultCheck()
+            ],
+            // isMandatory: false,
+            section: 2,
+            subSection: 2,
+            posYList: [172, 187, 203, 218, 233, 248, 264, 279],
+            posX: 149),
+        Field(
+            name: 'check_type_0',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_1',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_2',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_3',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_4',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_5',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_6',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'check_type_7',
+            type: FieldType.string,
+            input: false,
+            writePdf: false,
+            isMandatory: false,
+            section: 2,
+            subSection: 2,
+            stringValue: 'FALSE'),
+        Field(
+            name: 'other_type',
+            label: 'Other(if selected)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 2,
+            isMandatory: false,
+            maxLength: 12,
+            posX: 178,
+            posY: 282),
+        Field(
+            name: 'date_1',
+            label: 'Sector 1 Date',
+            // type: FieldType.string,
+            type: FieldType.date,
+            page: 1,
+            section: 2,
+            subSection: 3,
+            keyboardType: TextInputType.datetime,
+            stringValue: DateFormat('dd-MMM-yy').format(DateTime.now()),
+            dateTimeValue: DateTime.now(),
+            posX: 356,
+            posY: 191),
+        Field(
+            name: 'ac_type_1',
+            label: 'Sector 1 A/C Type',
+            type: FieldType.radio,
+            listValue: ['A320', 'A321', 'B737'],
+            intValue: kInitChoice,
+            section: 2,
+            subSection: 3,
+            posXList: [337, 371, 406],
+            posY: 172),
+        Field(
+            name: 'ac_reg_1',
+            label: 'Sector 1 Registration (HS-___)',
+            type: FieldType.string,
+            stringValue: 'VK',
+            section: 2,
+            subSection: 3,
+            maxLength: 3,
+            minLength: 3,
+            posX: 377,
+            posY: 236),
+        Field(
+            name: 'flt_no_1',
+            label: 'Sector 1 Flight No. (VZ___)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 3,
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            posX: 376,
+            posY: 206),
+        Field(
+            name: 'route_1',
+            label: 'Sector 1 Route (XXX-XXX)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 3,
+            maxLength: 7,
+            posX: 357,
+            posY: 221),
+        Field(
+            name: 'duty_1',
+            label: 'Sector 1 Duty',
+            type: FieldType.radio,
+            listValue: ['PF', 'PM'],
+            intValue: kInitChoice,
+            section: 2,
+            subSection: 3,
+            posXList: [360, 386],
+            posY: 248),
+
+        Field(
+            name: 'date_2',
+            label: 'Sector 2 Date',
+            // type: FieldType.string,
+            type: FieldType.date,
+            section: 2,
+            subSection: 4,
+            keyboardType: TextInputType.datetime,
+            stringValue: DateFormat('dd-MMM-yy').format(DateTime.now()),
+            dateTimeValue: DateTime.now(),
+            posX: 474,
+            posY: 191),
+        Field(
+            name: 'ac_type_2',
+            label: 'Sector 2 A/C Type',
+            type: FieldType.radio,
+            listValue: ['A320', 'A321', 'B737'],
+            intValue: kInitChoice,
+            section: 2,
+            subSection: 4,
+            posXList: [455, 489, 524],
+            posY: 172),
+        Field(
+            name: 'ac_reg_2',
+            label: 'Sector 2 Registration (HS-___)',
+            type: FieldType.string,
+            stringValue: 'VK',
+            section: 2,
+            subSection: 4,
+            maxLength: 3,
+            minLength: 3,
+            posX: 494,
+            posY: 236),
+        Field(
+            name: 'flt_no_2',
+            label: 'Sector 2 Flight No. (VZ___)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 4,
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            posX: 493,
+            posY: 206),
+        Field(
+            name: 'route_2',
+            label: 'Sector 2 Route (XXX-XXX)',
+            type: FieldType.string,
+            section: 2,
+            subSection: 4,
+            maxLength: 7,
+            posX: 475,
+            posY: 221),
+        Field(
+            name: 'duty_2',
+            label: 'Sector 2 Duty',
+            type: FieldType.radio,
+            listValue: ['PF', 'PM'],
+            intValue: kInitChoice,
+            section: 2,
+            subSection: 4,
+            posXList: [478, 504],
+            posY: 248),
+
+        Field(
+            name: 'accum_pf',
+            label: 'Accumulated PF',
+            type: FieldType.string,
+            page: 1,
+            section: 2,
+            subSection: 5,
+            keyboardType: TextInputType.number,
+            maxLine: 3,
+            posX: 357,
+            posY: 283),
+        Field(
+            name: 'accum_pm',
+            label: 'Accumulated PM',
+            type: FieldType.string,
+            page: 1,
+            section: 2,
+            subSection: 5,
+            keyboardType: TextInputType.number,
+            maxLine: 3,
+            posX: 515,
+            posY: 283),
+
+        ///.....................................................................
+        ///GRADING
+        ///.....................................................................
+        Field(
+            name: 'q1',
+            label:
+                'Flight documents, Security check, Flight crew and Cabin crew briefing',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 361),
+        Field(
+            name: 'q2',
+            label: 'Fuel policy / FMGS preparation / X-check',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 376),
+        Field(
+            name: 'q3',
+            label: 'Aircraft status / MEL',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 390),
+        Field(
+            name: 'q4',
+            label: 'Aircraft safety inspection (Exterior and Interior)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 404),
+        Field(
+            name: 'q5',
+            label:
+                'Load sheet / Takeoff performance calculation / EFB management',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 419),
+        Field(
+            name: 'q6',
+            label: 'Takeoff briefing / TEM / NAVAIDS setting',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 433),
+        Field(
+            name: 'q7',
+            label:
+                'Engine Start (Time management) / Monitoring engine start parameter',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 448),
+        Field(
+            name: 'q8',
+            label: 'ATC communication / Ground crew coordination',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 463),
+        Field(
+            name: 'q9',
+            label: 'Taxi technique / Taxi monitoring and support',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            posXList: _gradePosX,
+            posY: 476),
+        Field(
+            name: 'qa_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            section: 3,
+            subSection: 1,
+            gradeSection: 1,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 361,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q10',
+            label:
+                'Takeoff technique (Rotation rate, takeoff attitude, Tail strike awareness)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 2,
+            gradeSection: 2,
+            posXList: _gradePosX,
+            posY: 505),
+        Field(
+            name: 'q11',
+            label: 'Noise Abatement procedures',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 2,
+            gradeSection: 2,
+            posXList: _gradePosX,
+            posY: 520),
+        Field(
+            name: 'q12',
+            label: 'PF duties / PM Support (Procedures and Callouts)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 2,
+            gradeSection: 2,
+            posXList: _gradePosX,
+            posY: 534),
+        Field(
+            name: 'qb_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            section: 3,
+            subSection: 2,
+            gradeSection: 2,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 506,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q13',
+            label: 'SID / ATC compliance / PBN operations',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 563),
+        Field(
+            name: 'q14',
+            label: 'Climb technique / Procedure',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 577),
+        Field(
+            name: 'q15',
+            label: 'Altitude selection / Step climb / RVSM operations',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 591),
+        Field(
+            name: 'q16',
+            label:
+                'In-flight planning / Re-planning (e.g. fuel management) / Emergency procedures',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 605),
+        Field(
+            name: 'q17',
+            label: 'Enroute Communications / ATC procedure and compliance',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 620),
+        Field(
+            name: 'q18',
+            label: 'WX avoidance procedures (CAT / Wake Turbulence, etc.)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 634),
+        Field(
+            name: 'q19',
+            label: 'Descent planning / Briefing / TEM / Situation awareness',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 648),
+        Field(
+            name: 'q20',
+            label: 'Profile management / Speed / Altitude',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            posXList: _gradePosX,
+            posY: 663),
+        Field(
+            name: 'qc_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            section: 3,
+            subSection: 3,
+            gradeSection: 3,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 563,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q21',
+            label: 'STAR / ATC compliance / PBN operations',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 692),
+        Field(
+            name: 'q22',
+            label: 'Approach procedures (3D and 2D approach)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 706),
+        Field(
+            name: 'q23',
+            label:
+                'Aircraft configuration (Selection of landing flaps) and energy management',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 720),
+        Field(
+            name: 'q24',
+            label: 'Stabilized approach criteria compliance',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 735),
+        Field(
+            name: 'q25',
+            label: 'Landing technique',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 749),
+        Field(
+            name: 'q26',
+            label:
+                'Reversers / Braking / Runway clearance (Vacating) / Runway occupancy time',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            posXList: _gradePosX,
+            posY: 764),
+        Field(
+            name: 'qd_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            section: 3,
+            subSection: 4,
+            gradeSection: 4,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 692,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q27',
+            label: 'Taxi-in technique / Taxi monitoring and PM support',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 5,
+            gradeSection: 5,
+            posXList: _gradePosX,
+            posY: 112),
+        Field(
+            name: 'q28',
+            label: 'Parking / Shut Down procedures',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 5,
+            gradeSection: 5,
+            posXList: _gradePosX,
+            posY: 126),
+        Field(
+            name: 'q29',
+            label: 'Post-Flight documents / Procedures',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 5,
+            gradeSection: 5,
+            posXList: _gradePosX,
+            posY: 140),
+        Field(
+            name: 'qe_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 5,
+            gradeSection: 5,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 112,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q30',
+            label: 'Crew Resource Management (CRM)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 169),
+        Field(
+            name: 'q31',
+            label: 'Threat & Error Management (TEM)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 183),
+        Field(
+            name: 'q32',
+            label: 'Assertiveness',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 198),
+        Field(
+            name: 'q33',
+            label: 'Interpersonal Skills',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 212),
+        Field(
+            name: 'q34',
+            label: 'Security-Safety Attitude',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 226),
+        Field(
+            name: 'q35',
+            label: 'Public Address (PA)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            posXList: _gradePosX,
+            posY: 241),
+        Field(
+            name: 'qf_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 6,
+            gradeSection: 6,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 169,
+            width: 115,
+            fontSize: 8),
+        Field(
+            name: 'q36',
+            label:
+                'Green operations policy (Single engine taxi, Less flaps landing, etc.)',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            posXList: _gradePosX,
+            posY: 270),
+        Field(
+            name: 'q37_detail',
+            label: 'Additional 1',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 287),
+        Field(
+            name: 'q37',
+            label: 'Additional 1',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            posXList: _gradePosX,
+            posY: 284),
+        Field(
+            name: 'q38_detail',
+            label: 'Additional 2',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 301),
+        Field(
+            name: 'q38',
+            label: 'Additional 2',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            posXList: _gradePosX,
+            posY: 298),
+        Field(
+            name: 'q39_detail',
+            label: 'Additional 3',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 316),
+        Field(
+            name: 'q39',
+            label: 'Additional 3',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            posXList: _gradePosX,
+            posY: 313),
+        Field(
+            name: 'q40_detail',
+            label: 'Additional 4',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 330),
+        Field(
+            name: 'q40',
+            label: 'Additional 4',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            posXList: _gradePosX,
+            posY: 327),
+        Field(
+            name: 'qg_comment',
+            label: 'Comment',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 7,
+            gradeSection: 7,
+            isMandatory: false,
+            maxLength: gradeCommentMaxLen,
+            posX: 445,
+            posY: 270,
+            width: 115,
+            fontSize: 8),
+
+        ///.....................................................................
+        ///Competency Assessment and Comments
+        ///.....................................................................
+        Field(
+            name: 'comp_kno',
+            label: 'KNO',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 378),
+        Field(
+            name: 'comp_pro',
+            label: 'PRO',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 389),
+        Field(
+            name: 'comp_com',
+            label: 'COM',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 400),
+        Field(
+            name: 'comp_fpa',
+            label: 'FPA',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 410),
+        Field(
+            name: 'comp_fpm',
+            label: 'FPM',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 421),
+        Field(
+            name: 'comp_ltw',
+            label: 'LTW',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 431),
+        Field(
+            name: 'comp_psd',
+            label: 'PSD',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 442),
+        Field(
+            name: 'comp_saw',
+            label: 'SAW',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 453),
+        Field(
+            name: 'comp_wlm',
+            label: 'WLM',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            page: 2,
+            section: 4,
+            subSection: 1,
+            posXList: _gradePosX,
+            posY: 464),
+        Field(
+            name: 'general_comment',
+            label: 'General Comment',
+            type: FieldType.string,
+            page: 2,
+            section: 4,
+            subSection: 1,
+            isMandatory: false,
+            maxLength: 500,
+            posX: 42,
+            posY: 381,
+            width: 260,
+            height: 100,
+            fontSize: 8),
+
+        ///.....................................................................
+        ///OVERALL GRADING
+        ///.....................................................................
+        Field(
+            name: 'result',
+            label: 'Result',
+            type: FieldType.radio,
+            listValue: [
+              '(1) Unsatisfactory',
+              '(2) Improvement Required',
+              '(3) Company Standard',
+              '(4) Effective',
+              '(5) Precise',
+            ],
+            intValue: defaultGrade(),
+            page: 2,
+            section: 5,
+            subSection: 1,
+            posXList: [138, 228, 339, 440, 504],
+            posY: 489),
+        Field(
+            name: 'additional_note',
+            label: 'Additional notes (if applicable)',
+            type: FieldType.string,
+            page: 2,
+            section: 5,
+            subSection: 1,
+            isMandatory: false,
+            maxLength: 1000,
+            posX: 42,
+            posY: 674,
+            width: 510,
+            height: 100,
+            fontSize: 8),
+
+        ///.....................................................................
+        ///Signature
+        ///.....................................................................
+        Field(
+            name: 'pilot_sig',
+            label: 'Trainee\'s Signature',
+            type: FieldType.signature,
+            sigWidth: 80,
+            sigMaxHeight: 50,
+            page: 2,
+            section: 6,
+            posX: 70,
+            posY: 600),
+        Field(
+            duplicateFrom: 'pilot_name',
+            input: false,
+            isMandatory: false,
+            type: FieldType.string,
+            page: 2,
+            section: 6,
+            posX: 70,
+            posY: 622),
+        Field(
+            name: 'pilot_sig_date',
+            label: 'Date',
+            type: FieldType.date,
+            keyboardType: TextInputType.datetime,
+            page: 2,
+            section: 6,
+            stringValue:
+                DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
+            dateTimeValue: DateTime.now(),
+            posX: 70,
+            posY: 638),
+        Field(
+            name: 'instructor_sig',
+            label: 'Instructor\'s Signature',
+            type: FieldType.signature,
+            sigWidth: 80,
+            sigMaxHeight: 50,
+            page: 2,
+            section: 6,
+            posX: 197,
+            posY: 600),
+        Field(
+            duplicateFrom: 'instructor_name',
+            input: false,
+            isMandatory: false,
+            type: FieldType.string,
+            page: 2,
+            section: 6,
+            posX: 202,
+            posY: 622),
+        Field(
+            name: 'instructor_sig_date',
+            label: 'Date',
+            type: FieldType.date,
+            keyboardType: TextInputType.datetime,
+            page: 2,
+            section: 6,
+            stringValue:
+                DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
+            dateTimeValue: DateTime.now(),
+            posX: 202,
+            posY: 638),
+
+        Field(
+            name: 'examiner_result',
+            label: 'Result',
+            type: FieldType.radio,
+            isMandatory: false,
+            listValue: [
+              'Pass',
+              'Fail',
+            ],
+            intValue: defaultGrade(),
+            page: 2,
+            section: 6,
+            subSection: 2,
+            posXList: [305, 342],
+            posY: 550),
+        Field(
+            name: 'examiner_sig',
+            label: 'Examiner\'s Signature',
+            isMandatory: false,
+            type: FieldType.signature,
+            sigWidth: 80,
+            sigMaxHeight: 40,
+            page: 2,
+            section: 6,
+            subSection: 2,
+            posX: 329,
+            posY: 600),
+        Field(
+            duplicateFrom: 'examiner_name',
+            input: false,
+            isMandatory: false,
+            type: FieldType.string,
+            page: 2,
+            section: 6,
+            posX: 334,
+            posY: 622),
+        Field(
+            name: 'examiner_sig_date',
+            label: 'Date',
+            type: FieldType.date,
+            keyboardType: TextInputType.datetime,
+            page: 2,
+            section: 6,
+            isMandatory: false,
+            stringValue: '          ',
+            // DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
+            // dateTimeValue: DateTime.now(),
+            posX: 334,
+            posY: 638),
       ],
     );
   }

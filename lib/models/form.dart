@@ -10,12 +10,12 @@ enum FormType {
   sample,
   ppc,
   rt5,
+  lineTrain,
 }
 
 enum FormStatus { working, completed, pending }
 
 class Form extends ChangeNotifier {
-
   ///Auto generate UUID
   String id;
   FormStatus status;
@@ -61,38 +61,104 @@ class Form extends ChangeNotifier {
     this.dateFormat = 'dd MMM yyyy',
   });
 
-  int allRequired() => fields.where((c) => c.mandatory).toList().length;
+  // Form copyWith({
+  //   String? id,
+  //   FormStatus? status,
+  //   FormType? type,
+  //   String? formName,
+  //   DateTime? createDateTime,
+  //   String? createBy,
+  //   List<Field>? fields,
+  //   String? filePath,
+  //   double? fontSize,
+  //   String? dbTable,
+  //   String? dateFormat,
+  //   List<String>? sectionLabel,
+  //   List<String>? gradeSectionLabel,
+  //   String? formLabel,
+  //   String? formLabelInfoField1,
+  //   String? formLabelInfoField2,
+  // }) => Form(
+  //   id: id ?? this.id,
+  //   status: status ?? this.status,
+  //   type: type ?? this.type,
+  //   formName: formName ?? this.formName,
+  //   createDateTime: createDateTime ?? this.createDateTime,
+  //   createBy: createBy ?? this.createBy,
+  //   fields: fields ?? List<Field>.from(this.fields),
+  //   filePath: filePath ?? this.filePath,
+  //   fontSize: fontSize ?? this.fontSize,
+  //   dbTable: dbTable ?? this.dbTable,
+  //   dateFormat: dateFormat ?? this.dateFormat,
+  //   sectionLabel: sectionLabel ?? List<String>.from(this.sectionLabel),
+  //   gradeSectionLabel: gradeSectionLabel ?? List<String>.from(this.gradeSectionLabel as Iterable),
+  //   formLabel: formLabel ?? this.formLabel,
+  //   formLabelInfoField1: formLabelInfoField1 ?? this.formLabelInfoField1,
+  //   formLabelInfoField2: formLabelInfoField2 ?? this.formLabelInfoField2,
+  // );
 
-  int filledRequired() => fields
-      .where(
-        (c) =>
-            c.mandatory &&
-                ((c.type == FieldType.radio ||
-                        c.type == FieldType.string ||
-                        c.type == FieldType.date) &&
-                    c.stringValue != '' || c.intValue >= 0) ||
-            (c.type == FieldType.signature &&
-                c.signature != null &&
-                c.signature!.length > 0) ||
-            (c.type == FieldType.int && c.intValue >= 0),
-      )
-      .toList()
-      .length;
+  int allRequired() =>
+      fields.where((c) => c.isMandatory == true).toList().length;
+
+  int filledRequired() {
+    int count = 0;
+    for (int i = 0; i < fields.length; i++) {
+      if (fields[i].isMandatory) {
+        if (fields[i].type == FieldType.radio ||
+            fields[i].type == FieldType.string ||
+            fields[i].type == FieldType.date) {
+          if (fields[i].stringValue != '' || fields[i].intValue >= 0) {
+            count++;
+          }
+        } else if (fields[i].type == FieldType.signature) {
+          if (fields[i].signature != null && fields[i].signature!.isNotEmpty) {
+            count++;
+          }
+        } else if (fields[i].type == FieldType.int && fields[i].intValue >= 0) {
+          count++;
+        } else if (fields[i].type == FieldType.checkbox) {
+          if (fields[i].checkBoxValue.contains(true)) {
+            count++;
+          }
+        }
+      }
+    }
+    print(count);
+    return count;
+    // return fields
+    //     .where(
+    //       (c) =>
+    //           c.isMandatory &&
+    //               ((c.type == FieldType.radio ||
+    //                           c.type == FieldType.string ||
+    //                           c.type == FieldType.date) &&
+    //                       c.stringValue != '' ||
+    //                   c.intValue >= 0) ||
+    //           (c.type == FieldType.signature &&
+    //               c.signature != null &&
+    //               c.signature!.isNotEmpty) ||
+    //           (c.type == FieldType.int && c.intValue >= 0)
+    //     )
+    //     .toList()
+    //     .length;
+  }
 
   double percentFilled() {
-    int allRequired = fields.where((c) => c.mandatory).toList().length;
+    int allRequired = fields.where((c) => c.isMandatory).toList().length;
     int filledRequired = fields
         .where(
           (c) =>
-              c.mandatory &&
+              c.isMandatory &&
                   ((c.type == FieldType.radio ||
-                          c.type == FieldType.string ||
-                          c.type == FieldType.date) &&
-                      c.stringValue != '') ||
+                              c.type == FieldType.string ||
+                              c.type == FieldType.date) &&
+                          c.stringValue != '' ||
+                      c.intValue >= 0) ||
               (c.type == FieldType.signature &&
                   c.signature != null &&
-                  c.signature!.length > 0) ||
-              (c.type == FieldType.int && c.intValue >= 0),
+                  c.signature!.isNotEmpty) ||
+              (c.type == FieldType.int && c.intValue >= 0) ||
+              (c.type == FieldType.checkbox && c.checkBoxValue.contains(true)),
         )
         .toList()
         .length;
@@ -360,12 +426,15 @@ class Form extends ChangeNotifier {
                 .stringValue,
         // 'check_type': fields[fields.indexWhere((e) => e.name == 'check_type')]
         //     .stringValue,
-        'check_type_0': fields[fields.indexWhere((e) => e.name == 'check_type_0')]
-            .stringValue,
-        'check_type_1': fields[fields.indexWhere((e) => e.name == 'check_type_1')]
-            .stringValue,
-        'check_type_2': fields[fields.indexWhere((e) => e.name == 'check_type_2')]
-            .stringValue,
+        'check_type_0':
+            fields[fields.indexWhere((e) => e.name == 'check_type_0')]
+                .stringValue,
+        'check_type_1':
+            fields[fields.indexWhere((e) => e.name == 'check_type_1')]
+                .stringValue,
+        'check_type_2':
+            fields[fields.indexWhere((e) => e.name == 'check_type_2')]
+                .stringValue,
 
         //Grading & Comment
         //A
@@ -391,9 +460,15 @@ class Form extends ChangeNotifier {
         'c_12': fields[fields.indexWhere((e) => e.name == 'c_12')].stringValue,
         // 'c_13_detail': fields[fields.indexWhere((e) => e.name == 'c_13_detail')]
         //     .stringValue,
-        'c_13_check_0': fields[fields.indexWhere((e) => e.name == 'c_13_check_0')].stringValue,
-        'c_13_check_1': fields[fields.indexWhere((e) => e.name == 'c_13_check_1')].stringValue,
-        'c_13_check_2': fields[fields.indexWhere((e) => e.name == 'c_13_check_2')].stringValue,
+        'c_13_check_0':
+            fields[fields.indexWhere((e) => e.name == 'c_13_check_0')]
+                .stringValue,
+        'c_13_check_1':
+            fields[fields.indexWhere((e) => e.name == 'c_13_check_1')]
+                .stringValue,
+        'c_13_check_2':
+            fields[fields.indexWhere((e) => e.name == 'c_13_check_2')]
+                .stringValue,
         'c_13': fields[fields.indexWhere((e) => e.name == 'c_13')].stringValue,
         'c_14': fields[fields.indexWhere((e) => e.name == 'c_14')].stringValue,
         'c_15': fields[fields.indexWhere((e) => e.name == 'c_15')].stringValue,
@@ -404,8 +479,12 @@ class Form extends ChangeNotifier {
         'd_17': fields[fields.indexWhere((e) => e.name == 'd_17')].stringValue,
         // 'd_18_check': fields[fields.indexWhere((e) => e.name == 'd_18_check')]
         //     .stringValue,
-        'd_18_check_0': fields[fields.indexWhere((e) => e.name == 'd_18_check_0')].stringValue,
-        'd_18_check_1': fields[fields.indexWhere((e) => e.name == 'd_18_check_1')].stringValue,
+        'd_18_check_0':
+            fields[fields.indexWhere((e) => e.name == 'd_18_check_0')]
+                .stringValue,
+        'd_18_check_1':
+            fields[fields.indexWhere((e) => e.name == 'd_18_check_1')]
+                .stringValue,
         'd_18': fields[fields.indexWhere((e) => e.name == 'd_18')].stringValue,
         'd_19': fields[fields.indexWhere((e) => e.name == 'd_19')].stringValue,
         'd_comment':
@@ -413,10 +492,12 @@ class Form extends ChangeNotifier {
         //E
         // 'e_20_check': fields[fields.indexWhere((e) => e.name == 'e_20_check')]
         //     .stringValue,
-        'e_20_check_0': fields[fields.indexWhere((e) => e.name == 'e_20_check_0')]
-            .stringValue,
-        'e_20_check_1': fields[fields.indexWhere((e) => e.name == 'e_20_check_1')]
-            .stringValue,
+        'e_20_check_0':
+            fields[fields.indexWhere((e) => e.name == 'e_20_check_0')]
+                .stringValue,
+        'e_20_check_1':
+            fields[fields.indexWhere((e) => e.name == 'e_20_check_1')]
+                .stringValue,
         'e_20': fields[fields.indexWhere((e) => e.name == 'e_20')].stringValue,
         'e_21': fields[fields.indexWhere((e) => e.name == 'e_21')].stringValue,
         'e_22': fields[fields.indexWhere((e) => e.name == 'e_22')].stringValue,
@@ -433,16 +514,21 @@ class Form extends ChangeNotifier {
         //G
         // 'g_28_check': fields[fields.indexWhere((e) => e.name == 'g_28_check')]
         //     .stringValue,
-        'g_28_check_0': fields[fields.indexWhere((e) => e.name == 'g_28_check_0')]
-            .stringValue,
-        'g_28_check_1': fields[fields.indexWhere((e) => e.name == 'g_28_check_1')]
-            .stringValue,
-        'g_28_check_2': fields[fields.indexWhere((e) => e.name == 'g_28_check_2')]
-            .stringValue,
-        'g_28_check_3': fields[fields.indexWhere((e) => e.name == 'g_28_check_3')]
-            .stringValue,
-        'g_28_check_4': fields[fields.indexWhere((e) => e.name == 'g_28_check_4')]
-            .stringValue,
+        'g_28_check_0':
+            fields[fields.indexWhere((e) => e.name == 'g_28_check_0')]
+                .stringValue,
+        'g_28_check_1':
+            fields[fields.indexWhere((e) => e.name == 'g_28_check_1')]
+                .stringValue,
+        'g_28_check_2':
+            fields[fields.indexWhere((e) => e.name == 'g_28_check_2')]
+                .stringValue,
+        'g_28_check_3':
+            fields[fields.indexWhere((e) => e.name == 'g_28_check_3')]
+                .stringValue,
+        'g_28_check_4':
+            fields[fields.indexWhere((e) => e.name == 'g_28_check_4')]
+                .stringValue,
         'g_28': fields[fields.indexWhere((e) => e.name == 'g_28')].stringValue,
         'g_29': fields[fields.indexWhere((e) => e.name == 'g_29')].stringValue,
         'g_30': fields[fields.indexWhere((e) => e.name == 'g_30')].stringValue,
@@ -540,6 +626,7 @@ class Form extends ChangeNotifier {
         'id': id,
         'font_size': fontSize.round().toString(),
         'pdf_url': pdfUrl ?? '',
+
         ///----------------------------------------------------------------------
         ///ITEM
         ///----------------------------------------------------------------------
@@ -549,24 +636,24 @@ class Form extends ChangeNotifier {
         'pilot_name': fields[fields.indexWhere((e) => e.name == 'pilot_name')]
             .stringValue,
         'pilot_license_no':
-        fields[fields.indexWhere((e) => e.name == 'pilot_license_no')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'pilot_license_no')]
+                .stringValue,
         'pilot_id':
-        fields[fields.indexWhere((e) => e.name == 'pilot_id')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'pilot_id')].stringValue,
 
         ///Instructor info.
         'instructor_rank':
-        fields[fields.indexWhere((e) => e.name == 'instructor_rank')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'instructor_rank')]
+                .stringValue,
         'instructor_name':
-        fields[fields.indexWhere((e) => e.name == 'instructor_name')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'instructor_name')]
+                .stringValue,
         'instructor_cert_no':
-        fields[fields.indexWhere((e) => e.name == 'instructor_cert_no')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'instructor_cert_no')]
+                .stringValue,
         'instructor_id':
-        fields[fields.indexWhere((e) => e.name == 'instructor_id')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'instructor_id')]
+                .stringValue,
 
         //Check details
         'check_date': fields[fields.indexWhere((e) => e.name == 'check_date')]
@@ -574,7 +661,7 @@ class Form extends ChangeNotifier {
         'block_time': fields[fields.indexWhere((e) => e.name == 'block_time')]
             .stringValue,
         'fstd_no':
-        fields[fields.indexWhere((e) => e.name == 'fstd_no')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'fstd_no')].stringValue,
 
         ///Grading & Comment
         ///A
@@ -582,8 +669,8 @@ class Form extends ChangeNotifier {
         'q2': fields[fields.indexWhere((e) => e.name == 'q2')].stringValue,
         'q3': fields[fields.indexWhere((e) => e.name == 'q3')].stringValue,
         'q4': fields[fields.indexWhere((e) => e.name == 'q4')].stringValue,
-        'qa_comment':
-        fields[fields.indexWhere((e) => e.name == 'qa_comment')].stringValue,
+        'qa_comment': fields[fields.indexWhere((e) => e.name == 'qa_comment')]
+            .stringValue,
 
         ///B
         'qb': fields[fields.indexWhere((e) => e.name == 'qb')].stringValue,
@@ -595,56 +682,72 @@ class Form extends ChangeNotifier {
         'q10': fields[fields.indexWhere((e) => e.name == 'q10')].stringValue,
         'q11': fields[fields.indexWhere((e) => e.name == 'q11')].stringValue,
         'q12': fields[fields.indexWhere((e) => e.name == 'q12')].stringValue,
-        'q13_check_0': fields[fields.indexWhere((e) => e.name == 'q13_check_0')].stringValue,
-        'q13_check_1': fields[fields.indexWhere((e) => e.name == 'q13_check_1')].stringValue,
-        'q13_check_2': fields[fields.indexWhere((e) => e.name == 'q13_check_2')].stringValue,
-        'q13_check_3': fields[fields.indexWhere((e) => e.name == 'q13_check_3')].stringValue,
+        'q13_check_0': fields[fields.indexWhere((e) => e.name == 'q13_check_0')]
+            .stringValue,
+        'q13_check_1': fields[fields.indexWhere((e) => e.name == 'q13_check_1')]
+            .stringValue,
+        'q13_check_2': fields[fields.indexWhere((e) => e.name == 'q13_check_2')]
+            .stringValue,
+        'q13_check_3': fields[fields.indexWhere((e) => e.name == 'q13_check_3')]
+            .stringValue,
         'q13': fields[fields.indexWhere((e) => e.name == 'q13')].stringValue,
         'q14': fields[fields.indexWhere((e) => e.name == 'q14')].stringValue,
         'q15': fields[fields.indexWhere((e) => e.name == 'q15')].stringValue,
-        'q16_check_0': fields[fields.indexWhere((e) => e.name == 'q16_check_0')].stringValue,
-        'q16_check_1': fields[fields.indexWhere((e) => e.name == 'q16_check_1')].stringValue,
+        'q16_check_0': fields[fields.indexWhere((e) => e.name == 'q16_check_0')]
+            .stringValue,
+        'q16_check_1': fields[fields.indexWhere((e) => e.name == 'q16_check_1')]
+            .stringValue,
         'q16': fields[fields.indexWhere((e) => e.name == 'q16')].stringValue,
-        'q17_check_0': fields[fields.indexWhere((e) => e.name == 'q17_check_0')].stringValue,
-        'q17_check_1': fields[fields.indexWhere((e) => e.name == 'q17_check_1')].stringValue,
+        'q17_check_0': fields[fields.indexWhere((e) => e.name == 'q17_check_0')]
+            .stringValue,
+        'q17_check_1': fields[fields.indexWhere((e) => e.name == 'q17_check_1')]
+            .stringValue,
         'q17': fields[fields.indexWhere((e) => e.name == 'q17')].stringValue,
-        'q18_check_0': fields[fields.indexWhere((e) => e.name == 'q18_check_0')].stringValue,
-        'q18_check_1': fields[fields.indexWhere((e) => e.name == 'q18_check_1')].stringValue,
-        'q18_check_2': fields[fields.indexWhere((e) => e.name == 'q18_check_2')].stringValue,
+        'q18_check_0': fields[fields.indexWhere((e) => e.name == 'q18_check_0')]
+            .stringValue,
+        'q18_check_1': fields[fields.indexWhere((e) => e.name == 'q18_check_1')]
+            .stringValue,
+        'q18_check_2': fields[fields.indexWhere((e) => e.name == 'q18_check_2')]
+            .stringValue,
         'q18': fields[fields.indexWhere((e) => e.name == 'q18')].stringValue,
-        'q19_check_0': fields[fields.indexWhere((e) => e.name == 'q19_check_0')].stringValue,
-        'q19_check_1': fields[fields.indexWhere((e) => e.name == 'q19_check_1')].stringValue,
+        'q19_check_0': fields[fields.indexWhere((e) => e.name == 'q19_check_0')]
+            .stringValue,
+        'q19_check_1': fields[fields.indexWhere((e) => e.name == 'q19_check_1')]
+            .stringValue,
         'q19': fields[fields.indexWhere((e) => e.name == 'q19')].stringValue,
-        'qb_comment':
-        fields[fields.indexWhere((e) => e.name == 'qb_comment')].stringValue,
+        'qb_comment': fields[fields.indexWhere((e) => e.name == 'qb_comment')]
+            .stringValue,
 
         ///C
         'q20': fields[fields.indexWhere((e) => e.name == 'q20')].stringValue,
         'q21': fields[fields.indexWhere((e) => e.name == 'q21')].stringValue,
-        'qc_comment':
-        fields[fields.indexWhere((e) => e.name == 'qc_comment')].stringValue,
+        'qc_comment': fields[fields.indexWhere((e) => e.name == 'qc_comment')]
+            .stringValue,
 
         ///D
         'q22': fields[fields.indexWhere((e) => e.name == 'q22')].stringValue,
         'q23': fields[fields.indexWhere((e) => e.name == 'q23')].stringValue,
         'q24': fields[fields.indexWhere((e) => e.name == 'q24')].stringValue,
-        'q25_check_0': fields[fields.indexWhere((e) => e.name == 'q25_check_0')].stringValue,
-        'q25_check_1': fields[fields.indexWhere((e) => e.name == 'q25_check_1')].stringValue,
-        'q25_check_2': fields[fields.indexWhere((e) => e.name == 'q25_check_2')].stringValue,
+        'q25_check_0': fields[fields.indexWhere((e) => e.name == 'q25_check_0')]
+            .stringValue,
+        'q25_check_1': fields[fields.indexWhere((e) => e.name == 'q25_check_1')]
+            .stringValue,
+        'q25_check_2': fields[fields.indexWhere((e) => e.name == 'q25_check_2')]
+            .stringValue,
         'q25': fields[fields.indexWhere((e) => e.name == 'q25')].stringValue,
         'q26': fields[fields.indexWhere((e) => e.name == 'q26')].stringValue,
         'q27': fields[fields.indexWhere((e) => e.name == 'q27')].stringValue,
         'q28': fields[fields.indexWhere((e) => e.name == 'q28')].stringValue,
-        'qd_comment':
-        fields[fields.indexWhere((e) => e.name == 'qd_comment')].stringValue,
+        'qd_comment': fields[fields.indexWhere((e) => e.name == 'qd_comment')]
+            .stringValue,
 
         ///E
         'q29': fields[fields.indexWhere((e) => e.name == 'q29')].stringValue,
         'q30': fields[fields.indexWhere((e) => e.name == 'q30')].stringValue,
         'q31': fields[fields.indexWhere((e) => e.name == 'q31')].stringValue,
         'q32': fields[fields.indexWhere((e) => e.name == 'q32')].stringValue,
-        'qe_comment':
-        fields[fields.indexWhere((e) => e.name == 'qe_comment')].stringValue,
+        'qe_comment': fields[fields.indexWhere((e) => e.name == 'qe_comment')]
+            .stringValue,
 
         ///F
         'q33': fields[fields.indexWhere((e) => e.name == 'q33')].stringValue,
@@ -652,34 +755,34 @@ class Form extends ChangeNotifier {
         'q35': fields[fields.indexWhere((e) => e.name == 'q35')].stringValue,
         'q36': fields[fields.indexWhere((e) => e.name == 'q36')].stringValue,
         'q37': fields[fields.indexWhere((e) => e.name == 'q37')].stringValue,
-        'qf_comment':
-        fields[fields.indexWhere((e) => e.name == 'qf_comment')].stringValue,
+        'qf_comment': fields[fields.indexWhere((e) => e.name == 'qf_comment')]
+            .stringValue,
 
         ///G
         'q38': fields[fields.indexWhere((e) => e.name == 'q38')].stringValue,
         'q39': fields[fields.indexWhere((e) => e.name == 'q39')].stringValue,
         'q40': fields[fields.indexWhere((e) => e.name == 'q40')].stringValue,
         'q41': fields[fields.indexWhere((e) => e.name == 'q41')].stringValue,
-        'qg_comment':
-        fields[fields.indexWhere((e) => e.name == 'qg_comment')].stringValue,
+        'qg_comment': fields[fields.indexWhere((e) => e.name == 'qg_comment')]
+            .stringValue,
 
         ///H
         'q42': fields[fields.indexWhere((e) => e.name == 'q42')].stringValue,
         'q43': fields[fields.indexWhere((e) => e.name == 'q43')].stringValue,
         'q44_detail': fields[fields.indexWhere((e) => e.name == 'q44_detail')]
-          .stringValue,
+            .stringValue,
         'q44': fields[fields.indexWhere((e) => e.name == 'q44')].stringValue,
         'q45_detail': fields[fields.indexWhere((e) => e.name == 'q45_detail')]
-          .stringValue,
+            .stringValue,
         'q45': fields[fields.indexWhere((e) => e.name == 'q45')].stringValue,
         'q46_detail': fields[fields.indexWhere((e) => e.name == 'q46_detail')]
-          .stringValue,
+            .stringValue,
         'q46': fields[fields.indexWhere((e) => e.name == 'q46')].stringValue,
         'q47_detail': fields[fields.indexWhere((e) => e.name == 'q47_detail')]
-          .stringValue,
+            .stringValue,
         'q47': fields[fields.indexWhere((e) => e.name == 'q47')].stringValue,
         'q48_detail': fields[fields.indexWhere((e) => e.name == 'q48_detail')]
-          .stringValue,
+            .stringValue,
         'q48': fields[fields.indexWhere((e) => e.name == 'q48')].stringValue,
         'q49_detail': fields[fields.indexWhere((e) => e.name == 'q49_detail')]
             .stringValue,
@@ -687,8 +790,8 @@ class Form extends ChangeNotifier {
         'q50_detail': fields[fields.indexWhere((e) => e.name == 'q50_detail')]
             .stringValue,
         'q50': fields[fields.indexWhere((e) => e.name == 'q50')].stringValue,
-        'qh_comment':
-        fields[fields.indexWhere((e) => e.name == 'qh_comment')].stringValue,
+        'qh_comment': fields[fields.indexWhere((e) => e.name == 'qh_comment')]
+            .stringValue,
 
         ///LANDING AND GO-AROUND
         'no_landing': fields[fields.indexWhere((e) => e.name == 'no_landing')]
@@ -698,36 +801,271 @@ class Form extends ChangeNotifier {
 
         ///COMPETENCY
         'comp_kno':
-        fields[fields.indexWhere((e) => e.name == 'comp_kno')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_kno')].stringValue,
         'comp_pro':
-        fields[fields.indexWhere((e) => e.name == 'comp_pro')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_pro')].stringValue,
         'comp_com':
-        fields[fields.indexWhere((e) => e.name == 'comp_com')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_com')].stringValue,
         'comp_fpa':
-        fields[fields.indexWhere((e) => e.name == 'comp_fpa')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_fpa')].stringValue,
         'comp_fpm':
-        fields[fields.indexWhere((e) => e.name == 'comp_fpm')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_fpm')].stringValue,
         'comp_ltw':
-        fields[fields.indexWhere((e) => e.name == 'comp_ltw')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_ltw')].stringValue,
         'comp_psd':
-        fields[fields.indexWhere((e) => e.name == 'comp_psd')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_psd')].stringValue,
         'comp_saw':
-        fields[fields.indexWhere((e) => e.name == 'comp_saw')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_saw')].stringValue,
         'comp_wlm':
-        fields[fields.indexWhere((e) => e.name == 'comp_wlm')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'comp_wlm')].stringValue,
         'general_comment':
-        fields[fields.indexWhere((e) => e.name == 'general_comment')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'general_comment')]
+                .stringValue,
+
         ///RESULT
         'result':
-        fields[fields.indexWhere((e) => e.name == 'result')].stringValue,
+            fields[fields.indexWhere((e) => e.name == 'result')].stringValue,
 
         'pilot_sig_date':
-        fields[fields.indexWhere((e) => e.name == 'pilot_sig_date')]
-            .stringValue,
+            fields[fields.indexWhere((e) => e.name == 'pilot_sig_date')]
+                .stringValue,
         'instructor_sig_date':
-        fields[fields.indexWhere((e) => e.name == 'instructor_sig_date')]
+            fields[fields.indexWhere((e) => e.name == 'instructor_sig_date')]
+                .stringValue,
+      };
+    } else if (type == FormType.lineTrain) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': status.toString(),
+        'type': type.toString(),
+        'form_name': formName,
+        'create_at': createDateTime.toString(),
+        'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+        'create_by': createBy,
+        'file_path': filePath,
+        'id': id,
+        'font_size': fontSize.round().toString(),
+        'pdf_url': pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_name': fields[fields.indexWhere((e) => e.name == 'pilot_name')]
             .stringValue,
+        'pilot_license_no':
+            fields[fields.indexWhere((e) => e.name == 'pilot_license_no')]
+                .stringValue,
+        'pilot_id':
+            fields[fields.indexWhere((e) => e.name == 'pilot_id')].stringValue,
+
+        ///Instructor info.
+        'instructor_name':
+            fields[fields.indexWhere((e) => e.name == 'instructor_name')]
+                .stringValue,
+        'instructor_cert_no':
+            fields[fields.indexWhere((e) => e.name == 'instructor_cert_no')]
+                .stringValue,
+        'instructor_id':
+            fields[fields.indexWhere((e) => e.name == 'instructor_id')]
+                .stringValue,
+
+        ///Examiner / CAAT info.
+        'examiner_name':
+            fields[fields.indexWhere((e) => e.name == 'examiner_name')]
+                .stringValue,
+        'examiner_license_no':
+            fields[fields.indexWhere((e) => e.name == 'examiner_license_no')]
+                .stringValue,
+        'examiner_id': fields[fields.indexWhere((e) => e.name == 'examiner_id')]
+            .stringValue,
+
+        ///Check details
+        'course':
+            fields[fields.indexWhere((e) => e.name == 'course')].stringValue,
+        'other_course':
+            fields[fields.indexWhere((e) => e.name == 'other_course')]
+                .stringValue,
+        // 'check_type': fields[fields.indexWhere((e) => e.name == 'check_type')].stringValue,
+        'check_type_0':
+            fields[fields.indexWhere((e) => e.name == 'check_type_0')]
+                .stringValue,
+        'check_type_1':
+            fields[fields.indexWhere((e) => e.name == 'check_type_1')]
+                .stringValue,
+        'check_type_2':
+            fields[fields.indexWhere((e) => e.name == 'check_type_2')]
+                .stringValue,
+        'check_type_3':
+            fields[fields.indexWhere((e) => e.name == 'check_type_3')]
+                .stringValue,
+        'check_type_4':
+            fields[fields.indexWhere((e) => e.name == 'check_type_4')]
+                .stringValue,
+        'check_type_5':
+            fields[fields.indexWhere((e) => e.name == 'check_type_5')]
+                .stringValue,
+        'check_type_6':
+            fields[fields.indexWhere((e) => e.name == 'check_type_6')]
+                .stringValue,
+        'check_type_7':
+            fields[fields.indexWhere((e) => e.name == 'check_type_7')]
+                .stringValue,
+        'other_type': fields[fields.indexWhere((e) => e.name == 'other_type')]
+            .stringValue,
+
+        ///Sector
+        'date_1':
+            fields[fields.indexWhere((e) => e.name == 'date_1')].stringValue,
+        'ac_type_1':
+            fields[fields.indexWhere((e) => e.name == 'ac_type_1')].stringValue,
+        'ac_reg_1':
+            fields[fields.indexWhere((e) => e.name == 'ac_reg_1')].stringValue,
+        'flt_no_1':
+            fields[fields.indexWhere((e) => e.name == 'flt_no_1')].stringValue,
+        'route_1':
+            fields[fields.indexWhere((e) => e.name == 'route_1')].stringValue,
+        'duty_1':
+            fields[fields.indexWhere((e) => e.name == 'duty_1')].stringValue,
+        'date_2':
+            fields[fields.indexWhere((e) => e.name == 'date_2')].stringValue,
+        'ac_type_2':
+            fields[fields.indexWhere((e) => e.name == 'ac_type_2')].stringValue,
+        'ac_reg_2':
+            fields[fields.indexWhere((e) => e.name == 'ac_reg_2')].stringValue,
+        'flt_no_2':
+            fields[fields.indexWhere((e) => e.name == 'flt_no_2')].stringValue,
+        'route_2':
+            fields[fields.indexWhere((e) => e.name == 'route_2')].stringValue,
+        'duty_2':
+            fields[fields.indexWhere((e) => e.name == 'duty_2')].stringValue,
+
+        'accum_pf':
+            fields[fields.indexWhere((e) => e.name == 'accum_pf')].stringValue,
+        'accum_pm':
+            fields[fields.indexWhere((e) => e.name == 'accum_pm')].stringValue,
+
+        ///Grading & Comment
+        ///A
+        'q1': fields[fields.indexWhere((e) => e.name == 'q1')].stringValue,
+        'q2': fields[fields.indexWhere((e) => e.name == 'q2')].stringValue,
+        'q3': fields[fields.indexWhere((e) => e.name == 'q3')].stringValue,
+        'q4': fields[fields.indexWhere((e) => e.name == 'q4')].stringValue,
+        'q5': fields[fields.indexWhere((e) => e.name == 'q5')].stringValue,
+        'q6': fields[fields.indexWhere((e) => e.name == 'q6')].stringValue,
+        'q7': fields[fields.indexWhere((e) => e.name == 'q7')].stringValue,
+        'q8': fields[fields.indexWhere((e) => e.name == 'q8')].stringValue,
+        'q9': fields[fields.indexWhere((e) => e.name == 'q9')].stringValue,
+        'qa_comment': fields[fields.indexWhere((e) => e.name == 'qa_comment')]
+            .stringValue,
+
+        ///B
+        'q10': fields[fields.indexWhere((e) => e.name == 'q10')].stringValue,
+        'q11': fields[fields.indexWhere((e) => e.name == 'q11')].stringValue,
+        'q12': fields[fields.indexWhere((e) => e.name == 'q12')].stringValue,
+        'qb_comment': fields[fields.indexWhere((e) => e.name == 'qb_comment')]
+            .stringValue,
+
+        ///C
+        'q13': fields[fields.indexWhere((e) => e.name == 'q13')].stringValue,
+        'q14': fields[fields.indexWhere((e) => e.name == 'q14')].stringValue,
+        'q15': fields[fields.indexWhere((e) => e.name == 'q15')].stringValue,
+        'q16': fields[fields.indexWhere((e) => e.name == 'q16')].stringValue,
+        'q17': fields[fields.indexWhere((e) => e.name == 'q17')].stringValue,
+        'q18': fields[fields.indexWhere((e) => e.name == 'q18')].stringValue,
+        'q19': fields[fields.indexWhere((e) => e.name == 'q19')].stringValue,
+        'q20': fields[fields.indexWhere((e) => e.name == 'q20')].stringValue,
+        'qc_comment': fields[fields.indexWhere((e) => e.name == 'qc_comment')]
+            .stringValue,
+
+        ///D
+        'q21': fields[fields.indexWhere((e) => e.name == 'q21')].stringValue,
+        'q22': fields[fields.indexWhere((e) => e.name == 'q22')].stringValue,
+        'q23': fields[fields.indexWhere((e) => e.name == 'q23')].stringValue,
+        'q24': fields[fields.indexWhere((e) => e.name == 'q24')].stringValue,
+        'q25': fields[fields.indexWhere((e) => e.name == 'q25')].stringValue,
+        'q26': fields[fields.indexWhere((e) => e.name == 'q26')].stringValue,
+        'qd_comment': fields[fields.indexWhere((e) => e.name == 'qd_comment')]
+            .stringValue,
+
+        ///E
+        'q27': fields[fields.indexWhere((e) => e.name == 'q27')].stringValue,
+        'q28': fields[fields.indexWhere((e) => e.name == 'q28')].stringValue,
+        'q29': fields[fields.indexWhere((e) => e.name == 'q29')].stringValue,
+        'qe_comment': fields[fields.indexWhere((e) => e.name == 'qe_comment')]
+            .stringValue,
+
+        ///F
+        'q30': fields[fields.indexWhere((e) => e.name == 'q30')].stringValue,
+        'q31': fields[fields.indexWhere((e) => e.name == 'q31')].stringValue,
+        'q32': fields[fields.indexWhere((e) => e.name == 'q32')].stringValue,
+        'q33': fields[fields.indexWhere((e) => e.name == 'q33')].stringValue,
+        'q34': fields[fields.indexWhere((e) => e.name == 'q34')].stringValue,
+        'q35': fields[fields.indexWhere((e) => e.name == 'q35')].stringValue,
+        'qf_comment': fields[fields.indexWhere((e) => e.name == 'qf_comment')]
+            .stringValue,
+
+        ///G
+        'q36': fields[fields.indexWhere((e) => e.name == 'q36')].stringValue,
+        'q37_detail': fields[fields.indexWhere((e) => e.name == 'q37_detail')]
+            .stringValue,
+        'q37': fields[fields.indexWhere((e) => e.name == 'q37')].stringValue,
+        'q38_detail': fields[fields.indexWhere((e) => e.name == 'q38_detail')]
+            .stringValue,
+        'q38': fields[fields.indexWhere((e) => e.name == 'q38')].stringValue,
+        'q39_detail': fields[fields.indexWhere((e) => e.name == 'q39_detail')]
+            .stringValue,
+        'q39': fields[fields.indexWhere((e) => e.name == 'q39')].stringValue,
+        'q40_detail': fields[fields.indexWhere((e) => e.name == 'q40_detail')]
+            .stringValue,
+        'q40': fields[fields.indexWhere((e) => e.name == 'q40')].stringValue,
+        'qg_comment': fields[fields.indexWhere((e) => e.name == 'qg_comment')]
+            .stringValue,
+
+        ///COMPETENCY
+        'comp_kno':
+            fields[fields.indexWhere((e) => e.name == 'comp_kno')].stringValue,
+        'comp_pro':
+            fields[fields.indexWhere((e) => e.name == 'comp_pro')].stringValue,
+        'comp_com':
+            fields[fields.indexWhere((e) => e.name == 'comp_com')].stringValue,
+        'comp_fpa':
+            fields[fields.indexWhere((e) => e.name == 'comp_fpa')].stringValue,
+        'comp_fpm':
+            fields[fields.indexWhere((e) => e.name == 'comp_fpm')].stringValue,
+        'comp_ltw':
+            fields[fields.indexWhere((e) => e.name == 'comp_ltw')].stringValue,
+        'comp_psd':
+            fields[fields.indexWhere((e) => e.name == 'comp_psd')].stringValue,
+        'comp_saw':
+            fields[fields.indexWhere((e) => e.name == 'comp_saw')].stringValue,
+        'comp_wlm':
+            fields[fields.indexWhere((e) => e.name == 'comp_wlm')].stringValue,
+        'general_comment':
+            fields[fields.indexWhere((e) => e.name == 'general_comment')]
+                .stringValue,
+        'additional_note':
+            fields[fields.indexWhere((e) => e.name == 'additional_note')]
+                .stringValue,
+
+        ///RESULT
+        'result':
+            fields[fields.indexWhere((e) => e.name == 'result')].stringValue,
+        'examiner_result':
+            fields[fields.indexWhere((e) => e.name == 'examiner_result')]
+                .stringValue,
+        'pilot_sig_date':
+            fields[fields.indexWhere((e) => e.name == 'pilot_sig_date')]
+                .stringValue,
+        'instructor_sig_date':
+            fields[fields.indexWhere((e) => e.name == 'instructor_sig_date')]
+                .stringValue,
+        'examiner_sig_date':
+            fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
+                .stringValue,
       };
     } else {
       return {};
@@ -735,10 +1073,12 @@ class Form extends ChangeNotifier {
     // };
   }
 
-
   ///TODO: New form (8): Add validation (if any)
-  void validate() {
-    if (type == FormType.lineCheck) {
+  String validate() {
+    String result = '';
+
+    ///validate field input
+    if (type == FormType.lineCheck || type == FormType.lineTrain) {
       fields[fields.indexWhere((e) => e.name == 'ac_reg_1')].stringValue =
           fields[fields.indexWhere((e) => e.name == 'ac_reg_1')]
               .stringValue
@@ -768,5 +1108,35 @@ class Form extends ChangeNotifier {
               .replaceAll('TVJ', '')
               .trim();
     }
+
+    ///Validate line train examiner signature if required
+    if (type == FormType.lineTrain) {
+      print('validating line train form');
+      //Check if examiner signature is required and missing?
+      if ((fields[fields.indexWhere((e) => e.name == 'check_type_5')]
+                      .stringValue ==
+                  'true' ||
+              fields[fields.indexWhere((e) => e.name == 'check_type_6')]
+                      .stringValue ==
+                  'true') &&
+          (fields[fields
+                      .indexWhere((e) => e.name == 'examiner_name')]
+                  .stringValue
+                  .isEmpty ||
+              fields[fields.indexWhere((e) => e.name == 'examiner_sig')]
+                      .signature ==
+                  null ||
+              fields[fields.indexWhere((e) => e.name == 'examiner_sig')]
+                  .signature!
+                  .isEmpty ||
+              fields[fields.indexWhere((e) => e.name == 'examiner_result')]
+                      .stringValue ==
+                  '' ||
+              fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
+                  .stringValue.isEmpty)) {
+        result = 'Examiner details/signature/result are required for check flight.';
+      }
+    }
+    return result;
   }
 }

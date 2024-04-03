@@ -64,7 +64,8 @@ class Pdf {
             ///Signature
             if (_field.type == FieldType.signature &&
                 _field.signature != null) {
-              await _field.convertSignature((String response) {});
+              print(_field.name);
+              await _field.convertSignature((String response) {}, false);
               final PdfBitmap image = PdfBitmap(_field.signature!);
               var _decodedImage = await decodeImageFromList(_field.signature!);
               var _width = _field.sigWidth;
@@ -107,7 +108,9 @@ class Pdf {
                   document.pages[page - 1].graphics.drawImage(
                     mark,
                     Rect.fromLTWH(
-                        _field.posXList[_i] - 2,
+                        _field.posX != 0
+                            ? _field.posX - 2
+                            : _field.posXList[_i] - 2,
                         _field.posY != 0
                             ? _field.posY + 3
                             : _field.posYList[_i] + 3,
@@ -120,7 +123,7 @@ class Pdf {
 
             ///String: Write text
             else {
-              print('${_field.label} length: ${_field.stringValue.length}');
+              // print('${_field.label} length: ${_field.stringValue.length}');
               try {
                 PdfTextElement(
                   text: _field.stringValue,
@@ -200,7 +203,8 @@ class Pdf {
   }
 
   ///To save the pdf file in the device
-  Future<void> lunchPdf(f.Form form, void Function(String, ErrorType) callback) async {
+  Future<void> lunchPdf(
+      f.Form form, void Function(String, ErrorType) callback) async {
     String name = '${form.id}.pdf';
 
     Utils.showInProgress(true);
