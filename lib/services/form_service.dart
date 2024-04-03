@@ -5934,7 +5934,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 6,
             isMandatory: false,
-            stringValue: '          ',
+            stringValue: kBlankText,
             // DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
             // dateTimeValue: DateTime.now(),
             posX: 334,

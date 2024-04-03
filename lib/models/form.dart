@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:marverick/models/field.dart';
+import 'package:marverick/utils/constants.dart';
 import 'dart:typed_data';
 
 ///TODO: New form (1): Add new type
@@ -1133,7 +1134,7 @@ class Form extends ChangeNotifier {
                       .stringValue ==
                   '' ||
               fields[fields.indexWhere((e) => e.name == 'examiner_sig_date')]
-                  .stringValue.isEmpty)) {
+                  .stringValue == kBlankText)) {
         result = 'Examiner details/signature/result are required for check flight.';
       }
     }

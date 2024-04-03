@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.4.0';
+const String kVersion = '1.4.1';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -91,6 +91,7 @@ const String kLineTrainSheetUrl =
 
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
+const String kBlankText = '          ';
 // const String kBeamMail = 'beamtjo';
 // const String kBeamPassword = 'qwerty';
 
