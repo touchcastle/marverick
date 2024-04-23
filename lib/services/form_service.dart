@@ -4261,6 +4261,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             page: 2,
             section: 3,
+            subSection: 8,
             gradeSection: 8,
             isMandatory: false,
             textCapitalization: TextCapitalization.sentences,
@@ -4668,7 +4669,7 @@ class FormService extends ChangeNotifier {
         ///.....................................................................
         Field(
             name: 'pilot_name',
-            label: 'Trainee\'s Name',
+            label: 'Trainee\'s Rank & Name',
             type: FieldType.string,
             section: 1,
             subSection: 1,
@@ -4701,7 +4702,7 @@ class FormService extends ChangeNotifier {
         ///.....................................................................
         Field(
             name: 'instructor_name',
-            label: 'Instructor\'s Name',
+            label: 'Instructor\'s Rank & Name',
             type: FieldType.string,
             section: 1,
             subSection: 2,
@@ -4710,7 +4711,7 @@ class FormService extends ChangeNotifier {
             posY: 101),
         Field(
             name: 'instructor_cert_no',
-            label: 'Ins Certificate No',
+            label: 'Instructor License / Certificate No.',
             type: FieldType.string,
             section: 1,
             subSection: 2,
@@ -4734,7 +4735,7 @@ class FormService extends ChangeNotifier {
         ///.....................................................................
         Field(
             name: 'examiner_name',
-            label: 'Examiner\'s Name (Applicable only for check flight)',
+            label: 'Examiner\'s Rank & Name (Applicable only for check flight)',
             type: FieldType.string,
             isMandatory: false,
             section: 1,
@@ -4744,7 +4745,7 @@ class FormService extends ChangeNotifier {
             posY: 101),
         Field(
             name: 'examiner_license_no',
-            label: 'Examiner License No',
+            label: 'Examiner License / Certificate No.',
             type: FieldType.string,
             isMandatory: false,
             section: 1,
@@ -4774,6 +4775,7 @@ class FormService extends ChangeNotifier {
             type: FieldType.radio,
             listValue: [
               'Initial Type Rating',
+              // 'Transition',
               'Transition / Conversion',
               'CCQ',
               'Command Upgrade',
@@ -5035,7 +5037,7 @@ class FormService extends ChangeNotifier {
 
         Field(
             name: 'accum_pf',
-            label: 'Accumulated PF',
+            label: 'Accumulated PF at the end of this flight',
             type: FieldType.string,
             page: 1,
             section: 2,
@@ -5046,7 +5048,7 @@ class FormService extends ChangeNotifier {
             posY: 283),
         Field(
             name: 'accum_pm',
-            label: 'Accumulated PM',
+            label: 'Accumulated PM at the end of this flight',
             type: FieldType.string,
             page: 1,
             section: 2,
@@ -5844,8 +5846,9 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             page: 2,
             section: 6,
-            posX: 70,
-            posY: 622),
+            fontSize: 7,
+            posX: 66,
+            posY: 624),
         Field(
             name: 'pilot_sig_date',
             label: 'Date',
@@ -5856,7 +5859,7 @@ class FormService extends ChangeNotifier {
             stringValue:
                 DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
             dateTimeValue: DateTime.now(),
-            posX: 70,
+            posX: 66,
             posY: 638),
         Field(
             name: 'instructor_sig',
@@ -5875,8 +5878,9 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             page: 2,
             section: 6,
-            posX: 202,
-            posY: 622),
+            fontSize: 7,
+            posX: 199,
+            posY: 624),
         Field(
             name: 'instructor_sig_date',
             label: 'Date',
@@ -5887,7 +5891,7 @@ class FormService extends ChangeNotifier {
             stringValue:
                 DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
             dateTimeValue: DateTime.now(),
-            posX: 202,
+            posX: 199,
             posY: 638),
 
         Field(
@@ -5924,8 +5928,9 @@ class FormService extends ChangeNotifier {
             type: FieldType.string,
             page: 2,
             section: 6,
-            posX: 334,
-            posY: 622),
+            fontSize: 7,
+            posX: 330,
+            posY: 624),
         Field(
             name: 'examiner_sig_date',
             label: 'Date',
@@ -5937,7 +5942,7 @@ class FormService extends ChangeNotifier {
             stringValue: kBlankText,
             // DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
             // dateTimeValue: DateTime.now(),
-            posX: 334,
+            posX: 330,
             posY: 638),
       ],
     );
