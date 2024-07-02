@@ -65,6 +65,8 @@ class Field extends ChangeNotifier {
 
   /// Show field in input screen
   bool input;
+  bool editable;
+  List<bool> editableList;
 
   /// Display in PDF page...
   double page;
@@ -101,8 +103,10 @@ class Field extends ChangeNotifier {
     this.maxLine,
     this.isMandatory = true,
     this.input = true,
+    this.editable = true,
     this.stringValue = '',
     this.dateTimeValue,
+    this.editableList = const [],
     this.listValue = const [],
     this.checkBoxValue = const [],
     this.posXList = const [],

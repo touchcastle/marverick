@@ -314,7 +314,8 @@ class _FormListState extends State<FormList> {
     );
   }
 
-  Text formName(f.Form form) => Text(form.formLabel, style: header());
+  // Text formName(f.Form form) => Text(form.formLabel, style: header());
+  Text formName(f.Form form) => Text(form.formName, style: header());
 
   Text formStatus(f.Form form) =>
       Text(displayStatus(form.status), style: label());

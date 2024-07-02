@@ -215,25 +215,46 @@ class _MainMenuState extends State<MainMenu> {
                         .newForm(context, FormService.initLineCheck());
                   },
                 ),
+                // SpeedDialChild(
+                //   child: Icon(Icons.add, color: kPrimaryDarker),
+                //   label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.04)',
+                //   labelStyle: _header(),
+                //   onTap: () {
+                //     context
+                //         .read<FormService>()
+                //         .newForm(context, FormService.initPpc());
+                //   },
+                // ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.04)',
+                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.05)',
                   labelStyle: _header(),
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initPpc());
+                        .newForm(context, FormService.initPpc5());
                   },
                 ),
-                if (context.read<FormService>().rt5Valid())
+                // if (context.read<FormService>().rt5Valid())
+                //   SpeedDialChild(
+                //     child: Icon(Icons.add, color: kPrimaryDarker),
+                //     label: 'RECURRENT TRAINING RT5 (rev.00)',
+                //     labelStyle: _header(),
+                //     onTap: () {
+                //       context
+                //           .read<FormService>()
+                //           .newForm(context, FormService.initRt5());
+                //     },
+                //   ),
+                if (context.read<FormService>().rt6Valid())
                   SpeedDialChild(
                     child: Icon(Icons.add, color: kPrimaryDarker),
-                    label: 'RECURRENT TRAINING RT5 (rev.00)',
+                    label: 'RECURRENT TRAINING RT6 (rev.00)',
                     labelStyle: _header(),
                     onTap: () {
                       context
                           .read<FormService>()
-                          .newForm(context, FormService.initRt5());
+                          .newForm(context, FormService.initRt6());
                     },
                   ),
                 if (context.read<FormService>().lineTrainValid())

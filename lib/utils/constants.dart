@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.4.3';
+const String kVersion = '1.6.2';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -23,12 +23,16 @@ const String kInputPageName = '/input_page';
 const String kDbName = 'formServeDb.db'; //Database name
 const String kLineCheckTable = 'line_check_table';
 const String kPPCTable = 'ppc_table';
+const String kPPC5Table = 'ppc5_table';
 const String kRt5Table = 'rt5_table';
+const String kRt6Table = 'rt6_table';
 const String klineTrainTable = 'line_train_table';
 const List<String> kDbTableList = [
   'line_check_table',
   'ppc_table',
+  'ppc5_table',
   'rt5_table',
+  'rt6_table',
   'line_train_table',
 ];
 
@@ -84,10 +88,18 @@ const String kLineChekSheetUrl =
     "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
 const String kPPCSheetUrl =
     "https://script.google.com/macros/s/AKfycbz8y3I6TpZAEdaG0PC1IZ2HwxyqgkbNN95Qnf2QUAcKWQ_eePlY1lcTXYvu2Vne6Jgt1A/exec";
+const String kPPC5SheetUrl =
+    "https://script.google.com/macros/s/AKfycbyjXvXQ2PpTxksZ4WSaqqL2OBZkf3zxwAzbht7opSPhoDBgyl9PTbz1gYO7IXbv-8yABA/exec";
 const String kRt5SheetUrl =
     "https://script.google.com/macros/s/AKfycbyJYqi4u1gckKSMOzDv-cAVmphX3WAPRUDfmXSYmCs1xymbdOWTK-EJb-L-Kgu1gNq2cg/exec";
+const String kRt6SheetUrl =
+    "https://script.google.com/macros/s/AKfycbwEsW4ET4tUVciS2gap91ryhWGTWr9ZWobT2dQuE7nypxg_NDWjlcjK647PYZCt1Ib70w/exec";
 const String kLineTrainSheetUrl =
     "https://script.google.com/macros/s/AKfycbynCthDqbLzUwv0rh3aaJY6knx4JiVOfE-Mh36wReCNYkyys1jNt_V1RqKnu1oHnv1y8A/exec";
+
+
+
+
 
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
@@ -101,7 +113,7 @@ BoxDecoration fileBoxDecor(FormStatus status) {
     color: status == FormStatus.working
         ? Color(0xfffce19d).withOpacity(1)
         : status == FormStatus.completed
-            ? Colors.black12
+            ? Color(0xffdadada)
             : Color(0xfff7b7b7),
     borderRadius: BorderRadius.all(Radius.circular(8)),
     // backgroundBlendMode: ,

@@ -18,6 +18,14 @@ import 'package:marverick/services/pdf.dart';
 //   });
 // }
 
+/// ADMIN:
+/// - Submit incomplete form.
+/// - Visible all form.
+/// - Move form back to edit.
+///
+/// TJO:
+/// - Pre-input
+
 class Authen {
   static final auth = FirebaseAuth.instance;
   static var user;

@@ -70,7 +70,7 @@ class _InputScreenState extends State<InputScreen> {
           message = 'SUCCESS: form submitted';
         } else {
           message = response;
-          indexPage = 1;
+          errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
         }
       });
       Snackbar.show(context,
@@ -631,7 +631,8 @@ class _InputScreenState extends State<InputScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                       decoration: BoxDecoration(
                         border: Border.all(
                             color: widget.form.fields[index].intValue == radio
@@ -648,21 +649,23 @@ class _InputScreenState extends State<InputScreen> {
                     ),
                   ),
                   onTap: () {
-                    setState(() {
-                      ///Click new radio button
-                      if (widget.form.fields[index].intValue != radio) {
-                        widget.form.fields[index].intValue = radio;
-                        widget.form.fields[index].stringValue =
-                            widget.form.fields[index].listValue[radio];
-                      }
+                    if (widget.form.fields[index].editable) {
+                      setState(() {
+                        ///Click new radio button
+                        if (widget.form.fields[index].intValue != radio) {
+                          widget.form.fields[index].intValue = radio;
+                          widget.form.fields[index].stringValue =
+                              widget.form.fields[index].listValue[radio];
+                        }
 
-                      ///Click same radio button
-                      else {
-                        widget.form.fields[index].intValue = -1;
-                        widget.form.fields[index].stringValue = '';
-                      }
-                      _autoSave();
-                    });
+                        ///Click same radio button
+                        else {
+                          widget.form.fields[index].intValue = -1;
+                          widget.form.fields[index].stringValue = '';
+                        }
+                        _autoSave();
+                      });
+                    }
                   },
                 ),
                 SizedBox(width: 5),
@@ -704,36 +707,27 @@ class _InputScreenState extends State<InputScreen> {
                         style: value()),
                   ),
                   onTap: () {
-                    setState(() {
-                      widget.form.fields[index].checkBoxValue[checkIndex] =
-                          !widget.form.fields[index].checkBoxValue[checkIndex];
-                      String _name = widget.form.fields[index].name +
-                          '_' +
-                          checkIndex.toString();
-                      print(_name);
-                      widget
-                              .form
-                              .fields[widget.form.fields
-                                  .indexWhere((e) => e.name == _name)]
-                              .stringValue =
-                          widget.form.fields[index].checkBoxValue[checkIndex]
-                              .toString();
-                      print(widget
-                          .form
-                          .fields[widget.form.fields
-                              .indexWhere((e) => e.name == _name)]
-                          .stringValue);
-
-                      // if (widget.form.fields[index].intValue != checkIndex) {
-                      //   widget.form.fields[index].intValue = checkIndex;
-                      //   widget.form.fields[index].stringValue =
-                      //       widget.form.fields[index].listValue[checkIndex];
-                      // } else {
-                      //   widget.form.fields[index].intValue = -1;
-                      //   widget.form.fields[index].stringValue = '';
-                      // }
-                      _autoSave();
-                    });
+                    if (widget.form.fields[index].editable ||
+                        (!widget.form.fields[index].editable &&
+                            widget.form.fields[index].editableList.length >=
+                                checkIndex + 1 &&
+                            widget.form.fields[index].editableList[checkIndex]))
+                      setState(() {
+                        widget.form.fields[index].checkBoxValue[checkIndex] =
+                            !widget
+                                .form.fields[index].checkBoxValue[checkIndex];
+                        String _name = widget.form.fields[index].name +
+                            '_' +
+                            checkIndex.toString();
+                        widget
+                                .form
+                                .fields[widget.form.fields
+                                    .indexWhere((e) => e.name == _name)]
+                                .stringValue =
+                            widget.form.fields[index].checkBoxValue[checkIndex]
+                                .toString();
+                        _autoSave();
+                      });
                   },
                 ),
                 SizedBox(width: 5),
