@@ -3,7 +3,7 @@ import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
 ///Version number
-const String kVersion = '1.6.2';
+const String kVersion = '1.6.7';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -96,16 +96,12 @@ const String kRt6SheetUrl =
     "https://script.google.com/macros/s/AKfycbwEsW4ET4tUVciS2gap91ryhWGTWr9ZWobT2dQuE7nypxg_NDWjlcjK647PYZCt1Ib70w/exec";
 const String kLineTrainSheetUrl =
     "https://script.google.com/macros/s/AKfycbynCthDqbLzUwv0rh3aaJY6knx4JiVOfE-Mh36wReCNYkyys1jNt_V1RqKnu1oHnv1y8A/exec";
-
-
-
-
-
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
 const String kBlankText = '          ';
 // const String kBeamMail = 'beamtjo';
 // const String kBeamPassword = 'qwerty';
+const Duration kSubmitTimeout = Duration(seconds: 15);
 
 ///Decoration
 BoxDecoration fileBoxDecor(FormStatus status) {

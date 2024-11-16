@@ -28,17 +28,17 @@ class _MainMenuState extends State<MainMenu> {
   bool wasDisconnected = false;
 
   void _screenInit() async {
-    print(await Connectivity().checkConnectivity());
+    // print(await Connectivity().checkConnectivity());
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) async {
-      print(result);
+      // print(result);
 
       if (result == ConnectivityResult.none &&
           (await Connectivity().checkConnectivity() ==
               ConnectivityResult.none)) {
         wasDisconnected = true;
-        showOfflineSnackbar();
+        // showOfflineSnackbar();
       } else if (result != ConnectivityResult.none &&
           (await Connectivity().checkConnectivity() !=
               ConnectivityResult.none) &&

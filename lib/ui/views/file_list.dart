@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:async';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/services/pdf.dart';
@@ -12,6 +13,7 @@ import 'package:marverick/ui/views/input.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
+import 'package:marverick/utils/utils.dart';
 
 class FormList extends StatefulWidget {
   static const id = kFormListId; //for route.
@@ -118,17 +120,27 @@ class _FormListState extends State<FormList> {
       await Navigator.of(context).push(PageRouteBuilder(
           settings: const RouteSettings(name: kMainPageName),
           pageBuilder: (_, __, ___) => Login(fromInside: true)));
-    }
-    if (Authen.user != null) {
-      await context.read<FormService>().submitForm(form,
-          (String response, ErrorType type) {
-        errorType = type;
-        if (response == 'SUCCESS') {
-          message = 'SUCCESS: form submitted';
-        } else {
-          message = response;
-        }
-      });
+    } else {
+      Utils.showInProgress(true);
+      try {
+        await context.read<FormService>().submitForm(form,
+            (String response, ErrorType type) {
+          errorType = type;
+          if (response == 'SUCCESS') {
+            message = 'SUCCESS: form submitted';
+          } else {
+            message = response;
+          }
+        }).timeout(kSubmitTimeout);
+      } on TimeoutException {
+        Utils.showInProgress(false);
+        message = 'Session timeout, please try again';
+      } on Error catch (e) {
+        Utils.showInProgress(false);
+        print('Error [file_list137]: $e');
+      }
+
+      Utils.showInProgress(false);
       Snackbar.show(c,
           text: message,
           type: errorType == ErrorType.noInternet
@@ -202,14 +214,14 @@ class _FormListState extends State<FormList> {
                                 "Are you sure you wish to delete this form?"),
                             actions: <Widget>[
                               TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  child: const Text("DELETE")),
-                              TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
-                                child: const Text("CANCEL"),
+                                child: const Text("Cancel"),
                               ),
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text("Delete")),
                             ],
                           );
                         },
@@ -221,8 +233,9 @@ class _FormListState extends State<FormList> {
                       decoration: fileBoxDecor(_form.status),
                       child: GestureDetector(
                         onLongPress: () async {
-                          if (Authen.isAdmin() && (_form.status == FormStatus.pending ||
-                              _form.status == FormStatus.completed)) {
+                          if (Authen.isAdmin() &&
+                              (_form.status == FormStatus.pending ||
+                                  _form.status == FormStatus.completed)) {
                             return await showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -231,20 +244,25 @@ class _FormListState extends State<FormList> {
                                   content: const Text("Move back to editing?"),
                                   actions: <Widget>[
                                     TextButton(
-                                        onPressed: () {
-                                          _form.status = FormStatus.working;
-                                          Navigator.of(context).push(PageRouteBuilder(
-                                              settings: RouteSettings(name: kInputPageName),
-                                              pageBuilder: (_, __, ___) => InputScreen(
-                                                form: context.read<FormService>().forms[_index],
-                                              )));
-                                        },
-                                        child: const Text("EDIT")),
-                                    TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(false),
-                                      child: const Text("CANCEL"),
+                                      child: const Text("Cancel"),
                                     ),
+                                    TextButton(
+                                        onPressed: () {
+                                          _form.status = FormStatus.working;
+                                          Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                  settings: RouteSettings(
+                                                      name: kInputPageName),
+                                                  pageBuilder: (_, __, ___) =>
+                                                      InputScreen(
+                                                        form: context
+                                                            .read<FormService>()
+                                                            .forms[_index],
+                                                      )));
+                                        },
+                                        child: const Text("Edit")),
                                   ],
                                 );
                               },
@@ -291,7 +309,33 @@ class _FormListState extends State<FormList> {
                                     color: Colors.transparent,
                                     child: IconButton(
                                       onPressed: () async {
-                                        _submitForm(context, _form);
+                                        return await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text("Submit"),
+                                              content: const Text(
+                                                  "Confirm Submit form?"),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(false),
+                                                  child: const Text("Cancel"),
+                                                ),
+                                                TextButton(
+                                                    onPressed: () {
+                                                      _submitForm(
+                                                          context, _form);
+                                                      Navigator.of(context)
+                                                          .pop(false);
+                                                    },
+                                                    child:
+                                                        const Text("Submit")),
+                                              ],
+                                            );
+                                          },
+                                        );
                                       },
                                       icon: Icon(Icons.file_upload),
                                       iconSize: 40,

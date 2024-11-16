@@ -38,7 +38,7 @@ class Authen {
     }
   }
 
-  static void forcingAdmin(){
+  static void forcingAdmin() {
     forceAdmin++;
     print(forceAdmin);
   }
@@ -52,6 +52,7 @@ class Authen {
       return false;
     }
   }
+
   static bool isTjo() {
     if (user != null && user.email == kTjoMail) {
       return true;
@@ -65,9 +66,9 @@ class Authen {
     if (email == kSampleMail && password == kSamplePassword) {
       isSample = true;
       user = 'sample';
-    // } else if (email == kBeamMail && password == kBeamPassword) {
-    //   isSample = false;
-    //   user = 'beamtjo';
+      // } else if (email == kBeamMail && password == kBeamPassword) {
+      //   isSample = false;
+      //   user = 'beamtjo';
     } else {
       isSample = false;
       if (!email.contains('@') &&
@@ -75,13 +76,19 @@ class Authen {
           !email.contains('@vietjetair')) {
         email += '@vietjetair.com';
       }
-      try {
+      // try {
         await auth.signInWithEmailAndPassword(email: email, password: password);
         if (auth.currentUser != null) {
           user = auth.currentUser;
         }
-      } catch (e) {}
+      // } catch (e) {
+      //   print("login err with: $e");
+      // }
     }
+  }
+
+  static Future resetPassword(String email) async {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
 
   static Future logOut() async {

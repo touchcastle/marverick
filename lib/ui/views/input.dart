@@ -55,24 +55,36 @@ class _InputScreenState extends State<InputScreen> {
     int indexPage = 0;
     String message = '';
 
-    print(Authen.user);
+    // print(Authen.user);
     if (Authen.user == null) {
       await Navigator.of(context).push(PageRouteBuilder(
           settings: const RouteSettings(name: kMainPageName),
           pageBuilder: (_, __, ___) => Login(fromInside: true)));
-    }
-    if (Authen.user != null) {
+    } else {
       ErrorType errorType = ErrorType.success;
-      await context.read<FormService>().submitForm(widget.form,
-          (String response, ErrorType type) {
-        errorType = type;
-        if (response == kStatusSuccess) {
-          message = 'SUCCESS: form submitted';
-        } else {
-          message = response;
-          errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
-        }
-      });
+
+      Utils.showInProgress(true);
+      try {
+        await context.read<FormService>().submitForm(widget.form,
+            (String response, ErrorType type) {
+          errorType = type;
+          if (response == kStatusSuccess) {
+            message = 'SUCCESS: form submitted';
+          } else {
+            message = response;
+            errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
+          }
+        }).timeout(kSubmitTimeout);
+      } on TimeoutException{
+        Utils.showInProgress(false);
+        indexPage = 2;
+        message = 'Session timeout, please try again';
+      } on Error catch (e) {
+        Utils.showInProgress(false);
+        indexPage = 2;
+        print('Error [intput79]: $e');
+      }
+      Utils.showInProgress(false);
       Snackbar.show(context,
           text: message,
           type: errorType == ErrorType.noInternet
@@ -241,7 +253,29 @@ class _InputScreenState extends State<InputScreen> {
                 ),
                 onPressed: () async {
                   setState(() {});
-                  await _submitForm(context);
+
+                  return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Submit"),
+                        content: const Text("Confirm Submit form?"),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                _submitForm(context);
+                                Navigator.of(context).pop(false);
+                              },
+                              child: const Text("Submit")),
+                        ],
+                      );
+                    },
+                  );
+
                   // await context.read<Pdf>().gen(widget.form);
                 },
               )

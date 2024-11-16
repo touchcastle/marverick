@@ -114,8 +114,8 @@ class ScrollingTextState extends State<ScrollingText>
 
   /// To see if text will overflow?
   bool _isOverflow(BoxConstraints constraint) {
-    print(constraint.maxWidth);
-    print(widget.text);
+    // print(constraint.maxWidth);
+    // print(widget.text);
     // Build the Text span
     TextSpan _span = TextSpan(text: widget.text, style: widget.textStyle);
     // Use a Text painter to determine if it will exceed max lines

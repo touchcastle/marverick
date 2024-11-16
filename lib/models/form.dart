@@ -95,24 +95,28 @@ class Form extends ChangeNotifier {
 
   double percentFilled() {
     int allRequired = fields.where((c) => c.isMandatory).toList().length;
-    int filledRequired = fields
-        .where(
-          (c) =>
-              c.isMandatory &&
-                  ((c.type == FieldType.radio ||
-                              c.type == FieldType.string ||
-                              c.type == FieldType.date) &&
-                          c.stringValue != '' ||
-                      c.intValue >= 0) ||
-              (c.type == FieldType.signature &&
-                  c.signature != null &&
-                  c.signature!.isNotEmpty) ||
-              (c.type == FieldType.int && c.intValue >= 0) ||
-              (c.type == FieldType.checkbox && c.checkBoxValue.contains(true)),
-        )
-        .toList()
-        .length;
-    double percent = (filledRequired / allRequired) * 100;
+    // int filledRequired = fields
+    //     .where(
+    //       (c) =>
+    //           c.isMandatory &&
+    //               ((c.type == FieldType.radio ||
+    //                           c.type == FieldType.string ||
+    //                           c.type == FieldType.date) &&
+    //                       c.stringValue != '' ||
+    //                   c.intValue >= 0) ||
+    //           (c.type == FieldType.signature &&
+    //               c.signature != null &&
+    //               c.signature!.isNotEmpty) ||
+    //           (c.type == FieldType.int && c.intValue >= 0) ||
+    //           (c.type == FieldType.checkbox && c.checkBoxValue.contains(true)),
+    //     )
+    //     .toList()
+    //     .length;
+
+    print('filledRequired is: ${filledRequired()}');
+    print('allRequired is: $allRequired');
+    double percent = (filledRequired() / allRequired) * 100;
+    print('percent is: $percent');
     return percent;
   }
 

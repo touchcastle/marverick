@@ -187,10 +187,11 @@ class FormService extends ChangeNotifier {
       return '$id $name - $type $dateText $time.pdf';
     } else if (form.type == f.FormType.lineCheck) {
       String dateText = DateFormat('yyyyMMdd').format(date);
+      String time = DateFormat('kk:mm:ss').format(DateTime.now());
       String pilotName = form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_name')]
           .stringValue;
-      return '${formName(form.type)}_${pilotName}_$dateText.pdf';
+      return '${formName(form.type)}_${pilotName}_$dateText $time.pdf';
     } else {
       return '${form.id}.pdf';
     }
@@ -234,12 +235,11 @@ class FormService extends ChangeNotifier {
       f.Form form, void Function(String, ErrorType) callback) async {
     downloadUrl = null;
     DateTime submitDate = DateTime.now();
-    double percentCompleted;
+    // double percentCompleted;
     String validateResult = '';
     if (!Authen.isSample) {
-      Authen.isAdmin() ? percentCompleted = 1 : percentCompleted = 99.5;
       await save(form);
-      if (form.percentFilled() >= percentCompleted) {
+      if (form.percentFilled() == 100) {
         if (await (Connectivity().checkConnectivity()) ==
             ConnectivityResult.none) {
           callback('No internet connection: Form moved to pending',
@@ -247,7 +247,7 @@ class FormService extends ChangeNotifier {
           moveToPending(form);
         } else {
           try {
-            Utils.showInProgress(true);
+            // Utils.showInProgress(true);
             print('start pdf');
             //UPLOAD PDF TO GOOGLE STORAGE
             validateResult = form.validate();
@@ -304,12 +304,12 @@ class FormService extends ChangeNotifier {
           } catch (e) {
             ///To keep error form in draft.
             // moveToPending(form);
-            Utils.showInProgress(false);
+            // Utils.showInProgress(false);
             callback('ERROR: $e', ErrorType.other);
           }
         }
       } else {
-        Utils.showInProgress(false);
+        // Utils.showInProgress(false);
         callback(
             'ERROR: Please fill all required field', ErrorType.missingRequired);
       }
@@ -317,7 +317,7 @@ class FormService extends ChangeNotifier {
       ///Mockup success message
       callback(kStatusSuccess, ErrorType.success);
     }
-    Utils.showInProgress(false);
+    // Utils.showInProgress(false);
   }
 
   ///===========================================================================
@@ -3509,7 +3509,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 1,
             gradeSection: 1,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -3574,7 +3574,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 2,
             gradeSection: 2,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -3839,7 +3839,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 3,
             gradeSection: 3,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -3852,9 +3852,10 @@ class FormService extends ChangeNotifier {
             label: 'Pressurization / Air Condition / Bleed',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3866,9 +3867,10 @@ class FormService extends ChangeNotifier {
             label: 'Pitot / Static',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3880,9 +3882,10 @@ class FormService extends ChangeNotifier {
             label: 'Fuel',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3894,9 +3897,10 @@ class FormService extends ChangeNotifier {
             label: 'Electrical',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3908,9 +3912,10 @@ class FormService extends ChangeNotifier {
             label: 'Hydraulic',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3934,9 +3939,10 @@ class FormService extends ChangeNotifier {
             label: 'Anti-Icing / De-Icing system / Glare Shield Heating',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3960,9 +3966,10 @@ class FormService extends ChangeNotifier {
             label: 'Radios / Navigation Equipment / Instruments / FMS',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -3986,9 +3993,10 @@ class FormService extends ChangeNotifier {
             label: 'Slats and Flaps',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -4000,9 +4008,10 @@ class FormService extends ChangeNotifier {
             label: 'Engine / APU',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 4,
@@ -4016,7 +4025,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 4,
             gradeSection: 4,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -4077,9 +4086,10 @@ class FormService extends ChangeNotifier {
             label: 'Emergency Descent',
             type: FieldType.radio,
             listValue: _gradeList,
-            intValue: 5,
-            stringValue: 'N/O',
-            editable: false,
+            intValue: defaultGrade(),
+            // intValue: 5,
+            // stringValue: 'N/O',
+            // editable: false,
             page: 1,
             section: 3,
             subSection: 5,
@@ -4117,7 +4127,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -4169,7 +4179,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -4269,7 +4279,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 7,
             gradeSection: 7,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -4373,7 +4383,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 9,
             gradeSection: 9,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -4664,7 +4674,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 5,
             subSection: 1,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: 500,
             posX: 42,
             posY: 543,
@@ -6506,7 +6516,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 1,
             gradeSection: 1,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -6568,7 +6578,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 2,
             gradeSection: 2,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -6628,7 +6638,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 3,
             gradeSection: 3,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -6844,7 +6854,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 4,
             gradeSection: 4,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -6893,7 +6903,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -7069,7 +7079,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -7123,7 +7133,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 7,
             gradeSection: 7,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -7201,7 +7211,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 8,
             gradeSection: 8,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -7308,7 +7318,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 10,
             gradeSection: 10,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
@@ -7588,7 +7598,7 @@ class FormService extends ChangeNotifier {
             page: 2,
             section: 5,
             subSection: 1,
-            isMandatory: false,
+            // isMandatory: false,
             maxLength: 500,
             posX: 42,
             posY: 493,

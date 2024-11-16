@@ -73,6 +73,25 @@ class _LoginState extends State<Login> {
     );
   }
 
+  Future resetPassword() async {
+    try {
+      if(email == ''){
+        Snackbar.show(context, text: 'Please input username / email');
+      } else {
+        Utils.showInProgress(true);
+        await Authen.resetPassword(email);
+        Utils.showInProgress(false);
+        FocusManager.instance.primaryFocus?.unfocus();
+        Snackbar.show(context, text: 'Password reset email was sent. Please check your inbox.', type: Type.info);
+      }
+    } catch (e) {
+      Utils.showInProgress(false);
+      FocusManager.instance.primaryFocus?.unfocus();
+      Snackbar.show(context, text: '$e');
+      // if (widget.fromInputPage) Navigator.of(context).pop();
+    }
+  }
+
   Future loginAndNavigate() async {
     try {
       Utils.showInProgress(true);
@@ -104,6 +123,7 @@ class _LoginState extends State<Login> {
         // if (widget.fromInputPage) Navigator.of(context).pop();
       }
     } catch (e) {
+      Utils.showInProgress(false);
       Snackbar.show(context, text: '$e');
       // if (widget.fromInputPage) Navigator.of(context).pop();
     }
@@ -149,7 +169,7 @@ class _LoginState extends State<Login> {
                               onChanged: (value) => password = value,
                               decoration: decor('password'),
                             ),
-                            SizedBox(height: 30),
+                            SizedBox(height: 40),
                             Container(
                               width: inputAreaWidth,
                               height: 40,
@@ -169,6 +189,19 @@ class _LoginState extends State<Login> {
                                       fontWeight: FontWeight.w600,
                                       fontSize: 20),
                                 ),
+                              ),
+                            ),
+                            SizedBox(height: 15),
+                            TextButton(
+                              onPressed: () async {
+                                resetPassword();
+                              },
+                              child: Text(
+                                'Reset password',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14),
                               ),
                             ),
                           ],
