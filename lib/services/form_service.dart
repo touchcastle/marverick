@@ -98,7 +98,7 @@ class FormService extends ChangeNotifier {
       return 'ppc';
     } else if (type == f.FormType.ppc5) {
       return 'ppc5';
-    }else if (type == f.FormType.rt5) {
+    } else if (type == f.FormType.rt5) {
       return 'rt5';
     } else if (type == f.FormType.rt6) {
       return 'rt6';
@@ -117,7 +117,7 @@ class FormService extends ChangeNotifier {
       return 'ppc';
     } else if (type == f.FormType.ppc5) {
       return 'ppc5';
-    }else if (type == f.FormType.rt5) {
+    } else if (type == f.FormType.rt5) {
       return 'rt5';
     } else if (type == f.FormType.rt6) {
       return 'rt6';
@@ -154,10 +154,15 @@ class FormService extends ChangeNotifier {
         form.type == f.FormType.ppc5 ||
         form.type == f.FormType.rt5 ||
         form.type == f.FormType.rt6) {
-      String dateText = form
+      // String dateText = form
+      //     .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
+      //     .stringValue
+      //     .replaceAll(' ', '-');
+      DateTime date = form
           .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
-          .stringValue
-          .replaceAll(' ', '-');
+          .dateTimeValue!;
+      String dateText = DateFormat('yyyyMMdd').format(date);
+
       String id = idFormatted(form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
           .stringValue);
@@ -172,9 +177,14 @@ class FormService extends ChangeNotifier {
       String type = formName(form.type).toUpperCase();
       return '$id $rank$name - $type $dateText.pdf';
     } else if (form.type == f.FormType.lineTrain) {
-      String dateText = form
-          .fields[form.fields.indexWhere((e) => e.name == 'date_1')].stringValue
-          .replaceAll(' ', '-');
+      // String dateText = form
+      //     .fields[form.fields.indexWhere((e) => e.name == 'date_1')].stringValue
+      //     .replaceAll(' ', '-');
+      DateTime date = form
+          .fields[form.fields.indexWhere((e) => e.name == 'date_1')]
+          .dateTimeValue!;
+      String dateText = DateFormat('yyyyMMdd').format(date);
+
       String id = idFormatted(form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
           .stringValue);
@@ -392,7 +402,7 @@ class FormService extends ChangeNotifier {
         await databaseService.dbDelete(form, kPPCTable);
       } else if (form.type == f.FormType.ppc5) {
         await databaseService.dbDelete(form, kPPC5Table);
-      }else if (form.type == f.FormType.rt5) {
+      } else if (form.type == f.FormType.rt5) {
         await databaseService.dbDelete(form, kRt5Table);
       } else if (form.type == f.FormType.rt6) {
         await databaseService.dbDelete(form, kRt6Table);
@@ -3162,9 +3172,9 @@ class FormService extends ChangeNotifier {
     int defaultGrade() => Authen.isTjo() ? 2 : -1;
     bool defaultCheck = false;
     String defaultComment = '';
-        // 'I am being a person authorized by TVJ and/or CAAT to conduct such training'
-        // ' as indicated, have supervised the required session in '
-        // 'accordance with the published';
+    // 'I am being a person authorized by TVJ and/or CAAT to conduct such training'
+    // ' as indicated, have supervised the required session in '
+    // 'accordance with the published';
 
     return f.Form(
       type: f.FormType.ppc5,
@@ -3581,6 +3591,7 @@ class FormService extends ChangeNotifier {
             posY: 310,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q8',
@@ -3846,6 +3857,7 @@ class FormService extends ChangeNotifier {
             posY: 380,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q19',
@@ -4032,6 +4044,7 @@ class FormService extends ChangeNotifier {
             posY: 546,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q31',
@@ -4134,6 +4147,7 @@ class FormService extends ChangeNotifier {
             posY: 727,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q38',
@@ -4149,7 +4163,8 @@ class FormService extends ChangeNotifier {
             posY: 139),
         Field(
             name: 'q39',
-            label: 'Go Around / Missed Approach Procedure with one engine failure (*)',
+            label:
+                'Go Around / Missed Approach Procedure with one engine failure (*)',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -4186,6 +4201,7 @@ class FormService extends ChangeNotifier {
             posY: 139,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q41',
@@ -4249,7 +4265,8 @@ class FormService extends ChangeNotifier {
             posY: 250),
         Field(
             name: 'q46',
-            label: 'Landing Roll / After Landing / Parking / Securing Procedures',
+            label:
+                'Landing Roll / After Landing / Parking / Securing Procedures',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -4286,6 +4303,7 @@ class FormService extends ChangeNotifier {
             posY: 195,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q48',
@@ -4338,10 +4356,12 @@ class FormService extends ChangeNotifier {
             posY: 306,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q51',
-            label: 'Crew Resource Management (CRM) / Assertiveness / Support Process',
+            label:
+                'Crew Resource Management (CRM) / Assertiveness / Support Process',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -4390,6 +4410,7 @@ class FormService extends ChangeNotifier {
             posY: 361,
             width: 115,
             fontSize: 8),
+
         ///---------
         Field(
             name: 'q54_detail',
@@ -4536,6 +4557,7 @@ class FormService extends ChangeNotifier {
             posY: 417,
             width: 115,
             fontSize: 8),
+
         ///---------
 
         ///.....................................................................
@@ -6288,9 +6310,9 @@ class FormService extends ChangeNotifier {
     int defaultGrade() => Authen.isTjo() ? 2 : -1;
     bool defaultCheck = false;
     String defaultComment = '';
-        // 'I am being a person authorized by TVJ and/or CAAT to conduct such training'
-        // ' as indicated, have supervised the required session in '
-        // 'accordance with the published';
+    // 'I am being a person authorized by TVJ and/or CAAT to conduct such training'
+    // ' as indicated, have supervised the required session in '
+    // 'accordance with the published';
     // int defaultGrade() => Authen.isTjo() ? -1 : -1;
     // bool defaultCheck = true;
 
