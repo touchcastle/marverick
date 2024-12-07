@@ -154,14 +154,14 @@ class FormService extends ChangeNotifier {
         form.type == f.FormType.ppc5 ||
         form.type == f.FormType.rt5 ||
         form.type == f.FormType.rt6) {
-      // String dateText = form
-      //     .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
-      //     .stringValue
-      //     .replaceAll(' ', '-');
-      DateTime date = form
+      String dateText = form
           .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
-          .dateTimeValue!;
-      String dateText = DateFormat('yyyyMMdd').format(date);
+          .stringValue
+          .replaceAll(' ', '-');
+      // DateTime date = form
+      //     .fields[form.fields.indexWhere((e) => e.name == 'check_date')]
+      //     .dateTimeValue!;
+      // String dateText = DateFormat('yyyyMMdd').format(date);
 
       String id = idFormatted(form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
@@ -177,13 +177,13 @@ class FormService extends ChangeNotifier {
       String type = formName(form.type).toUpperCase();
       return '$id $rank$name - $type $dateText.pdf';
     } else if (form.type == f.FormType.lineTrain) {
-      // String dateText = form
-      //     .fields[form.fields.indexWhere((e) => e.name == 'date_1')].stringValue
-      //     .replaceAll(' ', '-');
-      DateTime date = form
-          .fields[form.fields.indexWhere((e) => e.name == 'date_1')]
-          .dateTimeValue!;
-      String dateText = DateFormat('yyyyMMdd').format(date);
+      String dateText = form
+          .fields[form.fields.indexWhere((e) => e.name == 'date_1')].stringValue
+          .replaceAll(' ', '-');
+      // DateTime date = form
+      //     .fields[form.fields.indexWhere((e) => e.name == 'date_1')]
+      //     .dateTimeValue!;
+      // String dateText = DateFormat('yyyyMMdd').format(date);
 
       String id = idFormatted(form
           .fields[form.fields.indexWhere((e) => e.name == 'pilot_id')]
