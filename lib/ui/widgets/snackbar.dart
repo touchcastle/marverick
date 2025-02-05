@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:marverick/ui/widgets/scroll_text.dart';
+import 'package:marverick/services/log.dart';
 
 enum Type {
   info,
@@ -34,13 +35,21 @@ class Snackbar {
                   : Icon(Icons.error, color: Colors.white),
           SizedBox(width: 5),
           Expanded(child: ScrollingText(text: text)),
+          SizedBox(width: 5),
+          type == Type.error
+              ? TextButton(
+                  onPressed: () async {
+                    await Log.send();
+                  },
+                  child: Text('Send Log'))
+              : SizedBox.shrink(),
         ],
       ),
       duration: duration != null
           ? Duration(seconds: duration)
           : type == Type.info
               ? const Duration(seconds: 3)
-              : const Duration(seconds: 5),
+              : const Duration(seconds: 10),
     ));
   }
 }

@@ -207,12 +207,62 @@ class _MainMenuState extends State<MainMenu> {
               children: [
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'CABIN CREW LINE TRAIN / CHECK',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initCcc());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'PURSER UPGRADE LINE TRAIN / CHECK',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initPsc());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'LINE CHECK (SV) (rev.04)',
                   labelStyle: _header(),
                   onTap: () {
                     context
                         .read<FormService>()
                         .newForm(context, FormService.initLineCheck());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.05)',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initPpc5());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'RECURRENT TRAINING RT1 (rev.00)',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initRt1());
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'LINE TRAIN / CHECK (rev.14)',
+                  labelStyle: _header(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initLineTrain());
                   },
                 ),
                 // SpeedDialChild(
@@ -225,16 +275,17 @@ class _MainMenuState extends State<MainMenu> {
                 //         .newForm(context, FormService.initPpc());
                 //   },
                 // ),
-                SpeedDialChild(
-                  child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.05)',
-                  labelStyle: _header(),
-                  onTap: () {
-                    context
-                        .read<FormService>()
-                        .newForm(context, FormService.initPpc5());
-                  },
-                ),
+                // if (context.read<FormService>().rt6Valid())
+                //   SpeedDialChild(
+                //     child: Icon(Icons.add, color: kPrimaryDarker),
+                //     label: 'RECURRENT TRAINING RT6 (rev.00)',
+                //     labelStyle: _header(),
+                //     onTap: () {
+                //       context
+                //           .read<FormService>()
+                //           .newForm(context, FormService.initRt6());
+                //     },
+                //   ),
                 // if (context.read<FormService>().rt5Valid())
                 //   SpeedDialChild(
                 //     child: Icon(Icons.add, color: kPrimaryDarker),
@@ -246,28 +297,6 @@ class _MainMenuState extends State<MainMenu> {
                 //           .newForm(context, FormService.initRt5());
                 //     },
                 //   ),
-                if (context.read<FormService>().rt6Valid())
-                  SpeedDialChild(
-                    child: Icon(Icons.add, color: kPrimaryDarker),
-                    label: 'RECURRENT TRAINING RT6 (rev.00)',
-                    labelStyle: _header(),
-                    onTap: () {
-                      context
-                          .read<FormService>()
-                          .newForm(context, FormService.initRt6());
-                    },
-                  ),
-                if (context.read<FormService>().lineTrainValid())
-                  SpeedDialChild(
-                    child: Icon(Icons.add, color: kPrimaryDarker),
-                    label: 'LINE TRAIN / CHECK (rev.14)',
-                    labelStyle: _header(),
-                    onTap: () {
-                      context
-                          .read<FormService>()
-                          .newForm(context, FormService.initLineTrain());
-                    },
-                  ),
               ],
             ),
     );

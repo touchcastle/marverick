@@ -14,6 +14,7 @@ import 'package:marverick/models/field.dart';
 import 'package:marverick/services/pdf.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
+import 'package:marverick/services/log.dart';
 import 'package:marverick/ui/views/main_menu.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
@@ -75,7 +76,7 @@ class _InputScreenState extends State<InputScreen> {
             errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
           }
         }).timeout(kSubmitTimeout);
-      } on TimeoutException{
+      } on TimeoutException {
         Utils.showInProgress(false);
         indexPage = 2;
         message = 'Session timeout, please try again';
@@ -233,7 +234,7 @@ class _InputScreenState extends State<InputScreen> {
                   // _submitForm();
                   setState(() {});
                   await _autoSave(showLoad: true);
-
+                  Log.add("${widget.form.id} preview pdf");
                   await context.read<Pdf>().lunchPdf(widget.form,
                       (String response, ErrorType type) {
                     if (response != kStatusSuccess) {
@@ -266,7 +267,7 @@ class _InputScreenState extends State<InputScreen> {
                             child: const Text("Cancel"),
                           ),
                           TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 _submitForm(context);
                                 Navigator.of(context).pop(false);
                               },
@@ -593,7 +594,8 @@ class _InputScreenState extends State<InputScreen> {
                     DateFormat(widget.form.dateFormat)
                         .format(args.value)
                         .toUpperCase();
-
+                Log.add(
+                    "${widget.form.fields[index].name} : ${widget.form.fields[index].stringValue}");
                 // if (widget.form.type == f.FormType.lineCheck) {
                 //   widget.form.fields[index].stringValue =
                 //       DateFormat('dd/MM/yyyy').format(args.value);
@@ -623,7 +625,10 @@ class _InputScreenState extends State<InputScreen> {
       maxLength: widget.form.fields[index].maxLength,
       onChanged: (text) => widget.form.fields[index].stringValue = text,
       onEditingComplete: () => _autoSave(),
-      onSaved: (value) => _autoSave(),
+      onSaved: (value) {
+        Log.add("${widget.form.fields[index].name} : $value");
+        _autoSave();
+      },
       decoration: textInputDecor(),
       style: value(),
     );
@@ -640,6 +645,7 @@ class _InputScreenState extends State<InputScreen> {
       maxLength: widget.form.fields[index].maxLength,
       onChanged: (text) => widget.form.fields[index].stringValue = text,
       onSubmitted: (text) {
+        Log.add("${widget.form.fields[index].name} : $text");
         _autoSave();
         setState(() {});
       },
@@ -697,6 +703,8 @@ class _InputScreenState extends State<InputScreen> {
                           widget.form.fields[index].intValue = -1;
                           widget.form.fields[index].stringValue = '';
                         }
+                        Log.add(
+                            "${widget.form.fields[index].name} : ${widget.form.fields[index].stringValue}");
                         _autoSave();
                       });
                     }
@@ -760,6 +768,8 @@ class _InputScreenState extends State<InputScreen> {
                                 .stringValue =
                             widget.form.fields[index].checkBoxValue[checkIndex]
                                 .toString();
+                        Log.add(
+                            "${widget.form.fields[index].name}/$_name : ${widget.form.fields[widget.form.fields.indexWhere((e) => e.name == _name)].stringValue}");
                         _autoSave();
                       });
                   },

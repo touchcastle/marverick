@@ -92,7 +92,9 @@ class Pdf {
               document.pages[page - 1].graphics.drawImage(
                 mark,
                 Rect.fromLTWH(
-                    _field.posXList[_field.intValue] - 2,
+                    _field.posX != 0
+                        ? _field.posX - 2
+                        : _field.posXList[_field.intValue] - 2,
                     _field.posY != 0
                         ? _field.posY + 3
                         : _field.posYList[_field.intValue] + 3,
@@ -183,6 +185,7 @@ class Pdf {
     //       bounds: Rect.fromLTWH(390, 107, 0, 0), brush: PdfBrushes.black);
     // }
     //Save the document
+    print("before read sig1");
     List<int> bytes = await document.save();
     callback(kStatusSuccess, ErrorType.success);
     //Dispose the document
