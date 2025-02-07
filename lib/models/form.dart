@@ -451,7 +451,7 @@ class Form extends ChangeNotifier {
         'instructor_cert_no': getStrVal('instructor_cert_no'),
         'instructor_id': getStrVal('instructor_id'),
 
-        //Check details
+        ///Check details
         'check_date': getStrVal('check_date'),
         'block_time': getStrVal('block_time'),
         'fstd_no': getStrVal('fstd_no'),
@@ -745,7 +745,7 @@ class Form extends ChangeNotifier {
 
         ///Grading & Comment
         ///A
-        'q1': getStrVal('q1'),
+        'q1': getStrVal('q1s'),
         'q2': getStrVal('q2'),
         'q3': getStrVal('q3'),
         'q4': getStrVal('q4'),

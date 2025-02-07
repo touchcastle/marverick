@@ -373,7 +373,6 @@ class DatabaseService {
     print('create ppc6 complete');
   }
   static Future createRt1(Database db) async {
-    print('Crate new table>> rt1');
     await db.execute("CREATE TABLE $kRt1Table(id TEXT PRIMARY KEY , "
         "status TEXT NOT NULL, "
         "type TEXT NOT NULL, "
