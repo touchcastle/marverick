@@ -118,23 +118,31 @@ class _InputScreenState extends State<InputScreen> {
     await context.read<FormService>().save(widget.form, showLoad: showLoad);
   }
 
-  TextStyle label() =>
-      TextStyle(color: Colors.black54, fontWeight: FontWeight.w500);
-
   TextStyle subLabel() => TextStyle(
       fontSize: 12,
       color: Colors.black54,
       fontWeight: FontWeight.w400,
       fontStyle: FontStyle.italic);
 
-  TextStyle value() =>
-      TextStyle(color: Colors.black, fontWeight: FontWeight.bold);
+  TextStyle value() => TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+      fontSize: Utils.isIpad ? 14 : 10);
 
   TextStyle header() => TextStyle(
-      color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
+      color: kPrimaryDarker,
+      fontWeight: FontWeight.bold,
+      fontSize: Utils.isIpad ? 18 : 14);
 
   TextStyle subHeader() => TextStyle(
-      color: kSecondaryDarker, fontWeight: FontWeight.bold, fontSize: 16);
+      color: kSecondaryDarker,
+      fontWeight: FontWeight.bold,
+      fontSize: Utils.isIpad ? 16 : 10);
+
+  TextStyle label() => TextStyle(
+      color: Colors.black54,
+      fontWeight: FontWeight.w500,
+      fontSize: Utils.isIpad ? 16 : 10);
 
   Widget boxContainer(
       {required FieldType fieldType, required List<Widget> children}) {
@@ -159,7 +167,7 @@ class _InputScreenState extends State<InputScreen> {
 
   Widget spacer({required FieldType fieldType}) {
     if (fieldType == FieldType.radio || fieldType == FieldType.signature) {
-      return SizedBox(height: 10);
+      return SizedBox(height: 15);
     } else {
       return SizedBox(height: 10);
       // return SizedBox(width: 10);
@@ -214,20 +222,23 @@ class _InputScreenState extends State<InputScreen> {
             leading: BackButton(color: Colors.white),
             elevation: 0,
             backgroundColor: kPrimary,
+
             title: Text(
               widget.form.formName,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
+                fontSize: Utils.isIpad ? 24 : 16,
               ),
             ),
             actions: [
               TextButton(
-                child: const Text(
+                child: Text(
                   'Preview',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: Utils.isIpad ? 14 : 10,
                   ),
                 ),
                 onPressed: () async {
@@ -245,11 +256,12 @@ class _InputScreenState extends State<InputScreen> {
                 },
               ),
               TextButton(
-                child: const Text(
+                child: Text(
                   'Submit',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: Utils.isIpad ? 14 : 10,
                   ),
                 ),
                 onPressed: () async {
@@ -398,7 +410,7 @@ class _InputScreenState extends State<InputScreen> {
 
   Container formProgress() {
     return Container(
-      height: 35,
+      height: Utils.isIpad ? 35 : 26,
       color: kSecondary,
       padding: EdgeInsets.symmetric(horizontal: 18),
       child: Stack(
@@ -406,7 +418,7 @@ class _InputScreenState extends State<InputScreen> {
           Center(
             child: Text(
               '${widget.form.filledRequired()} / ${widget.form.allRequired()}',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: Utils.isIpad ? 14 : 12),
             ),
           ),
           // widget.form.filledRequired() < widget.form.allRequired()
@@ -418,7 +430,7 @@ class _InputScreenState extends State<InputScreen> {
               constraints: BoxConstraints(),
               icon: Icon(
                   toggleMandatory ? Icons.pageview : Icons.pageview_outlined),
-              iconSize: 30,
+              iconSize:  Utils.isIpad ? 30 : 24,
               onPressed: () {
                 setState(() {
                   toggleMandatory = !toggleMandatory;
@@ -454,10 +466,12 @@ class _InputScreenState extends State<InputScreen> {
         children: [
           Row(
             children: [
-              Text(
-                field.label,
-                style: label(),
-                overflow: TextOverflow.fade,
+              Expanded(
+                child: Text(
+                  field.label,
+                  style: label(),
+                  overflow: TextOverflow.fade,
+                ),
               ),
               field.type == FieldType.checkbox
                   ? Text(
@@ -516,7 +530,7 @@ class _InputScreenState extends State<InputScreen> {
           section,
           style: header(),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: Utils.isIpad ? 20 : 1),
       ],
     );
   }
@@ -693,6 +707,7 @@ class _InputScreenState extends State<InputScreen> {
                       setState(() {
                         ///Click new radio button
                         if (widget.form.fields[index].intValue != radio) {
+                          print(radio);
                           widget.form.fields[index].intValue = radio;
                           widget.form.fields[index].stringValue =
                               widget.form.fields[index].listValue[radio];

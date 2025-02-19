@@ -172,6 +172,7 @@ class _LoginState extends State<Login> {
                             SizedBox(height: 40),
                             Container(
                               width: inputAreaWidth,
+                              // width: MediaQuery.of(context).size.width),
                               height: 40,
                               decoration: const BoxDecoration(
                                 color: kSecondary,

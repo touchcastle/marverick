@@ -333,20 +333,21 @@ class FormService extends ChangeNotifier {
         } else {
           try {
             // Utils.showInProgress(true);
-            print('start pdf');
-            Log.add("${form.id} start pdf");
             //UPLOAD PDF TO GOOGLE STORAGE
             validateResult = form.validate();
             if (validateResult == '') {
+              print('start pdf');
+              Log.add("${form.id} start pdf");
               String name = pdfName(form, submitDate);
               Log.add("${form.id} end pdf naming");
               Log.add("${form.id} start gen pdf");
               List<int> pdfAsBytes =
-                  await pdf.gen(form, (String response, ErrorType type) {
+              await pdf.gen(form, (String response, ErrorType type) {
                 callback(response, type);
               });
+              Log.add("${form.id} gen pdf completed");
               final Directory directory =
-                  await path_provider.getApplicationSupportDirectory();
+              await path_provider.getApplicationSupportDirectory();
               String path = directory.path;
               final File file = File('$path/$name');
               await file.writeAsBytes(pdfAsBytes, flush: true);
@@ -354,7 +355,7 @@ class FormService extends ChangeNotifier {
               TaskSnapshot snapshot = await storage
                   .ref()
                   .child(
-                      "${folderName(form.type)}/${pdfName(form, submitDate)}")
+                  "${folderName(form.type)}/${pdfName(form, submitDate)}")
                   .putFile(file);
               if (snapshot.state == TaskState.success) {
                 downloadUrl = await snapshot.ref.getDownloadURL();
@@ -392,6 +393,7 @@ class FormService extends ChangeNotifier {
                   callback('Sheet error code: ${response.statusCode}',
                       ErrorType.other);
                 }
+
               });
             } else {
               Log.add("${form.id} validation fault");
@@ -4023,7 +4025,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX2,
+            posXList: _gradePosX,
             posY: 656),
         Field(
             name: 'q28',
@@ -4034,7 +4036,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX2,
+            posXList: _gradePosX,
             posY: 670),
         Field(
             name: 'q29',
@@ -4045,7 +4047,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX2,
+            posXList: _gradePosX,
             posY: 683),
         Field(
             name: 'q30',
@@ -4056,7 +4058,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX2,
+            posXList: _gradePosX,
             posY: 697),
         Field(
             name: 'q31',
@@ -4078,7 +4080,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX,
+            posXList: _gradePosX2,
             posY: 725),
         Field(
             name: 'q33',
@@ -4090,7 +4092,7 @@ class FormService extends ChangeNotifier {
             section: 3,
             subSection: 6,
             gradeSection: 6,
-            posXList: _gradePosX,
+            posXList: _gradePosX2,
             posY: 738),
         Field(
             name: 'q34',

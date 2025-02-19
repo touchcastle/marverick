@@ -83,6 +83,8 @@ dev_dependencies:
   upgrader: 8.4.0
   win32: 5.8.0
   flutter_email_sender: ^6.0.3
+  device_info_plus: ^11.3.0
+  device_info_plus_platform_interface: ^7.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

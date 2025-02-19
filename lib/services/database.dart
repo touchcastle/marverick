@@ -110,6 +110,7 @@ class DatabaseService {
             "examiner_sig_date TEXT"
             ")");
   }
+
   static Future createPpc(Database db) async {
     print('Crate new table>> ppc');
     await db.execute("CREATE TABLE $kPPCTable(id TEXT PRIMARY KEY , "
@@ -241,6 +242,7 @@ class DatabaseService {
         ")");
     print('create ppc complete');
   }
+
   static Future createPpc5(Database db) async {
     print('Crate new table>> ppc5');
     await db.execute("CREATE TABLE $kPPC5Table(id TEXT PRIMARY KEY , "
@@ -372,6 +374,7 @@ class DatabaseService {
         ")");
     print('create ppc6 complete');
   }
+
   static Future createRt1(Database db) async {
     await db.execute("CREATE TABLE $kRt1Table(id TEXT PRIMARY KEY , "
         "status TEXT NOT NULL, "
@@ -489,6 +492,7 @@ class DatabaseService {
         ")");
     print('create rt1 complete');
   }
+
   static Future createRt5(Database db) async {
     print('Crate new table>> rt5');
     await db.execute("CREATE TABLE $kRt5Table(id TEXT PRIMARY KEY , "
@@ -612,6 +616,7 @@ class DatabaseService {
         ")");
     print('create rt5 complete');
   }
+
   static Future createRt6(Database db) async {
     print('Crate new table>> rt5');
     await db.execute("CREATE TABLE $kRt6Table(id TEXT PRIMARY KEY , "
@@ -731,6 +736,7 @@ class DatabaseService {
         ")");
     print('create rt6 complete');
   }
+
   static Future createLineTrain(Database db) async {
     print('Crate new table>> lineTrain');
     await db.execute("CREATE TABLE $kLineTrainTable(id TEXT PRIMARY KEY , "
@@ -849,6 +855,7 @@ class DatabaseService {
         ")");
     print('create rt5 complete');
   }
+
   static Future createCcc(Database db) async {
     print('Crate new table>> ccc');
     await db.execute("CREATE TABLE $kCccTable(id TEXT PRIMARY KEY , "
@@ -932,6 +939,7 @@ class DatabaseService {
         "evaluator_sig_date TEXT"
         ")");
   }
+
   static Future createPsc(Database db) async {
     print('Crate new table>> psc');
     await db.execute("CREATE TABLE $kPscTable(id TEXT PRIMARY KEY , "
@@ -1171,65 +1179,78 @@ class databaseService {
       return _result;
     }
 
+    bool isInitiated = false;
     for (int dbIndex = 0; dbIndex < kDbTableList.length; dbIndex++) {
       final List<Map<String, dynamic>> maps =
           await db.query(kDbTableList[dbIndex]);
       List.generate(maps.length, (i) {
-        late Form append;
+        // late Form append;
+        Form? append;
+        isInitiated = false;
         ///TODO: New form (8): Add new form query db
+        print('initiate db: ${kDbTableList[dbIndex]}');
         if (kDbTableList[dbIndex] == kLineCheckTable) {
           append = FormService.initLineCheck();
-        // } else if (kDbTableList[dbIndex] == kPPCTable) {
-        //   append = FormService.initPpc();
+          isInitiated = true;
+          // } else if (kDbTableList[dbIndex] == kPPCTable) {
+          //   append = FormService.initPpc();
         } else if (kDbTableList[dbIndex] == kPPC5Table) {
           append = FormService.initPpc5();
+          isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt1Table) {
           append = FormService.initRt1();
-        // } else if (kDbTableList[dbIndex] == kRt5Table) {
-        //   append = FormService.initRt5();
-        // } else if (kDbTableList[dbIndex] == kRt6Table) {
-        //   append = FormService.initRt6();
+          isInitiated = true;
+          // } else if (kDbTableList[dbIndex] == kRt5Table) {
+          //   append = FormService.initRt5();
+          // } else if (kDbTableList[dbIndex] == kRt6Table) {
+          //   append = FormService.initRt6();
         } else if (kDbTableList[dbIndex] == kLineTrainTable) {
           append = FormService.initLineTrain();
+          isInitiated = true;
         } else if (kDbTableList[dbIndex] == kCccTable) {
           append = FormService.initCcc();
+          isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPscTable) {
           append = FormService.initPsc();
+          isInitiated = true;
         }
 
-        ///Move data from database mapping into app's list
-        append.status = FormStatus.values
-            .firstWhere((e) => e.toString() == maps[i]['status']);
-        // append.type = FormType.lineCheck;
-        append.formName = maps[i]['form_name'];
-        append.createDateTime = DateTime.parse(maps[i]['create_at']);
-        if (maps[i]['submit_at'] != null && maps[i]['submit_at'] != '') {
-          append.submitDateTime = DateTime.parse(maps[i]['submit_at']);
-        }
-        append.createBy = maps[i]['create_by'];
-        append.filePath = maps[i]['file_path'];
-        append.id = maps[i]['id'];
-        append.fontSize = double.parse(maps[i]['font_size']);
+        if (isInitiated) {
+          ///Move data from database mapping into app's list
+          append!.status = FormStatus.values
+              .firstWhere((e) => e.toString() == maps[i]['status']);
+          // append.type = FormType.lineCheck;
+          append.formName = maps[i]['form_name'];
+          append.createDateTime = DateTime.parse(maps[i]['create_at']);
+          if (maps[i]['submit_at'] != null && maps[i]['submit_at'] != '') {
+            append.submitDateTime = DateTime.parse(maps[i]['submit_at']);
+          }
+          append.createBy = maps[i]['create_by'];
+          append.filePath = maps[i]['file_path'];
+          append.id = maps[i]['id'];
+          append.fontSize = double.parse(maps[i]['font_size']);
 
-        ///Fields as []
-        for (int _i = 0; _i < append.fields.length; _i++) {
-          ///Move data into corresponding field. (normal case)
-          append.fields[_i] = _replaceItemValue(append.fields[_i], maps, i);
+          ///Fields as []
+          for (int _i = 0; _i < append.fields.length; _i++) {
+            ///Move data into corresponding field. (normal case)
+            append.fields[_i] = _replaceItemValue(append.fields[_i], maps, i);
 
-          ///in case of checkbox type, boolean data is stored in another field
-          ///with named as [field's name + '_' + array number]
-          if (append.fields[_i].type == FieldType.checkbox) {
-            for (int _c = 0;
-                _c < append.fields[_i].checkBoxValue.length;
-                _c++) {
-              String name = '${append.fields[_i].name}_$_c';
-              append.fields[_i].checkBoxValue[_c] =
-                  bool.parse(maps[i][name].toLowerCase());
+            ///in case of checkbox type, boolean data is stored in another field
+            ///with named as [field's name + '_' + array number]
+            if (append.fields[_i].type == FieldType.checkbox) {
+              for (int _c = 0;
+                  _c < append.fields[_i].checkBoxValue.length;
+                  _c++) {
+                String name = '${append.fields[_i].name}_$_c';
+                append.fields[_i].checkBoxValue[_c] =
+                    bool.parse(maps[i][name].toLowerCase());
+              }
             }
           }
-        }
 
-        _dbList.add(append);
+          _dbList.add(append);
+          isInitiated = false;
+        }
       });
     }
 

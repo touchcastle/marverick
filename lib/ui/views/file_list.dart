@@ -33,7 +33,7 @@ class _FormListState extends State<FormList> {
         String text = form.fields[i].stringValue;
         return Text(
           text,
-          style: label(),
+          style: Utils.isIpad ? labelL() : labelS(),
         );
       } else {
         return SizedBox.shrink();
@@ -43,11 +43,15 @@ class _FormListState extends State<FormList> {
     }
   }
 
-  TextStyle header() =>
+  TextStyle headerL() =>
       TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 22);
+  TextStyle headerS() =>
+      TextStyle(color: Colors.black, fontWeight: FontWeight.w800, fontSize: 16);
 
-  TextStyle label() =>
-      TextStyle(color: Colors.black, fontWeight: FontWeight.w500);
+  TextStyle labelL() =>
+      TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 16);
+  TextStyle labelS() =>
+      TextStyle(color: Colors.black, fontWeight: FontWeight.w500, fontSize: 12);
 
   String displayStatus(FormStatus status) {
     if (status == FormStatus.completed) {
@@ -359,16 +363,16 @@ class _FormListState extends State<FormList> {
   }
 
   // Text formName(f.Form form) => Text(form.formLabel, style: header());
-  Text formName(f.Form form) => Text(form.formName, style: header());
+  Text formName(f.Form form) => Text(form.formName, style: Utils.isIpad ? headerL() : headerS());
 
   Text formStatus(f.Form form) =>
-      Text(displayStatus(form.status), style: label());
+      Text(displayStatus(form.status), style: Utils.isIpad ? labelL() : labelS());
 
   Widget formPercentCompleted(f.Form form, int index) {
     if (form.status == FormStatus.working) {
       return Text(
         '${context.watch<FormService>().forms[index].percentFilled().round()}%',
-        style: label(),
+        style: Utils.isIpad ? labelL() : labelS(),
       );
     } else {
       return const SizedBox.shrink();
@@ -387,6 +391,7 @@ class _FormListState extends State<FormList> {
               children: [
                 formName(form),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     formStatus(form),
                     // const SizedBox(width: 5),
@@ -406,12 +411,12 @@ class _FormListState extends State<FormList> {
                   children: [
                     Text(
                       'Created on: ${dateTimeText(form.createDateTime)}',
-                      style: label(),
+                      style: Utils.isIpad ? labelL() : labelS(),
                     ),
                     form.submitDateTime != null
                         ? Text(
                             'Submitted on: ${dateTimeText(form.submitDateTime!)}',
-                            style: label(),
+                      style: Utils.isIpad ? labelL() : labelS(),
                           )
                         : const SizedBox.shrink(),
                   ],

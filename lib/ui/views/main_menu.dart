@@ -10,7 +10,9 @@ import 'package:marverick/services/authen.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
+import 'package:marverick/utils/utils.dart';
 import 'package:upgrader/upgrader.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class MainMenu extends StatefulWidget {
   static const id = kMainMenuId; //for route.
@@ -83,8 +85,12 @@ class _MainMenuState extends State<MainMenu> {
     //     Authen.isAdmin() ||
     //     DateTime.now().isAfter(DateTime.parse('2024-01-01 00:00:00.000'));
 
-    TextStyle _header() => TextStyle(
+    print('is ipad >> ${Utils.isIpad}');
+
+    TextStyle headerL() => TextStyle(
         color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
+    TextStyle headerS() => TextStyle(
+        color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 14);
 
     context.read<FormService>().countPending();
     String _pendingLabel = context.watch<FormService>().pendingCount > 0 &&
@@ -96,60 +102,64 @@ class _MainMenuState extends State<MainMenu> {
             ? 'Draft (${context.watch<FormService>().draftCount.toString()})'
             : 'Draft';
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: kPrimary,
-        actions: [
-          Container(
-            width: 100,
-            // color: Colors.white,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  Authen.forcingAdmin();
-                });
-              },
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(Utils.isIpad ? 55 : 40),
+        child: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: kPrimary,
+          actions: [
+            Container(
+              width: 100,
+              // color: Colors.white,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    Authen.forcingAdmin();
+                  });
+                },
+              ),
             ),
-          ),
-          Authen.user == null
-              ? TextButton(
-                  child: const Text(
-                    'Log In',
-                    style: TextStyle(color: Colors.white),
+            Authen.user == null
+                ? TextButton(
+                    child: const Text(
+                      'Log In',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(context).push(PageRouteBuilder(
+                          settings: RouteSettings(name: kMainPageName),
+                          pageBuilder: (_, __, ___) =>
+                              Login(fromInside: true)));
+                    },
+                  )
+                : TextButton(
+                    child: const Text(
+                      'Log Out',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        builder: (_) => _logOutWithConfirm(),
+                      );
+                    },
                   ),
-                  onPressed: () async {
-                    Navigator.of(context).push(PageRouteBuilder(
-                        settings: RouteSettings(name: kMainPageName),
-                        pageBuilder: (_, __, ___) => Login(fromInside: true)));
-                  },
-                )
-              : TextButton(
-                  child: const Text(
-                    'Log Out',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () async {
-                    showDialog(
-                      context: context,
-                      builder: (_) => _logOutWithConfirm(),
-                    );
-                  },
-                ),
-          Authen.isAdmin()
-              ? TextButton(
-                  child: const Text(
-                    'ADMIN',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () async {
-                    setState(() {
-                      Authen.forceAdmin = 0;
-                    });
-                  },
-                )
-              : SizedBox.shrink(),
-        ],
-        // title: const Text('Choose PDF to create'),
+            Authen.isAdmin()
+                ? TextButton(
+                    child: const Text(
+                      'ADMIN',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () async {
+                      setState(() {
+                        Authen.forceAdmin = 0;
+                      });
+                    },
+                  )
+                : SizedBox.shrink(),
+          ],
+          // title: const Text('Choose PDF to create'),
+        ),
       ),
       body: UpgradeAlert(
         upgrader: Upgrader(dialogStyle: UpgradeDialogStyle.cupertino),
@@ -164,15 +174,15 @@ class _MainMenuState extends State<MainMenu> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.cloud_done),
+            icon: Icon(Icons.cloud_done, size: Utils.isIpad ? 24 : 16),
             label: 'Submitted',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.file_upload),
+            icon: Icon(Icons.file_upload, size: Utils.isIpad ? 24 : 16),
             label: _pendingLabel,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.mode_edit),
+            icon: Icon(Icons.mode_edit, size: Utils.isIpad ? 24 : 16),
             label: _draftLabel,
           ),
         ],
@@ -199,16 +209,19 @@ class _MainMenuState extends State<MainMenu> {
                 }
               })
           : SpeedDial(
+              buttonSize: Utils.isIpad ? Size(56.0, 56.0) : Size(36.0, 36.0),
+              childrenButtonSize:
+                  Utils.isIpad ? Size(56.0, 56.0) : Size(36.0, 36.0),
               elevation: 3,
               child: Icon(Icons.add, color: Colors.white),
               backgroundColor: kPrimaryAccent,
               spacing: 10,
-              spaceBetweenChildren: 5,
+              spaceBetweenChildren: 1,
               children: [
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'CABIN CREW LINE TRAIN / CHECK',
-                  labelStyle: _header(),
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
@@ -218,7 +231,7 @@ class _MainMenuState extends State<MainMenu> {
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'PURSER UPGRADE LINE TRAIN / CHECK',
-                  labelStyle: _header(),
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
@@ -228,7 +241,7 @@ class _MainMenuState extends State<MainMenu> {
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'LINE CHECK (SV) (rev.04)',
-                  labelStyle: _header(),
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
@@ -237,8 +250,8 @@ class _MainMenuState extends State<MainMenu> {
                 ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.05)',
-                  labelStyle: _header(),
+                  label: 'PPC / SKILL TEST (rev.05)',
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
@@ -248,7 +261,7 @@ class _MainMenuState extends State<MainMenu> {
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'RECURRENT TRAINING RT1 (rev.00)',
-                  labelStyle: _header(),
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
@@ -258,7 +271,7 @@ class _MainMenuState extends State<MainMenu> {
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'LINE TRAIN / CHECK (rev.14)',
-                  labelStyle: _header(),
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
