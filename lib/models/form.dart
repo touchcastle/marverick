@@ -416,8 +416,8 @@ class Form extends ChangeNotifier {
         //RESULT
         'result': getStrVal('result'),
 
-        'pilot_sig_date': getStrVal('pilot_sig_date'),
-        'examiner_sig_date': getStrVal('examiner_sig_date'),
+        // 'pilot_sig_date': getStrVal('pilot_sig_date'),
+        // 'examiner_sig_date': getStrVal('examiner_sig_date'),
       };
     } else if (type == FormType.rt1) {
       return {
@@ -554,8 +554,8 @@ class Form extends ChangeNotifier {
 
         ///RESULT
         'result': getStrVal('result'),
-        'pilot_sig_date': getStrVal('pilot_sig_date'),
-        'instructor_sig_date': getStrVal('instructor_sig_date'),
+        // 'pilot_sig_date': getStrVal('pilot_sig_date'),
+        // 'instructor_sig_date': getStrVal('instructor_sig_date'),
       };
     } else if (type == FormType.rt5) {
       return ({});
@@ -696,8 +696,8 @@ class Form extends ChangeNotifier {
         ///RESULT
         'result': getStrVal('result'),
         'examiner_result': getStrVal('examiner_result'),
-        'pilot_sig_date': getStrVal('pilot_sig_date'),
-        'instructor_sig_date': getStrVal('instructor_sig_date'),
+        // 'pilot_sig_date': getStrVal('pilot_sig_date'),
+        // 'instructor_sig_date': getStrVal('instructor_sig_date'),
         'examiner_sig_date': getStrVal('examiner_sig_date'),
       };
     } else if (type == FormType.ccc) {
