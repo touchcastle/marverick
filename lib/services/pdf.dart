@@ -64,7 +64,7 @@ class Pdf {
             ///Signature
             if (_field.type == FieldType.signature &&
                 _field.signature != null) {
-              print(_field.name);
+              // print(_field.name);
               await _field.convertSignature((String response) {}, false);
               final PdfBitmap image = PdfBitmap(_field.signature!);
               var _decodedImage = await decodeImageFromList(_field.signature!);

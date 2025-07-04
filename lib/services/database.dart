@@ -8,7 +8,7 @@ import 'package:marverick/models/field.dart';
 class DatabaseService {
   static Future openDB() async {
     openDatabase(join(await getDatabasesPath(), kDbName),
-        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 7);
+        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 8);
   }
 
   static Future createLineCheck(Database db) async {
@@ -372,6 +372,137 @@ class DatabaseService {
         "pilot_sig_date TEXT,"
         "examiner_sig_date TEXT"
         ")");
+    print('create ppc5 complete');
+  }
+
+  static Future createPpc6(Database db) async {
+    print('Crate new table>> ppc6');
+    await db.execute("CREATE TABLE $kPPC6Table(id TEXT PRIMARY KEY , "
+        "status TEXT NOT NULL, "
+        "type TEXT NOT NULL, "
+        "form_name TEXT NOT NULL, "
+        "create_at TEXT NOT NULL, "
+        "submit_at TEXT NOT NULL, "
+        "create_by TEXT NOT NULL, "
+        "file_path TEXT NOT NULL, "
+        "font_size TEXT, "
+        "pdf_url TEXT, "
+        "pilot_rank TEXT, "
+        "pilot_id TEXT, "
+        "pilot_license_no TEXT, "
+        "pilot_name TEXT, "
+        "instructor_rank TEXT, "
+        "instructor_id TEXT, "
+        "instructor_cert_no TEXT, "
+        "instructor_name TEXT, "
+        "examiner_type TEXT, "
+        "examiner_id TEXT, "
+        "examiner_pel_no TEXT, "
+        "examiner_name TEXT, "
+        "check_date TEXT, "
+        "block_time TEXT, "
+        "fstd_no TEXT, "
+        "route TEXT, "
+        "ac_type TEXT, "
+        "check_type_0 TEXT, "
+        "check_type_1 TEXT, "
+        "check_type_2 TEXT, "
+        "check_type_3 TEXT, "
+        "q1 TEXT, "
+        "q2 TEXT, "
+        "q3_detail TEXT, "
+        "q3 TEXT, "
+        "q4 TEXT, "
+        "qa_comment TEXT, "
+        "q5 TEXT, "
+        "q6 TEXT, "
+        "q7 TEXT, "
+        "q8 TEXT, "
+        "qb_comment TEXT, "
+        "q9 TEXT, "
+        "q10 TEXT, "
+        "q11 TEXT, "
+        "q12_check_0 TEXT, "
+        "q12_check_1 TEXT, "
+        "q12 TEXT, "
+        "q13 TEXT, "
+        "q14_check_0 TEXT, "
+        "q14_check_1 TEXT, "
+        "q14_check_2 TEXT, "
+        "q14 TEXT, "
+        "q15 TEXT, "
+        "q16 TEXT, "
+        "q17_check_0 TEXT, "
+        "q17_check_1 TEXT, "
+        "q17 TEXT, "
+        "q18 TEXT, "
+        "q19 TEXT, "
+        "q20 TEXT, "
+        "qc_comment TEXT, "
+        "q21 TEXT, "
+        "q22 TEXT, "
+        "q23 TEXT, "
+        "q24 TEXT, "
+        "q25 TEXT, "
+        "q26 TEXT, "
+        "q27 TEXT, "
+        "q28 TEXT, "
+        "q29 TEXT, "
+        "q30 TEXT, "
+        "q31 TEXT, "
+        "q32 TEXT, "
+        "qd_comment TEXT, "
+        "q33 TEXT, "
+        "q34 TEXT, "
+        "q35 TEXT, "
+        "q36 TEXT, "
+        "q37 TEXT, "
+        "q38 TEXT, "
+        "q39 TEXT, "
+        "qe_comment TEXT, "
+        "q40 TEXT, "
+        "q41 TEXT, "
+        "q42 TEXT, "
+        "qf_comment TEXT, "
+        "q43 TEXT, "
+        "q44 TEXT, "
+        "q45 TEXT, "
+        "q46 TEXT, "
+        "q47 TEXT, "
+        "q48 TEXT, "
+        "q49 TEXT, "
+        "qg_comment TEXT, "
+        "q50 TEXT, "
+        "q51 TEXT, "
+        "q52 TEXT, "
+        "qh_comment TEXT, "
+        "q53 TEXT, "
+        "q54 TEXT, "
+        "q55 TEXT, "
+        "qi_comment TEXT, "
+        "q56_detail TEXT, "
+        "q56 TEXT, "
+        "q57_detail TEXT, "
+        "q57 TEXT, "
+        "q58_detail TEXT, "
+        "q58 TEXT, "
+        "qj_comment TEXT, "
+        "no_landing TEXT, "
+        "no_goaround TEXT, "
+        "comp_kno TEXT, "
+        "comp_pro TEXT, "
+        "comp_com TEXT, "
+        "comp_fpa TEXT, "
+        "comp_fpm TEXT, "
+        "comp_ltw TEXT, "
+        "comp_psd TEXT, "
+        "comp_saw TEXT, "
+        "comp_wlm TEXT, "
+        "general_comment TEXT, "
+        "result TEXT, "
+        "pilot_sig_date TEXT,"
+        "examiner_sig_date TEXT"
+        ")");
     print('create ppc6 complete');
   }
 
@@ -491,6 +622,134 @@ class DatabaseService {
         "instructor_sig_date TEXT"
         ")");
     print('create rt1 complete');
+  }
+
+  static Future createRt2(Database db) async {
+    await db.execute("CREATE TABLE $kRt2Table(id TEXT PRIMARY KEY , "
+        "status TEXT NOT NULL, "
+        "type TEXT NOT NULL, "
+        "form_name TEXT NOT NULL, "
+        "create_at TEXT NOT NULL, "
+        "submit_at TEXT NOT NULL, "
+        "create_by TEXT NOT NULL, "
+        "file_path TEXT NOT NULL, "
+        "font_size TEXT, "
+        "pdf_url TEXT, "
+        "pilot_rank TEXT, "
+        "pilot_id TEXT, "
+        "pilot_license_no TEXT, "
+        "pilot_name TEXT, "
+        "instructor_rank TEXT, "
+        "instructor_id TEXT, "
+        "instructor_cert_no TEXT, "
+        "instructor_name TEXT, "
+        "check_date TEXT, "
+        "block_time TEXT, "
+        "fstd_no TEXT, "
+        "ac_type TEXT, "
+        "loft_duty TEXT, "
+        "q1 TEXT, "
+        "q2 TEXT, "
+        "q3 TEXT, "
+        "q4 TEXT, "
+        "qa_comment TEXT, "
+        "q5 TEXT, "
+        "q6_detail TEXT, "
+        "q6 TEXT, "
+        "q7 TEXT, "
+        "qb_comment TEXT, "
+        "q8 TEXT, "
+        "q9 TEXT, "
+        "q10 TEXT, "
+        "q11 TEXT, "
+        "qc_comment TEXT, "
+        "q12 TEXT, "
+        "q13 TEXT, "
+        "q14_check_0 TEXT, "
+        "q14_check_1 TEXT, "
+        "q14 TEXT, "
+        "q15 TEXT, "
+        "q16_check_0 TEXT, "
+        "q16_check_1 TEXT, "
+        "q16_check_2 TEXT, "
+        "q16 TEXT, "
+        "q17 TEXT, "
+        "q18 TEXT, "
+        "q19_check_0 TEXT, "
+        "q19_check_1 TEXT, "
+        "q19 TEXT, "
+        "q20 TEXT, "
+        "q21 TEXT, "
+        "q22 TEXT, "
+        "q23 TEXT, "
+        "q24 TEXT, "
+        "q25 TEXT, "
+        "q26 TEXT, "
+        "qd_comment TEXT, "
+        "q27_check_0 TEXT, "
+        "q27_check_1 TEXT, "
+        "q27_check_2 TEXT, "
+        "q27 TEXT, "
+        "q28_check_0 TEXT, "
+        "q28_check_1 TEXT, "
+        "q28_check_2 TEXT, "
+        "q28 TEXT, "
+        "q29_check_0 TEXT, "
+        "q29_check_1 TEXT, "
+        "q29_check_2 TEXT, "
+        "q29 TEXT, "
+        "qe_comment TEXT, "
+        "q30 TEXT, "
+        "q31 TEXT, "
+        "q32 TEXT, "
+        "q33 TEXT, "
+        "q34 TEXT, "
+        "q35 TEXT, "
+        "q36 TEXT, "
+        "qf_comment TEXT, "
+        "q37 TEXT, "
+        "q38 TEXT, "
+        "q39 TEXT, "
+        "qg_comment TEXT, "
+        "q40 TEXT, "
+        "q41 TEXT, "
+        "q42 TEXT, "
+        "q43 TEXT, "
+        "q44 TEXT, "
+        "q45 TEXT, "
+        "q46 TEXT, "
+        "qh_comment TEXT, "
+        "q47 TEXT, "
+        "q48 TEXT, "
+        "q49 TEXT, "
+        "qi_comment TEXT, "
+        "q50 TEXT, "
+        "q51 TEXT, "
+        "q52 TEXT, "
+        "qj_comment TEXT, "
+        "q53 TEXT, "
+        "q54 TEXT, "
+        "q55 TEXT, "
+        "q56 TEXT, "
+        "q57 TEXT, "
+        "qk_comment TEXT, "
+        "no_landing TEXT, "
+        "no_goaround TEXT, "
+        "comp_kno TEXT, "
+        "comp_pro TEXT, "
+        "comp_com TEXT, "
+        "comp_fpa TEXT, "
+        "comp_fpm TEXT, "
+        "comp_ltw TEXT, "
+        "comp_psd TEXT, "
+        "comp_saw TEXT, "
+        "comp_wlm TEXT, "
+        "general_comment TEXT, "
+        "result TEXT, "
+        "pilot_sig_date TEXT,"
+        "instructor_sig_date TEXT"
+        ")");
+    print('create rt2 complete');
   }
 
   static Future createRt5(Database db) async {
@@ -1085,7 +1344,9 @@ class DatabaseService {
     await createLineCheck(db);
     await createPpc(db);
     await createPpc5(db);
+    await createPpc6(db);
     await createRt1(db);
+    await createRt2(db);
     await createRt5(db);
     await createRt6(db);
     await createLineTrain(db);
@@ -1100,35 +1361,50 @@ class DatabaseService {
       await createPsc(db);
       await createCcc(db);
       await createRt1(db);
+      await createRt2(db);
       await createRt5(db);
       await createRt6(db);
       await createLineTrain(db);
       await createPpc5(db);
+      await createPpc6(db);
     } else if (oldVersion == 2) {
       await createPsc(db);
       await createCcc(db);
       await createRt1(db);
+      await createRt2(db);
       await createLineTrain(db);
       await createRt6(db);
       await createPpc5(db);
+      await createPpc6(db);
     } else if (oldVersion == 3) {
       await createPsc(db);
       await createCcc(db);
       await createRt1(db);
+      await createRt2(db);
       await createRt6(db);
       await createPpc5(db);
+      await createPpc6(db);
     } else if (oldVersion == 4) {
       await createPsc(db);
       await createCcc(db);
       await createRt1(db);
+      await createRt2(db);
       await createPpc5(db);
+      await createPpc6(db);
     } else if (oldVersion == 5) {
       await createPsc(db);
       await createCcc(db);
       await createRt1(db);
+      await createRt2(db);
+      await createPpc6(db);
     } else if (oldVersion == 6) {
       await createPsc(db);
       await createCcc(db);
+      await createRt2(db);
+      await createPpc6(db);
+    } else if (oldVersion == 7) {
+      await createRt2(db);
+      await createPpc6(db);
     }
   }
 }
@@ -1187,6 +1463,7 @@ class databaseService {
         // late Form append;
         Form? append;
         isInitiated = false;
+
         ///TODO: New form (8): Add new form query db
         print('initiate db: ${kDbTableList[dbIndex]}');
         if (kDbTableList[dbIndex] == kLineCheckTable) {
@@ -1197,6 +1474,9 @@ class databaseService {
         } else if (kDbTableList[dbIndex] == kPPC5Table) {
           append = FormService.initPpc5();
           isInitiated = true;
+        } else if (kDbTableList[dbIndex] == kPPC6Table) {
+          append = FormService.initPpc6();
+          isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt1Table) {
           append = FormService.initRt1();
           isInitiated = true;
@@ -1204,6 +1484,9 @@ class databaseService {
           //   append = FormService.initRt5();
           // } else if (kDbTableList[dbIndex] == kRt6Table) {
           //   append = FormService.initRt6();
+        } else if (kDbTableList[dbIndex] == kRt2Table) {
+          append = FormService.initRt2();
+          isInitiated = true;
         } else if (kDbTableList[dbIndex] == kLineTrainTable) {
           append = FormService.initLineTrain();
           isInitiated = true;
@@ -1242,8 +1525,13 @@ class databaseService {
                   _c < append.fields[_i].checkBoxValue.length;
                   _c++) {
                 String name = '${append.fields[_i].name}_$_c';
-                append.fields[_i].checkBoxValue[_c] =
-                    bool.parse(maps[i][name].toLowerCase());
+                if (maps[i][name] == 'true' ||
+                    maps[i][name] == 'TRUE' ||
+                    maps[i][name] == 'false' ||
+                    maps[i][name] == 'FALSE') {
+                  append.fields[_i].checkBoxValue[_c] =
+                      bool.parse(maps[i][name].toLowerCase());
+                }
               }
             }
           }

@@ -85,7 +85,11 @@ class _MainMenuState extends State<MainMenu> {
     //     Authen.isAdmin() ||
     //     DateTime.now().isAfter(DateTime.parse('2024-01-01 00:00:00.000'));
 
-    print('is ipad >> ${Utils.isIpad}');
+    // print('is ipad >> ${Utils.isIpad}');
+
+    String rtText() => DateTime.now().isAfter(kFirstMay25)
+        ? 'RECURRENT TRAINING RT1 (rev.01)'
+        : 'RECURRENT TRAINING RT1 (rev.00)';
 
     TextStyle headerL() => TextStyle(
         color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
@@ -248,6 +252,7 @@ class _MainMenuState extends State<MainMenu> {
                         .newForm(context, FormService.initLineCheck());
                   },
                 ),
+                if ((DateTime.now().isBefore(kFirstJuly25)) || Authen.isAdmin())
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: 'PPC / SKILL TEST (rev.05)',
@@ -258,14 +263,39 @@ class _MainMenuState extends State<MainMenu> {
                         .newForm(context, FormService.initPpc5());
                   },
                 ),
+                if ((DateTime.now().isAfter(kFirstJuly25)) || Authen.isAdmin())
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    label: 'PPC / SKILL TEST (rev.06)',
+                    labelStyle: Utils.isIpad ? headerL() : headerS(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, FormService.initPpc6());
+                    },
+                  ),
+                if ((DateTime.now().isBefore(kFirstJuly25)) || Authen.isAdmin())
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    // label: 'RECURRENT TRAINING RT1 (rev.01)',
+                    label: rtText(),
+                    labelStyle: Utils.isIpad ? headerL() : headerS(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, FormService.initRt1());
+                    },
+                  ),
+                if ((DateTime.now().isAfter(kFirstJuly25)) || Authen.isAdmin())
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'RECURRENT TRAINING RT1 (rev.00)',
+                  // label: 'RECURRENT TRAINING RT1 (rev.01)',
+                  label: 'RECURRENT TRAINING RT2 (rev.01)',
                   labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initRt1());
+                        .newForm(context, FormService.initRt2());
                   },
                 ),
                 SpeedDialChild(
