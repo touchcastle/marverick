@@ -47,7 +47,7 @@ class _MainMenuState extends State<MainMenu> {
           wasDisconnected) {
         wasDisconnected = false;
         Snackbar.show(context,
-            text: 'Connection restored',
+            text: 'Connection restored.',
             type: Type.info,
             isFixed: true,
             duration: 5);
