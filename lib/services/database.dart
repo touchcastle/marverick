@@ -12,7 +12,6 @@ class DatabaseService {
   }
 
   static Future createLineCheck(Database db) async {
-    print('Crate new table>> linecheck');
     await db
         .execute("CREATE TABLE $kLineCheckTable (id TEXT PRIMARY KEY NOT NULL, "
             "status TEXT NOT NULL, "
@@ -112,7 +111,6 @@ class DatabaseService {
   }
 
   static Future createPpc(Database db) async {
-    print('Crate new table>> ppc');
     await db.execute("CREATE TABLE $kPPCTable(id TEXT PRIMARY KEY , "
         "status TEXT NOT NULL, "
         "type TEXT NOT NULL, "
@@ -244,7 +242,6 @@ class DatabaseService {
   }
 
   static Future createPpc5(Database db) async {
-    print('Crate new table>> ppc5');
     await db.execute("CREATE TABLE $kPPC5Table(id TEXT PRIMARY KEY , "
         "status TEXT NOT NULL, "
         "type TEXT NOT NULL, "
@@ -376,7 +373,6 @@ class DatabaseService {
   }
 
   static Future createPpc6(Database db) async {
-    print('Crate new table>> ppc6');
     await db.execute("CREATE TABLE $kPPC6Table(id TEXT PRIMARY KEY , "
         "status TEXT NOT NULL, "
         "type TEXT NOT NULL, "
@@ -876,7 +872,7 @@ class DatabaseService {
         "pilot_sig_date TEXT,"
         "instructor_sig_date TEXT"
         ")");
-    print('create rt2 complete');
+    print('create rt22 complete');
   }
 
   static Future createRt5(Database db) async {
