@@ -363,7 +363,7 @@ class _FormListState extends State<FormList> {
   }
 
   // Text formName(f.Form form) => Text(form.formLabel, style: header());
-  Text formName(f.Form form) => Text(form.formName, style: Utils.isIpad ? headerL() : headerS());
+  Text formName(f.Form form) => Text(form.formLabel, style: Utils.isIpad ? headerL() : headerS());
 
   Text formStatus(f.Form form) =>
       Text(displayStatus(form.status), style: Utils.isIpad ? labelL() : labelS());

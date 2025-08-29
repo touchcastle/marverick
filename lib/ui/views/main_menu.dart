@@ -320,6 +320,16 @@ class _MainMenuState extends State<MainMenu> {
                         .newForm(context, FormService.initLineTrain());
                   },
                 ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'STANDARD LOFT (rev.04)',
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initStdloft());
+                  },
+                ),
                 // SpeedDialChild(
                 //   child: Icon(Icons.add, color: kPrimaryDarker),
                 //   label: 'PILOT PROFICIENCY CHECK / SKILL TEST (rev.04)',

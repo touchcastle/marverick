@@ -224,7 +224,7 @@ class _InputScreenState extends State<InputScreen> {
             backgroundColor: kPrimary,
 
             title: Text(
-              widget.form.formName,
+              widget.form.formLabel,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

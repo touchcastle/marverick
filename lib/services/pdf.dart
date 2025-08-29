@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marverick/services/authen.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'dart:async';
 import 'dart:typed_data';
@@ -43,7 +44,74 @@ class Pdf {
     // drawFormat.LineSpacing = 20f;
     // drawFormat.WordSpacing = 10f;
     form.validate();
+
     for (int page = 1; page <= pageCount; page++) {
+      final double width = document.pages[page - 1].getClientSize().width;
+      final double height = document.pages[page - 1].getClientSize().height;
+      final PdfGraphics graphics = document.pages[page - 1].graphics;
+
+      final PdfPen grayPen =
+          PdfPen(PdfColor(100, 100, 100), width: 0.5); // light gray lines
+      final PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 6);
+      final PdfBrush blackBrush = PdfSolidBrush(PdfColor(0, 0, 0));
+
+      if (Authen.isTjo() && form.ruler) {
+        // --- Vertical ruler ---
+        for (double x = 0; x <= width; x += 10) {
+          if (x > 0 && x % 10 == 0) {
+            // Measure text width
+            final String text = x.toInt().toString();
+            final Size textSize = font.measureString(text);
+
+            // Draw number centered at top
+            graphics.drawString(
+              text,
+              font,
+              brush: blackBrush,
+              bounds: Rect.fromLTWH(
+                  x - textSize.width / 2, 0, textSize.width, textSize.height),
+            );
+
+            // Line begins AFTER number (below text)
+            graphics.drawLine(
+              grayPen,
+              Offset(x, textSize.height + 2), // start just below number
+              Offset(x, height),
+            );
+          } else {
+            // Just draw full line (no number)
+            graphics.drawLine(grayPen, Offset(x, 0), Offset(x, height));
+          }
+        }
+
+        // --- Horizontal ruler ---
+        for (double y = 0; y <= height; y += 10) {
+          if (y > 0 && y % 10 == 0) {
+            final String text = y.toInt().toString();
+            final Size textSize = font.measureString(text);
+
+            // Draw number centered at left
+            graphics.drawString(
+              text,
+              font,
+              brush: blackBrush,
+              bounds: Rect.fromLTWH(
+                  0, y - textSize.height / 2, textSize.width, textSize.height),
+            );
+
+            // Line begins AFTER number (to the right of text)
+            graphics.drawLine(
+              grayPen,
+              Offset(textSize.width + 2, y), // start just after number
+              Offset(width, y),
+            );
+          } else {
+            // Just draw full line (no number)
+            graphics.drawLine(grayPen, Offset(0, y), Offset(width, y));
+          }
+        }
+      }
+
       for (int i = 0; i < form.fields.length; i++) {
         Field _field = form.fields[i];
 

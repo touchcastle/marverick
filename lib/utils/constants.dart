@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/ui/views/file_list.dart';
 
+///=============================================================================
+/// Version No.   Date          Description
+/// 1.9.3         20.08.2025    - Fix bug form name not correct date.
+/// 1.10.0        28.08.2025    - Add new form: [Standard LOFT].
+///
+///=============================================================================
+
 ///Version number
-const String kVersion = '1.9.2';
+const String kVersion = '1.10.0';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -28,6 +35,7 @@ const String kPPC6Table = 'ppc6_table';
 const String kRt1Table = 'rt1_table';
 const String kRt2Table = 'rt2_table';
 const String kRt22Table = 'rt22_table';
+const String kStdloftTable = 'stdloft_table';
 const String kRt5Table = 'rt5_table';
 const String kRt6Table = 'rt6_table';
 const String kLineTrainTable = 'line_train_table';
@@ -41,6 +49,7 @@ const List<String> kDbTableList = [
   'rt1_table',
   'rt2_table',
   'rt22_table',
+  'stdloft_table',
   'rt5_table',
   'rt6_table',
   'line_train_table',
@@ -108,6 +117,8 @@ const String kRt1SheetUrl =
     "https://script.google.com/macros/s/AKfycbzJn79oV2eX_lIavKZQNK-XJ_j5CNlJKG6DG23ugZ87j5wBrwCMRbtDwG2ZLn2Ed6vUUw/exec";
 const String kRt2SheetUrl =
     "https://script.google.com/macros/s/AKfycby5iYo_sJdyPfKrv_PMuqSSn8wROycmxB7ADcLbDKUpGTPKvh6jKVickMyuJgvv4Wix/exec";
+const String kStdloftSheetUrl =
+    "https://script.google.com/macros/s/AKfycbypiQrQUaJ-SAGC1J3pBRqB36lo0NZP7EG59krNbeuEc29831wGRBxpE5vCSDOQErrf/exec";
 const String kRt22SheetUrl =
     "https://script.google.com/macros/s/AKfycbzLvZZ1ueJ4S9KsFptnbCk19IPMdpjdqLoXn7C2eKdIYVqEFB2ZNLgpSzOZqUcFCKjB/exec";
 const String kRt5SheetUrl =
