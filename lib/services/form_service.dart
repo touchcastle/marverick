@@ -5318,9 +5318,9 @@ class FormService extends ChangeNotifier {
     int defaultGrade() => Authen.isTjo() ? 2 : -1;
     bool defaultCheck = false;
     String formName = 'forms/stdloft.pdf';
-    // String defaultComment = '';
-    String defaultComment =
-        'I am being a person authorized by TVJ and/or CAAT to conduct such training as indicated, have supervised the required session in accordance with the published';
+    String defaultComment = '';
+    // String defaultComment =
+    //     'I am being a person authorized by TVJ and/or CAAT to conduct such training as indicated, have supervised the required session in accordance with the published';
 // int defaultGrade() => Authen.isTjo() ? -1 : -1;
 // bool defaultCheck = true;
 
