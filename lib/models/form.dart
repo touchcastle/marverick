@@ -1203,7 +1203,7 @@ class Form extends ChangeNotifier {
         'examiner_id': getStrVal('examiner_id'),
 
         ///Check details
-        'course': getStrVal('TcourseJO'),
+        'course': getStrVal('course'),
         'other_course': getStrVal('other_course'),
         'check_type_0': getStrVal('check_type_0'),
         'check_type_1': getStrVal('check_type_1'),
@@ -1212,7 +1212,7 @@ class Form extends ChangeNotifier {
         'check_type_4': getStrVal('check_type_4'),
         'check_type_5': getStrVal('check_type_5'),
         'check_type_6': getStrVal('check_type_6'),
-        'check_type_7': getStrVal('check_type_7'),
+        // 'check_type_7': getStrVal('check_type_7'),
         'other_type': getStrVal('other_type'),
 
         ///Sector

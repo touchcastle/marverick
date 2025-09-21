@@ -497,29 +497,28 @@ class FormService extends ChangeNotifier {
   /// TODO: New form (5) remove exclusion
   Future save(f.Form form, {bool showLoad = false}) async {
     // if (form.type != f.FormType.stdloft) {
-      print(form.dbTable);
-      if (!Authen.isSample) {
-        showLoad ? Utils.showInProgress(true) : null;
-        try {
-          await databaseService.dbInsert(form.formMap(), form.dbTable);
+    print(form.dbTable);
+    if (!Authen.isSample) {
+      showLoad ? Utils.showInProgress(true) : null;
+      try {
+        await databaseService.dbInsert(form.formMap(), form.dbTable);
 
-          ///Save signature
-          for (int i = 0; i < form.fields.length; i++) {
-            if (form.fields[i].type == FieldType.signature) {
-              await form.fields[i]
-                  .convertSignature((String response) {}, false);
-              if (form.fields[i].signature != null) {
-                await _saveSigToDevice('${form.id}${form.fields[i].name}',
-                    form.fields[i].signature!);
-              }
+        ///Save signature
+        for (int i = 0; i < form.fields.length; i++) {
+          if (form.fields[i].type == FieldType.signature) {
+            await form.fields[i].convertSignature((String response) {}, false);
+            if (form.fields[i].signature != null) {
+              await _saveSigToDevice('${form.id}${form.fields[i].name}',
+                  form.fields[i].signature!);
             }
           }
-        } catch (e) {
-          print(e);
         }
-        showLoad ? Utils.showInProgress(false) : null;
-        notifyListeners();
+      } catch (e) {
+        print(e);
       }
+      showLoad ? Utils.showInProgress(false) : null;
+      notifyListeners();
+    }
     // }
   }
 
@@ -5804,10 +5803,7 @@ class FormService extends ChangeNotifier {
             label: 'Approach Maneuvering .........',
             type: FieldType.checkbox,
             listValue: ['Visual Circuit', ' Circling Approach'],
-            checkBoxValue: [
-              defaultCheck,
-              defaultCheck
-            ],
+            checkBoxValue: [defaultCheck, defaultCheck],
             isMandatory: false,
             section: 3,
             subSection: 3,
@@ -6135,7 +6131,7 @@ class FormService extends ChangeNotifier {
         Field(
             name: 'q40',
             label:
-            'Go Around / Missed Approach Procedure with one engine failure',
+                'Go Around / Missed Approach Procedure with one engine failure',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -6211,7 +6207,8 @@ class FormService extends ChangeNotifier {
             posY: 192),
         Field(
             name: 'q45',
-            label: 'Reduced Flaps Landing (A320: Flap3 or less, B737: Flap15 or less)',
+            label:
+                'Reduced Flaps Landing (A320: Flap3 or less, B737: Flap15 or less)',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -6236,7 +6233,7 @@ class FormService extends ChangeNotifier {
         Field(
             name: 'q47',
             label:
-            'Landing Roll / After Landing / Parking / Securing Procedures',
+                'Landing Roll / After Landing / Parking / Securing Procedures',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -6331,7 +6328,7 @@ class FormService extends ChangeNotifier {
         Field(
             name: 'q52',
             label:
-            'Crew Resource Management (CRM) / Assertiveness / Support Process',
+                'Crew Resource Management (CRM) / Assertiveness / Support Process',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -6419,8 +6416,7 @@ class FormService extends ChangeNotifier {
             posY: 413),
         Field(
             name: 'q58',
-            label:
-            'Use Appropriate Level of Automation',
+            label: 'Use Appropriate Level of Automation',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -6445,6 +6441,7 @@ class FormService extends ChangeNotifier {
             posY: 384,
             width: 115,
             fontSize: 8),
+
         ///------------------------------------
 
         ///.....................................................................
@@ -10935,7 +10932,7 @@ class FormService extends ChangeNotifier {
       createDateTime: timeStamp,
       createBy: Authen.user != null ? Authen.user.email : '',
       id: uuid.v1(),
-      filePath: 'forms/linetrain.pdf',
+      filePath: 'forms/linetrain15.pdf',
       dbTable: kLineTrainTable,
       fontSize: 8,
       sectionLabel: [
@@ -10958,6 +10955,7 @@ class FormService extends ChangeNotifier {
       formLabel: 'Line Train / Check',
       formLabelInfoField1: 'pilot_name',
       formLabelInfoField2: '',
+      // ruler: true,
       fields: [
         ///.....................................................................
         ///TRAINEE
@@ -10973,13 +10971,13 @@ class FormService extends ChangeNotifier {
             posY: 101),
         Field(
             name: 'pilot_license_no',
-            label: 'Trainee\'s License No',
+            label: 'FCL / FIC / FEC No.',
             type: FieldType.string,
             section: 1,
             subSection: 1,
             stringValue: Authen.isTjo() ? 'TH.FCL.9999999' : '',
-            posX: 148,
-            posY: 117),
+            posX: 330,
+            posY: 101),
         Field(
             name: 'pilot_id',
             label: 'Trainee\'s Staff No(xxxx)',
@@ -10989,8 +10987,8 @@ class FormService extends ChangeNotifier {
             maxLength: 4,
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '0895' : '',
-            posX: 166,
-            posY: 132),
+            posX: 465,
+            posY: 100),
 
         ///.....................................................................
         ///INSTRUCTOR
@@ -11002,16 +11000,16 @@ class FormService extends ChangeNotifier {
             section: 1,
             subSection: 2,
             stringValue: Authen.isTjo() ? 'MAVERICK' : '',
-            posX: 287,
-            posY: 101),
+            posX: 148,
+            posY: 117),
         Field(
             name: 'instructor_cert_no',
-            label: 'Instructor License / Certificate No.',
+            label: 'FCL / FIC / FEC No.',
             type: FieldType.string,
             section: 1,
             subSection: 2,
             stringValue: Authen.isTjo() ? 'INS MAV' : '',
-            posX: 287,
+            posX: 330,
             posY: 117),
         Field(
             name: 'instructor_id',
@@ -11022,8 +11020,8 @@ class FormService extends ChangeNotifier {
             maxLength: 4,
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '9999' : '',
-            posX: 305,
-            posY: 132),
+            posX: 465,
+            posY: 116),
 
         ///.....................................................................
         ///Examminer / CAAT
@@ -11036,18 +11034,18 @@ class FormService extends ChangeNotifier {
             section: 1,
             subSection: 3,
             stringValue: Authen.isTjo() ? 'Christopher Pike' : '',
-            posX: 426,
-            posY: 101),
+            posX: 148,
+            posY: 133),
         Field(
             name: 'examiner_license_no',
-            label: 'Examiner License / Certificate No.',
+            label: 'FCL / FIC / FEC No.',
             type: FieldType.string,
             isMandatory: false,
             section: 1,
             subSection: 3,
             stringValue: Authen.isTjo() ? 'NCC-1701' : '',
-            posX: 426,
-            posY: 117),
+            posX: 330,
+            posY: 133),
         Field(
             name: 'examiner_id',
             label: 'Examiner\'s Staff No(xxxx)',
@@ -11055,11 +11053,11 @@ class FormService extends ChangeNotifier {
             isMandatory: false,
             section: 1,
             subSection: 3,
-            maxLength: 4,
+            maxLength: 10,
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '0000' : '',
-            posX: 444,
-            posY: 132),
+            posX: 450,
+            posY: 133),
 
         ///.....................................................................
         ///CHECK DETAILS
@@ -11072,16 +11070,16 @@ class FormService extends ChangeNotifier {
               'Initial Type Rating',
               // 'Transition',
               'Transition / Conversion',
-              'CCQ',
-              'Command Upgrade',
               'On Type',
+              'Command Upgrade',
+              'Requalification',
               'Other'
             ],
             intValue: kInitChoice,
             section: 2,
             subSection: 1,
             posXList: [45, 45, 45, 45, 45, 45],
-            posYList: [172, 187, 203, 218, 233, 248]),
+            posYList: [179, 194, 210, 225, 240, 255]),
         Field(
             name: 'other_course',
             label: 'Other(if selected)',
@@ -11097,11 +11095,10 @@ class FormService extends ChangeNotifier {
             label: 'Type of Training',
             type: FieldType.checkbox,
             listValue: [
-              'IOE',
-              'LIFUS',
               'Aircraft Base Training',
               'Aircraft Base Check',
-              'IOE / LIFUS Check',
+              'LIFUS Training',
+              'LIFUS Check',
               'Base Release',
               'Initial Line Check',
               'Other',
@@ -11113,13 +11110,13 @@ class FormService extends ChangeNotifier {
               defaultCheck(),
               defaultCheck(),
               defaultCheck(),
-              defaultCheck(),
               defaultCheck()
+              // defaultCheck()
             ],
             // isMandatory: false,
             section: 2,
             subSection: 2,
-            posYList: [172, 187, 203, 218, 233, 248, 264, 279],
+            posYList: [179, 194, 210, 225, 240, 255, 271],
             posX: 149),
         Field(
             name: 'check_type_0',
@@ -11184,15 +11181,15 @@ class FormService extends ChangeNotifier {
             section: 2,
             subSection: 2,
             stringValue: 'FALSE'),
-        Field(
-            name: 'check_type_7',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 2,
-            subSection: 2,
-            stringValue: 'FALSE'),
+        // Field(
+        //     name: 'check_type_7',
+        //     type: FieldType.string,
+        //     input: false,
+        //     writePdf: false,
+        //     isMandatory: false,
+        //     section: 2,
+        //     subSection: 2,
+        //     stringValue: 'FALSE'),
         Field(
             name: 'other_type',
             label: 'Other(if selected)',
@@ -11215,7 +11212,7 @@ class FormService extends ChangeNotifier {
             stringValue: DateFormat('dd-MMM-yy').format(DateTime.now()),
             dateTimeValue: DateTime.now(),
             posX: 356,
-            posY: 191),
+            posY: 198),
         Field(
             name: 'ac_type_1',
             label: 'Sector 1 A/C Type',
@@ -11225,7 +11222,7 @@ class FormService extends ChangeNotifier {
             section: 2,
             subSection: 3,
             posXList: [337, 371, 406],
-            posY: 172),
+            posY: 179),
         Field(
             name: 'ac_reg_1',
             label: 'Sector 1 Registration (HS-___)',
@@ -11236,7 +11233,7 @@ class FormService extends ChangeNotifier {
             maxLength: 3,
             minLength: 3,
             posX: 377,
-            posY: 236),
+            posY: 243),
         Field(
             name: 'flt_no_1',
             label: 'Sector 1 Flight No. (VZ___)',
@@ -11246,7 +11243,7 @@ class FormService extends ChangeNotifier {
             maxLength: 4,
             keyboardType: TextInputType.number,
             posX: 376,
-            posY: 206),
+            posY: 213),
         Field(
             name: 'route_1',
             label: 'Sector 1 Route (XXX-XXX)',
@@ -11255,7 +11252,7 @@ class FormService extends ChangeNotifier {
             subSection: 3,
             maxLength: 7,
             posX: 357,
-            posY: 221),
+            posY: 228),
         Field(
             name: 'duty_1',
             label: 'Sector 1 Duty',
@@ -11265,7 +11262,7 @@ class FormService extends ChangeNotifier {
             section: 2,
             subSection: 3,
             posXList: [360, 386],
-            posY: 248),
+            posY: 255),
 
         Field(
             name: 'date_2',
@@ -11278,7 +11275,7 @@ class FormService extends ChangeNotifier {
             stringValue: DateFormat('dd-MMM-yy').format(DateTime.now()),
             dateTimeValue: DateTime.now(),
             posX: 474,
-            posY: 191),
+            posY: 198),
         Field(
             name: 'ac_type_2',
             label: 'Sector 2 A/C Type',
@@ -11288,7 +11285,7 @@ class FormService extends ChangeNotifier {
             section: 2,
             subSection: 4,
             posXList: [455, 489, 524],
-            posY: 172),
+            posY: 179),
         Field(
             name: 'ac_reg_2',
             label: 'Sector 2 Registration (HS-___)',
@@ -11299,7 +11296,7 @@ class FormService extends ChangeNotifier {
             maxLength: 3,
             minLength: 3,
             posX: 494,
-            posY: 236),
+            posY: 243),
         Field(
             name: 'flt_no_2',
             label: 'Sector 2 Flight No. (VZ___)',
@@ -11309,7 +11306,7 @@ class FormService extends ChangeNotifier {
             maxLength: 4,
             keyboardType: TextInputType.number,
             posX: 493,
-            posY: 206),
+            posY: 213),
         Field(
             name: 'route_2',
             label: 'Sector 2 Route (XXX-XXX)',
@@ -11318,7 +11315,7 @@ class FormService extends ChangeNotifier {
             subSection: 4,
             maxLength: 7,
             posX: 475,
-            posY: 221),
+            posY: 228),
         Field(
             name: 'duty_2',
             label: 'Sector 2 Duty',
@@ -11328,7 +11325,7 @@ class FormService extends ChangeNotifier {
             section: 2,
             subSection: 4,
             posXList: [478, 504],
-            posY: 248),
+            posY: 255),
 
         Field(
             name: 'accum_pf',
@@ -11340,7 +11337,7 @@ class FormService extends ChangeNotifier {
             keyboardType: TextInputType.number,
             maxLine: 3,
             posX: 357,
-            posY: 283),
+            posY: 290),
         Field(
             name: 'accum_pm',
             label: 'Accumulated PM at the end of this flight',
@@ -11351,7 +11348,7 @@ class FormService extends ChangeNotifier {
             keyboardType: TextInputType.number,
             maxLine: 3,
             posX: 515,
-            posY: 283),
+            posY: 290),
 
         ///.....................................................................
         ///GRADING
@@ -11727,7 +11724,7 @@ class FormService extends ChangeNotifier {
             posY: 126),
         Field(
             name: 'q29',
-            label: 'Post-Flight documents / Procedures',
+            label: 'Post-Flight documents procedures',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),

@@ -6,11 +6,12 @@ import 'package:marverick/ui/views/file_list.dart';
 /// Version No.   Date          Description
 /// 1.9.3         20.08.2025    - Fix bug form name not correct date.
 /// 1.10.0        28.08.2025    - Add new form: [Standard LOFT].
+/// 1.11.0        21.09.2025    - Update form version [LINE TRAIN/CHK ver15].
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.10.0';
+const String kVersion = '1.11.0';
 
 ///PageID
 const String kLandingId = 'landing_screen';

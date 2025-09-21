@@ -312,7 +312,7 @@ class _MainMenuState extends State<MainMenu> {
                   ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'LINE TRAIN / CHECK (rev.14)',
+                  label: 'LINE TRAIN / CHECK (rev.15)',
                   labelStyle: Utils.isIpad ? headerL() : headerS(),
                   onTap: () {
                     context
