@@ -21,7 +21,7 @@ class Snackbar {
       behavior: isFixed ? SnackBarBehavior.fixed : SnackBarBehavior.floating,
       // elevation: 0,
       backgroundColor: type == Type.info
-          ? Colors.black
+          ? Colors.green
           : type == Type.caution
               ? Colors.orangeAccent
               : Colors.red,

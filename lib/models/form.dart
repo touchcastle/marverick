@@ -10,6 +10,7 @@ import 'dart:typed_data';
 enum FormType {
   loe,
   lineCheck,
+  lineCheck5,
   sample,
   ppc,
   ppc5,
@@ -18,11 +19,13 @@ enum FormType {
   rt1,
   rt2,
   rt22,
+  rt3,
   rt5,
   rt6,
   lineTrain,
   ccc, //Cabin Crew Line Train/Check
   psc, //Purser Upgrade Train/Check
+  fcss, //Flight Crew Simulator Screening
 }
 
 enum FormStatus { working, completed, pending }
@@ -283,7 +286,139 @@ class Form extends ChangeNotifier {
         'pilot_sig_date': getStrVal('pilot_sig_date'),
         'examiner_sig_date': getStrVal('examiner_sig_date'),
       };
-    } else if (type == FormType.ppc) {
+    } else if (type == FormType.lineCheck5) {
+      return {
+        //----------------------------------------------------------------------
+        //HEADER
+        //----------------------------------------------------------------------
+        //Form info.
+        'status': status.toString(),
+        'type': type.toString(),
+        'form_name': formName,
+        'create_at': createDateTime.toString(),
+        'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+        'create_by': createBy,
+        'file_path': filePath,
+        'id': id,
+        'font_size': fontSize.round().toString(),
+        'pdf_url': pdfUrl ?? '',
+        //----------------------------------------------------------------------
+        //ITEM
+        //----------------------------------------------------------------------
+        //Pilot info.
+        // 'pilot_rank': getStrVal('pilot_rank'),
+        'pilot_id': getStrVal('pilot_id'),
+        'pilot_license_no': getStrVal('pilot_license_no'),
+        'pilot_name': getStrVal('pilot_name'),
+
+        //Examiner info.
+        // 'examiner_rank': getStrVal('examiner_rank'),
+        'examiner_id': getStrVal('examiner_id'),
+        'examiner_license_no': getStrVal('examiner_license_no'),
+        'examiner_name': getStrVal('examiner_name'),
+
+        //Check type
+        'type_of_check': getStrVal('type_of_check'),
+        'other_type': getStrVal('other_type'),
+
+        //Sector#1
+        'date_1': getStrVal('date_1'),
+        'ac_type_1': getStrVal('ac_type_1'),
+        'ac_reg_1': getStrVal('ac_reg_1'),
+        'flt_no_1': getStrVal('flt_no_1'),
+        'from_1': getStrVal('from_1'),
+        'to_1': getStrVal('to_1'),
+        'duty_1': getStrVal('duty_1'),
+
+        //Sector#2
+        'date_2': getStrVal('date_2'),
+        'ac_type_2': getStrVal('ac_type_2'),
+        'ac_reg_2': getStrVal('ac_reg_2'),
+        'flt_no_2': getStrVal('flt_no_2'),
+        'from_2': getStrVal('from_2'),
+        'to_2': getStrVal('to_2'),
+        'duty_2': getStrVal('duty_2'),
+
+        //Grading & Comment
+        //A
+        'q1': getStrVal('q1'),
+        'q2': getStrVal('q2'),
+        'q3': getStrVal('q3'),
+        'q4': getStrVal('q4'),
+        'q5': getStrVal('q5'),
+        'q6': getStrVal('q6'),
+        'q7': getStrVal('q7'),
+        'a_comment': getStrVal('a_comment'),
+        //B
+        'q8': getStrVal('q8'),
+        'q9': getStrVal('q9'),
+        'q10': getStrVal('q10'),
+        'q11': getStrVal('q11'),
+        'q12': getStrVal('q12'),
+        'q13': getStrVal('q13'),
+        'b_comment': getStrVal('b_comment'),
+        //C
+        'q14': getStrVal('q14'),
+        'q15': getStrVal('q15'),
+        'q16': getStrVal('q16'),
+        'q17': getStrVal('q17'),
+        'q18': getStrVal('q18'),
+        'c_comment': getStrVal('c_comment'),
+        //D
+        'q19': getStrVal('q19'),
+        'q20': getStrVal('q20'),
+        'q21': getStrVal('q21'),
+        'q22': getStrVal('q22'),
+        'q23': getStrVal('q23'),
+        'q24': getStrVal('q24'),
+        'q25': getStrVal('q25'),
+        'q26': getStrVal('q26'),
+        'q27': getStrVal('q27'),
+        'q28': getStrVal('q28'),
+        'd_comment': getStrVal('d_comment'),
+        //E
+        'q29': getStrVal('q29'),
+        'q30': getStrVal('q30'),
+        'q31': getStrVal('q31'),
+        'q32': getStrVal('q32'),
+        'q33': getStrVal('q33'),
+        'q34': getStrVal('q34'),
+        'e_comment': getStrVal('e_comment'),
+        //BRIEFING
+        'brief_1': getStrVal('brief_1'),
+        'brief_2': getStrVal('brief_2'),
+        'brief_3': getStrVal('brief_3'),
+        'brief_4': getStrVal('brief_4'),
+        'brief_5': getStrVal('brief_5'),
+        'brief_6': getStrVal('brief_6'),
+        'brief_comment': getStrVal('brief_comment'),
+        //ORAL TEST
+        'oral_1_text': getStrVal('oral_1_text'),
+        'oral_1': getStrVal('oral_1'),
+        'oral_2_text': getStrVal('oral_2_text'),
+        'oral_2': getStrVal('oral_2'),
+        'oral_3_text': getStrVal('oral_3_text'),
+        'oral_3': getStrVal('oral_3'),
+        'oral_comment': getStrVal('oral_comment'),
+        //COMPETENCY
+        'comp_pro': getStrVal('comp_pro'),
+        'comp_com': getStrVal('comp_com'),
+        'comp_fpa': getStrVal('comp_fpa'),
+        'comp_fpm': getStrVal('comp_fpm'),
+        'comp_kno': getStrVal('comp_kno'),
+        'comp_ltw': getStrVal('comp_ltw'),
+        'comp_psd': getStrVal('comp_psd'),
+        'comp_saw': getStrVal('comp_saw'),
+        'comp_wlm': getStrVal('comp_wlm'),
+        'general_comment': getStrVal('general_comment'),
+        //RESULT
+        'result': getStrVal('result'),
+        'competent_level': getStrVal('competent_level'),
+        'result_comment': getStrVal('result_comment'),
+        'pilot_sig_date': getStrVal('pilot_sig_date'),
+        'examiner_sig_date': getStrVal('examiner_sig_date'),
+      };
+    }else if (type == FormType.ppc) {
       return ({});
     } else if (type == FormType.ppc5) {
       return {
@@ -1025,6 +1160,157 @@ class Form extends ChangeNotifier {
 // 'pilot_sig_date': getStrVal('pilot_sig_date'),
 // 'instructor_sig_date': getStrVal('instructor_sig_date'),
       };
+    } else if (type == FormType.rt3) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': status.toString(),
+        'type': type.toString(),
+        'form_name': formName,
+        'create_at': createDateTime.toString(),
+        'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+        'create_by': createBy,
+        'file_path': filePath,
+        'id': id,
+        'font_size': fontSize.round().toString(),
+        'pdf_url': pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_rank': getStrVal('pilot_rank'),
+        'pilot_name': getStrVal('pilot_name'),
+        'pilot_license_no': getStrVal('pilot_license_no'),
+        'pilot_id': getStrVal('pilot_id'),
+
+        ///Instructor info.
+        'instructor_rank': getStrVal('instructor_rank'),
+        'instructor_name': getStrVal('instructor_name'),
+        'instructor_cert_no': getStrVal('instructor_cert_no'),
+        'instructor_id': getStrVal('instructor_id'),
+
+        ///Check details
+        'check_date': getStrVal('check_date'),
+        'block_time': getStrVal('block_time'),
+        'fstd_no': getStrVal('fstd_no'),
+        'ac_type': getStrVal('ac_type'),
+        'route': getStrVal('route'),
+        'rhs': getStrVal('rhs'),
+        'loft_duty': getStrVal('loft_duty'),
+
+        ///Grading & Comment
+        ///A
+        'q1': getStrVal('q1'),
+        'q2': getStrVal('q2'),
+        'q3': getStrVal('q3'),
+        'q4': getStrVal('q4'),
+        'q5_detail': getStrVal('q5_detail'),
+        'q5': getStrVal('q5'),
+        'q6': getStrVal('q6'),
+        'q7': getStrVal('q7'),
+        'q8': getStrVal('q8'),
+        'q9': getStrVal('q9'),
+        'q10': getStrVal('q10'),
+        'q11': getStrVal('q11'),
+        'q12': getStrVal('q12'),
+        'q13': getStrVal('q13'),
+        'q14_check_0': getStrVal('q14_check_0'),
+        'q14_check_1': getStrVal('q14_check_1'),
+        'q14_check_2': getStrVal('q14_check_2'),
+        'q14': getStrVal('q14'),
+        'q15': getStrVal('q15'),
+        'q16': getStrVal('q16'),
+        'q17_check_0': getStrVal('q17_check_0'),
+        'q17_check_1': getStrVal('q17_check_1'),
+        'q17': getStrVal('q17'),
+        'q18': getStrVal('q18'),
+        'q19': getStrVal('q19'),
+        'q20': getStrVal('q20'),
+        'q21': getStrVal('q21'),
+        'q22': getStrVal('q22'),
+        'q23': getStrVal('q23'),
+        'q24': getStrVal('q24'),
+        'q25_check_0': getStrVal('q25_check_0'),
+        'q25_check_1': getStrVal('q25_check_1'),
+        'q25_check_2': getStrVal('q25_check_2'),
+        'q25_check_3': getStrVal('q25_check_3'),
+        'q25': getStrVal('q25'),
+        'q26_check_0': getStrVal('q26_check_0'),
+        'q26_check_1': getStrVal('q26_check_1'),
+        'q26': getStrVal('q26'),
+        'q27_check_0': getStrVal('q27_check_0'),
+        'q27_check_1': getStrVal('q27_check_1'),
+        'q27_check_2': getStrVal('q27_check_2'),
+        'q27_check_3': getStrVal('q27_check_3'),
+        'q27': getStrVal('q27'),
+        'q28': getStrVal('q28'),
+        'q29': getStrVal('q29'),
+        'q30': getStrVal('q30'),
+        'q31': getStrVal('q31'),
+        'q32': getStrVal('q32'),
+        'q33': getStrVal('q33'),
+        'q34_check_0': getStrVal('q34_check_0'),
+        'q34_check_1': getStrVal('q34_check_1'),
+        'q34': getStrVal('q34'),
+        'q35': getStrVal('q35'),
+        'q36': getStrVal('q36'),
+        'q37': getStrVal('q37'),
+        'q38': getStrVal('q38'),
+        'q39': getStrVal('q39'),
+        'q40': getStrVal('q40'),
+        'q41': getStrVal('q41'),
+        'q42': getStrVal('q42'),
+        'q43': getStrVal('q43'),
+        'q44': getStrVal('q44'),
+        'q45': getStrVal('q45'),
+        'q46': getStrVal('q46'),
+        'q47': getStrVal('q47'),
+        'q48': getStrVal('q48'),
+        'q49': getStrVal('q49'),
+        'q50': getStrVal('q50'),
+        'q51': getStrVal('q51'),
+        'q52': getStrVal('q52'),
+        'q53': getStrVal('q53'),
+        'q54': getStrVal('q54'),
+        'q55': getStrVal('q55'),
+        'q56': getStrVal('q56'),
+
+        'qa_comment': getStrVal('qa_comment'),
+        'qb_comment': getStrVal('qb_comment'),
+        'qc_comment': getStrVal('qc_comment'),
+        'qd_comment': getStrVal('qd_comment'),
+        'qe_comment': getStrVal('qe_comment'),
+        'qf_comment': getStrVal('qf_comment'),
+        'qg_comment': getStrVal('qg_comment'),
+        'qh_comment': getStrVal('qh_comment'),
+        'qi_comment': getStrVal('qi_comment'),
+        'qj_comment': getStrVal('qj_comment'),
+        'qk_comment': getStrVal('qk_comment'),
+
+        ///LANDING AND GO-AROUND
+        'no_landing': getStrVal('no_landing'),
+        'no_goaround': getStrVal('no_goaround'),
+
+        ///COMPETENCY
+        'comp_kno': getStrVal('comp_kno'),
+        'comp_pro': getStrVal('comp_pro'),
+        'comp_com': getStrVal('comp_com'),
+        'comp_fpa': getStrVal('comp_fpa'),
+        'comp_fpm': getStrVal('comp_fpm'),
+        'comp_ltw': getStrVal('comp_ltw'),
+        'comp_psd': getStrVal('comp_psd'),
+        'comp_saw': getStrVal('comp_saw'),
+        'comp_wlm': getStrVal('comp_wlm'),
+        'general_comment': getStrVal('general_comment'),
+
+        ///RESULT
+        'result': getStrVal('result'),
+// 'pilot_sig_date': getStrVal('pilot_sig_date'),
+// 'instructor_sig_date': getStrVal('instructor_sig_date'),
+      };
     } else if (type == FormType.stdloft) {
       return {
         ///----------------------------------------------------------------------
@@ -1062,6 +1348,7 @@ class Form extends ChangeNotifier {
         'block_time': getStrVal('block_time'),
         'fstd_no': getStrVal('fstd_no'),
         'ac_type': getStrVal('ac_type'),
+        'route': getStrVal('route'),
         'loft_duty': getStrVal('loft_duty'),
 
         ///Grading & Comment
@@ -1163,7 +1450,7 @@ class Form extends ChangeNotifier {
         ///RESULT
         'result': getStrVal('result'),
       };
-    }else if (type == FormType.rt5) {
+    } else if (type == FormType.rt5) {
       return ({});
     } else if (type == FormType.rt6) {
       return ({});
@@ -1569,6 +1856,112 @@ class Form extends ChangeNotifier {
         'trainee_sig_date': getStrVal('trainee_sig_date'),
         'purser_sig_date': getStrVal('purser_sig_date'),
         'evaluator_sig_date': getStrVal('evaluator_sig_date'),
+      };
+    } else if (type == FormType.fcss) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': status.toString(),
+        'type': type.toString(),
+        'form_name': formName,
+        'create_at': createDateTime.toString(),
+        'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+        'create_by': createBy,
+        'file_path': filePath,
+        'id': id,
+        'font_size': fontSize.round().toString(),
+        'pdf_url': pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_rank': getStrVal('pilot_rank'),
+        'pilot_name': getStrVal('pilot_name'),
+        'pilot_license_no': getStrVal('pilot_license_no'),
+        'pilot_id': getStrVal('pilot_id'),
+
+        ///Instructor info.
+        'evaluator_rank': getStrVal('evaluator_rank'),
+        'evaluator_name': getStrVal('evaluator_name'),
+        'evaluator_license_no': getStrVal('evaluator_license_no'),
+        'evaluator_id': getStrVal('evaluator_id'),
+
+        ///Check details
+        'check_date': getStrVal('check_date'),
+        'block_time': getStrVal('block_time'),
+        'fstd_no': getStrVal('fstd_no'),
+        'ac_type': getStrVal('ac_type'),
+        'check_type': getStrVal('check_type'),
+        'check_type_other': getStrVal('check_type_other'),
+
+        ///Grading & Comment
+        ///A
+        'q1': getStrVal('q1'),
+        'q2': getStrVal('q2'),
+        'q3': getStrVal('q3'),
+        'q4_check_0': getStrVal('q4_check_0'),
+        'q4_check_1': getStrVal('q4_check_1'),
+        'q4_check_2': getStrVal('q4_check_2'),
+        'q4_detail': getStrVal('q4_detail'),
+        'q4': getStrVal('q4'),
+        'q5': getStrVal('q5'),
+        'q6': getStrVal('q6'),
+        'q7': getStrVal('q7'),
+        'q8_check_0': getStrVal('q8_check_0'),
+        'q8_check_1': getStrVal('q8_check_1'),
+        'q8': getStrVal('q8'),
+        'q9': getStrVal('q9'),
+        'q10_check_0': getStrVal('q10_check_0'),
+        'q10_check_1': getStrVal('q10_check_1'),
+        'q10': getStrVal('q10'),
+        'q11_check_0': getStrVal('q11_check_0'),
+        'q11_check_1': getStrVal('q11_check_1'),
+        'q11_check_2': getStrVal('q11_check_2'),
+        'q11_check_3': getStrVal('q11_check_3'),
+        'q11_detail': getStrVal('q11_detail'),
+        'q11': getStrVal('q11'),
+        'q12_check_0': getStrVal('q12_check_0'),
+        'q12_check_1': getStrVal('q12_check_1'),
+        'q12': getStrVal('q12'),
+        'q13': getStrVal('q13'),
+        'q14': getStrVal('q14'),
+        'q15_check_0': getStrVal('q15_check_0'),
+        'q15_check_1': getStrVal('q15_check_1'),
+        'q15_check_2': getStrVal('q15_check_2'),
+        'q15': getStrVal('q15'),
+        'q16': getStrVal('q16'),
+        'q17': getStrVal('q17'),
+        'q18': getStrVal('q18'),
+        'q19': getStrVal('q19'),
+        'q20': getStrVal('q20'),
+
+
+        'qa_comment': getStrVal('qa_comment'),
+        'qb_comment': getStrVal('qb_comment'),
+        'qc_comment': getStrVal('qc_comment'),
+
+        ///LANDING AND GO-AROUND
+        'no_landing': getStrVal('no_landing'),
+        'no_goaround': getStrVal('no_goaround'),
+
+        ///COMPETENCY
+        'comp_kno': getStrVal('comp_kno'),
+        'comp_pro': getStrVal('comp_pro'),
+        'comp_com': getStrVal('comp_com'),
+        'comp_fpa': getStrVal('comp_fpa'),
+        'comp_fpm': getStrVal('comp_fpm'),
+        'comp_ltw': getStrVal('comp_ltw'),
+        'comp_psd': getStrVal('comp_psd'),
+        'comp_saw': getStrVal('comp_saw'),
+        'comp_wlm': getStrVal('comp_wlm'),
+        'general_comment': getStrVal('general_comment'),
+
+        ///RESULT
+        'result': getStrVal('result'),
+// 'instructor_sig_date': getStrVal('instructor_sig_date'),
       };
     } else {
       return ({});
