@@ -52,6 +52,78 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   //Method to Submit Feedback and save it in Google Sheets
+  // Future _submitForm(BuildContext c) async {
+  //   int indexPage = 0;
+  //   String message = '';
+  //   ErrorType errorType = ErrorType.success;
+  //
+  //   if (Authen.user == null) {
+  //     await Navigator.of(context).push(
+  //       PageRouteBuilder(
+  //         settings: const RouteSettings(name: kMainPageName),
+  //         pageBuilder: (_, __, ___) => Login(fromInside: true),
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   Utils.showInProgress(true);
+  //
+  //   try {
+  //     await context.read<FormService>().submitForm(
+  //       widget.form,
+  //           (String response, ErrorType type) {
+  //         errorType = type;
+  //         if (response == kStatusSuccess) {
+  //           message = 'SUCCESS: form submitted';
+  //         } else {
+  //           message = response;
+  //           errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
+  //         }
+  //       },
+  //     ).timeout(kSubmitTimeout);
+  //   } on TimeoutException {
+  //     indexPage = 2;
+  //     message = 'Session timeout, please try again';
+  //     errorType = ErrorType.other;
+  //   } catch (e) {
+  //     indexPage = 2;
+  //     message = 'Unexpected error';
+  //     errorType = ErrorType.other;
+  //   }
+  //
+  //   Utils.showInProgress(false);
+  //
+  //   Snackbar.show(
+  //     context,
+  //     text: message,
+  //     type: errorType == ErrorType.noInternet
+  //         ? Type.caution
+  //         : errorType == ErrorType.success
+  //         ? Type.info
+  //         : Type.error,
+  //     isFixed: true,
+  //   );
+  //
+  //   if (errorType == ErrorType.missingRequired) {
+  //     setState(() {
+  //       toggleMandatory = true;
+  //     });
+  //     return;
+  //   }
+  //
+  //   if (errorType == ErrorType.success) {
+  //     await Future.delayed(const Duration(seconds: 2));
+  //     if (!mounted) return;
+  //
+  //     Navigator.of(context).pushReplacement(
+  //       PageRouteBuilder(
+  //         settings: const RouteSettings(name: kMainPageName),
+  //         pageBuilder: (_, __, ___) => MainMenu(selectedIndex: indexPage),
+  //       ),
+  //     );
+  //   }
+  // }
   Future _submitForm(BuildContext c) async {
     int indexPage = 0;
     String message = '';
@@ -209,13 +281,23 @@ class _InputScreenState extends State<InputScreen> {
       },
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
-          // logic
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
           _autoSave();
-          Navigator.of(context).pushReplacement(PageRouteBuilder(
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
               settings: const RouteSettings(name: kMainPageName),
-              pageBuilder: (_, __, ___) => MainMenu(selectedIndex: 2)));
+              pageBuilder: (_, __, ___) => MainMenu(selectedIndex: 2),
+            ),
+          );
         },
+        // onPopInvoked: (didPop) {
+        //   // logic
+        //   _autoSave();
+        //   Navigator.of(context).pushReplacement(PageRouteBuilder(
+        //       settings: const RouteSettings(name: kMainPageName),
+        //       pageBuilder: (_, __, ___) => MainMenu(selectedIndex: 2)));
+        // },
         // onWillPop: _onWillPop,
         child: Scaffold(
           appBar: AppBar(
@@ -264,33 +346,66 @@ class _InputScreenState extends State<InputScreen> {
                     fontSize: Utils.isIpad ? 14 : 10,
                   ),
                 ),
-                onPressed: () async {
-                  setState(() {});
 
-                  return await showDialog(
+                onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  // setState(() {});
+
+                  final confirmed = await showDialog<bool>(
                     context: context,
-                    builder: (BuildContext context) {
+                    useRootNavigator: true,
+                    barrierDismissible: false,
+                    builder: (dialogContext) {
                       return AlertDialog(
-                        title: const Text("Submit"),
-                        content: const Text("Confirm Submit form?"),
-                        actions: <Widget>[
+                        title: const Text('Submit'),
+                        content: const Text('Confirm Submit form?'),
+                        actions: [
                           TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text("Cancel"),
+                            onPressed: () => Navigator.of(dialogContext, rootNavigator: true).pop(false),
+                            child: const Text('Cancel'),
                           ),
                           TextButton(
-                              onPressed: () async {
-                                _submitForm(context);
-                                Navigator.of(context).pop(false);
-                              },
-                              child: const Text("Submit")),
+                            onPressed: () => Navigator.of(dialogContext, rootNavigator: true).pop(true),
+                            child: const Text('Submit'),
+                          ),
                         ],
                       );
                     },
                   );
 
-                  // await context.read<Pdf>().gen(widget.form);
+                  if (confirmed == true) {
+                    await _submitForm(context);
+                  }
                 },
+
+
+                // onPressed: () async {
+                //   setState(() {});
+                //
+                //   return await showDialog(
+                //     context: context,
+                //     builder: (BuildContext context) {
+                //       return AlertDialog(
+                //         title: const Text("Submit"),
+                //         content: const Text("Confirm Submit form?"),
+                //         actions: <Widget>[
+                //           TextButton(
+                //             onPressed: () => Navigator.of(context).pop(false),
+                //             child: const Text("Cancel"),
+                //           ),
+                //           TextButton(
+                //               onPressed: () async {
+                //                 _submitForm(context);
+                //                 Navigator.of(context).pop(false);
+                //               },
+                //               child: const Text("Submit")),
+                //         ],
+                //       );
+                //     },
+                //   );
+                //
+                //   // await context.read<Pdf>().gen(widget.form);
+                // },
               )
             ],
           ),

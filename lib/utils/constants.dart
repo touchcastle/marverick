@@ -16,11 +16,13 @@ import 'package:marverick/ui/views/file_list.dart';
 /// 1.12.2        19.01.2026    - Update RT3 pdf
 /// 1.13.0        01.03.2026    - Add form FCSS
 /// 1.14.0        27.03.2026    - Linecheck Rev.05
+/// 1.14.1        14.04.2026    - Fix form linecheck5 not load and submit dialog
+///                               disappear.
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.14.0';
+const String kVersion = '1.14.1';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -56,7 +58,7 @@ const String kCccTable = 'ccc_table';
 const String kPscTable = 'psc_table';
 const List<String> kDbTableList = [
   'line_check_table',
-  // 'line_check5_table',
+  'line_check5_table',
   'ppc_table',
   'ppc5_table',
   'ppc6_table',
