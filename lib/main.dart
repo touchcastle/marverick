@@ -13,42 +13,74 @@ import 'package:marverick/utils/constants.dart';
 import 'package:upgrader/upgrader.dart';
 
 void main() async {
-  /// Database initialization and query.
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await Utils.checkIpad();
-
-  // await Upgrader.clearSavedSettings();
 
   Pdf pdf = Pdf();
   Authen authen = Authen();
   FormService service = FormService(authen: authen, pdf: pdf);
-  var provider = MultiProvider(
-    providers: [
-      Provider<Pdf>(create: (_) => pdf),
-      ListenableProvider<FormService>(create: (_) => service),
-      Provider<Authen>(create: (_) => authen),
-      // ListenableProvider<Pdf>(create: (_) => pdf),
-    ],
-    child: Marverick(),
-  );
-  void configLoading() {
-    EasyLoading.instance
-      // ..displayDuration = const Duration(milliseconds: 2000)
-      ..indicatorType = EasyLoadingIndicatorType.wave
-      ..loadingStyle = EasyLoadingStyle.custom
-      // ..indicatorSize = 45.0
-      // ..radius = 10.0
-      ..progressColor = kPrimary
-      ..backgroundColor = kSecondaryDarker
-      ..indicatorColor = kPrimaryDarker
-      ..textColor = kPrimaryDarker;
-  }
 
   await DatabaseService.openDB();
-  runApp(provider);
-  configLoading();
+  configLoading(); // ✅ Move BEFORE runApp
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<Pdf>(create: (_) => pdf),
+        ListenableProvider<FormService>(create: (_) => service),
+        Provider<Authen>(create: (_) => authen),
+      ],
+      child: Marverick(),
+    ),
+  );
 }
+
+void configLoading() {
+  EasyLoading.instance
+    ..indicatorType = EasyLoadingIndicatorType.wave
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..progressColor = kPrimary
+    ..backgroundColor = kSecondaryDarker
+    ..indicatorColor = kPrimaryDarker
+    ..textColor = kPrimaryDarker;
+}
+
+// void main() async {
+//   /// Database initialization and query.
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   await Utils.checkIpad();
+//
+//   // await Upgrader.clearSavedSettings();
+//
+//   Pdf pdf = Pdf();
+//   Authen authen = Authen();
+//   FormService service = FormService(authen: authen, pdf: pdf);
+//   var provider = MultiProvider(
+//     providers: [
+//       Provider<Pdf>(create: (_) => pdf),
+//       ListenableProvider<FormService>(create: (_) => service),
+//       Provider<Authen>(create: (_) => authen),
+//       // ListenableProvider<Pdf>(create: (_) => pdf),
+//     ],
+//     child: Marverick(),
+//   );
+//   void configLoading() {
+//     EasyLoading.instance
+//       // ..displayDuration = const Duration(milliseconds: 2000)
+//       ..indicatorType = EasyLoadingIndicatorType.wave
+//       ..loadingStyle = EasyLoadingStyle.custom
+//       // ..indicatorSize = 45.0
+//       // ..radius = 10.0
+//       ..progressColor = kPrimary
+//       ..backgroundColor = kSecondaryDarker
+//       ..indicatorColor = kPrimaryDarker
+//       ..textColor = kPrimaryDarker;
+//   }
+//
+//   await DatabaseService.openDB();
+//   runApp(provider);
+//   configLoading();
+// }
 
 class Marverick extends StatelessWidget {
   @override

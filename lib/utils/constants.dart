@@ -18,11 +18,12 @@ import 'package:marverick/ui/views/file_list.dart';
 /// 1.14.0        27.03.2026    - Linecheck Rev.05
 /// 1.14.1        14.04.2026    - Fix form linecheck5 not load and submit dialog
 ///                               disappear.
+/// 1.15.0        18.06.2026    - Add form RT4 & PPC8
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.14.1';
+const String kVersion = '1.15.0';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -45,10 +46,12 @@ const String kLineCheck5Table = 'line_check5_table';
 const String kPPCTable = 'ppc_table';
 const String kPPC5Table = 'ppc5_table';
 const String kPPC6Table = 'ppc6_table';
+const String kPPC8Table = 'ppc8_table';
 const String kRt1Table = 'rt1_table';
 const String kRt2Table = 'rt2_table';
 const String kRt22Table = 'rt22_table';
 const String kRt3Table = 'rt3_table';
+const String kRt4Table = 'rt4_table';
 const String kFcssTable = 'fcss_table';
 const String kStdloftTable = 'stdloft_table';
 const String kRt5Table = 'rt5_table';
@@ -62,10 +65,12 @@ const List<String> kDbTableList = [
   'ppc_table',
   'ppc5_table',
   'ppc6_table',
+  'ppc8_table',
   'rt1_table',
   'rt2_table',
   'rt22_table',
   'rt3_table',
+  'rt4_table',
   'stdloft_table',
   'rt5_table',
   'rt6_table',
@@ -133,12 +138,16 @@ const String kPPC5SheetUrl =
     "https://script.google.com/macros/s/AKfycbyjXvXQ2PpTxksZ4WSaqqL2OBZkf3zxwAzbht7opSPhoDBgyl9PTbz1gYO7IXbv-8yABA/exec";
 const String kPPC6SheetUrl =
     "https://script.google.com/macros/s/AKfycbx0xpbZiQQ7JYGXAtMUZemP4BWbS0Sila0QkxiypKadW9f8-HqnDPKdBzV_2BLddRK1/exec";
+const String kPPC8SheetUrl =
+    "https://script.google.com/macros/s/AKfycbxmbcxCX5eOGEaf-b_YxZy_GU8m047F53LzrWG4RdyyKYTDy1qoYGA9-UTvojNruRfiUw/exec";
 const String kRt1SheetUrl =
     "https://script.google.com/macros/s/AKfycbzJn79oV2eX_lIavKZQNK-XJ_j5CNlJKG6DG23ugZ87j5wBrwCMRbtDwG2ZLn2Ed6vUUw/exec";
 const String kRt2SheetUrl =
     "https://script.google.com/macros/s/AKfycby5iYo_sJdyPfKrv_PMuqSSn8wROycmxB7ADcLbDKUpGTPKvh6jKVickMyuJgvv4Wix/exec";
 const String kRt3SheetUrl =
     "https://script.google.com/macros/s/AKfycbwCr7dhHFQu7sl-x-PsjoE92WGvLPZv8RK5Eo0bCGsnoxEm7N9Dq3m7W1V3FFwpVe8/exec";
+const String kRt4SheetUrl =
+    "https://script.google.com/macros/s/AKfycbxGJC8fsTIkVOiJHB7l5aikMCnAWwliegqsuxczkp9ihY-Z1pAEIdpvO0rhSl4ti34O/exec";
 const String kStdloftSheetUrl =
     "https://script.google.com/macros/s/AKfycby05meqvQZEv_00At1yy5zAnKMsCGSnBxXfEr60f9coKUW2MTOFylWXwle_EOxGIKr0/exec";
 const String kRt22SheetUrl =
@@ -167,6 +176,7 @@ final DateTime kFirstJune25 = DateTime.parse('2025-06-01 00:00:00.000');
 final DateTime kFirstJuly25 = DateTime.parse('2025-07-01 00:00:00.000');
 final DateTime k28July25 = DateTime.parse('2025-07-28 00:00:00.000');
 final DateTime k1Jan26 = DateTime.parse('2026-01-01 00:00:00.000');
+final DateTime k1Jul26 = DateTime.parse('2026-07-01 00:00:00.000');
 
 ///Decoration
 BoxDecoration fileBoxDecor(FormStatus status) {

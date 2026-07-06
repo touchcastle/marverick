@@ -50,7 +50,7 @@ class _MainMenuState extends State<MainMenu> {
             text: 'Connection restored.',
             type: Type.info,
             isFixed: true,
-            duration: 5);
+            duration: 2);
       }
     });
   }
@@ -283,7 +283,7 @@ class _MainMenuState extends State<MainMenu> {
                 //           .newForm(context, FormService.initPpc5());
                 //     },
                 //   ),
-                if ((DateTime.now().isAfter(kFirstJuly25)) || Authen.isAdmin())
+                if ((DateTime.now().isBefore(k1Jul26)) || Authen.isAdmin())
                   SpeedDialChild(
                     child: Icon(Icons.add, color: kPrimaryDarker),
                     label: DateTime.now().isBefore(k1Jan26)
@@ -294,6 +294,17 @@ class _MainMenuState extends State<MainMenu> {
                       context
                           .read<FormService>()
                           .newForm(context, FormService.initPpc6());
+                    },
+                  ),
+                if ((DateTime.now().isAfter(k1Jul26)) || Authen.isAdmin())
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    label: 'PPC / SKILL TEST (rev.08)',
+                    labelStyle: Utils.isIpad ? headerL() : headerS(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, FormService.initPpc8());
                     },
                   ),
                 // if ((DateTime.now().isBefore(kFirstJuly25)) || Authen.isAdmin())
@@ -320,19 +331,19 @@ class _MainMenuState extends State<MainMenu> {
                 //           .newForm(context, FormService.initRt2());
                 //     },
                 //   ),
-                if ((DateTime.now().isBefore(k1Jan26)) || Authen.isAdmin())
-                  SpeedDialChild(
-                    child: Icon(Icons.add, color: kPrimaryDarker),
-                    // label: 'RECURRENT TRAINING RT1 (rev.01)',
-                    label: 'RECURRENT TRAINING RT2 (rev.02)',
-                    labelStyle: Utils.isIpad ? headerL() : headerS(),
-                    onTap: () {
-                      context
-                          .read<FormService>()
-                          .newForm(context, FormService.initRt22());
-                    },
-                  ),
-                if ((DateTime.now().isAfter(k1Jan26)) || Authen.isAdmin())
+                // if ((DateTime.now().isBefore(k1Jan26)) || Authen.isAdmin())
+                //   SpeedDialChild(
+                //     child: Icon(Icons.add, color: kPrimaryDarker),
+                //     // label: 'RECURRENT TRAINING RT1 (rev.01)',
+                //     label: 'RECURRENT TRAINING RT2 (rev.02)',
+                //     labelStyle: Utils.isIpad ? headerL() : headerS(),
+                //     onTap: () {
+                //       context
+                //           .read<FormService>()
+                //           .newForm(context, FormService.initRt22());
+                //     },
+                //   ),
+                if ((DateTime.now().isBefore(k1Jul26)) || Authen.isAdmin())
                   SpeedDialChild(
                     child: Icon(Icons.add, color: kPrimaryDarker),
                     // label: 'RECURRENT TRAINING RT1 (rev.01)',
@@ -344,6 +355,17 @@ class _MainMenuState extends State<MainMenu> {
                           .newForm(context, FormService.initRt3());
                     },
                   ),
+                if ((DateTime.now().isAfter(k1Jul26)) || Authen.isAdmin())
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'RECURRENT TRAINING RT4 (rev.01)',
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
+                  onTap: () {
+                    context
+                        .read<FormService>()
+                        .newForm(context, FormService.initRt4());
+                  },
+                ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: DateTime.now().isBefore(k1Jan26)
