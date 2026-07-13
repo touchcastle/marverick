@@ -45,7 +45,7 @@ class FormSubmission {
       return;
     }
 
-    if (form.percentFilled() < 100) {
+    if (form.percentFilled() < 100 && !Authen.isAdmin()) {
       onResult('ERROR: Please fill all required fields', ErrorType.missingRequired);
       return;
     }

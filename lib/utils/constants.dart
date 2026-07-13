@@ -19,11 +19,12 @@ import 'package:marverick/ui/views/file_list.dart';
 /// 1.14.1        14.04.2026    - Fix form linecheck5 not load and submit dialog
 ///                               disappear.
 /// 1.15.0        18.06.2026    - Add form RT4 & PPC8
+/// 1.15.1        06.07.2026    - Claude refractor
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.15.0';
+const String kVersion = '1.15.1';
 
 ///PageID
 const String kLandingId = 'landing_screen';

@@ -3,13 +3,30 @@ import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:marverick/models/form.dart';
-import 'package:marverick/services/form_service.dart';
 import 'package:marverick/models/field.dart';
+import 'package:marverick/services/forms/ccc_form.dart';
+import 'package:marverick/services/forms/fcss_form.dart';
+import 'package:marverick/services/forms/line_check5_form.dart';
+import 'package:marverick/services/forms/line_check_form.dart';
+import 'package:marverick/services/forms/line_train_form.dart';
+import 'package:marverick/services/forms/ppc5_form.dart';
+import 'package:marverick/services/forms/ppc6_form.dart';
+import 'package:marverick/services/forms/ppc8_form.dart';
+import 'package:marverick/services/forms/psc_form.dart';
+import 'package:marverick/services/forms/rt1_form.dart';
+import 'package:marverick/services/forms/rt22_form.dart';
+import 'package:marverick/services/forms/rt2_form.dart';
+import 'package:marverick/services/forms/rt3_form.dart';
+import 'package:marverick/services/forms/rt4_form.dart';
+import 'package:marverick/services/forms/stdloft_form.dart';
 
 class DatabaseService {
-  static Future openDB() async {
-    openDatabase(join(await getDatabasesPath(), kDbName),
-        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 15);
+  static Future<Database> openDB() async {
+    // Must return/await the actual open — otherwise callers (main.dart)
+    // proceed before the database file exists and before onCreate/onUpgrade
+    // (schema migrations) have actually finished running.
+    return openDatabase(join(await getDatabasesPath(), kDbName),
+        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 16);
   }
 
   static Future createLineCheck(Database db) async {
@@ -24,6 +41,7 @@ class DatabaseService {
             "file_path TEXT NOT NULL, "
             "font_size TEXT, "
             "pdf_url TEXT, "
+            "updated_at TEXT, "
             "pilot_rank TEXT, "
             "pilot_id TEXT, "
             "pilot_license_no TEXT, "
@@ -123,6 +141,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         // "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -229,6 +248,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -360,6 +380,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -491,6 +512,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -621,6 +643,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -750,6 +773,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -868,6 +892,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -996,6 +1021,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1124,6 +1150,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1254,6 +1281,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1383,6 +1411,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1504,6 +1533,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1628,6 +1658,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -1748,6 +1779,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_name TEXT, "
         "pilot_license_no TEXT, "
         "pilot_id TEXT, "
@@ -1867,6 +1899,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "trainee_name TEXT, "
         "trainee_id TEXT, "
         "purser_name TEXT, "
@@ -1951,6 +1984,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "trainee_name TEXT, "
         "trainee_id TEXT, "
         "purser_name TEXT, "
@@ -2090,6 +2124,7 @@ class DatabaseService {
         "file_path TEXT NOT NULL, "
         "font_size TEXT, "
         "pdf_url TEXT, "
+            "updated_at TEXT, "
         "pilot_rank TEXT, "
         "pilot_id TEXT, "
         "pilot_license_no TEXT, "
@@ -2327,6 +2362,10 @@ class DatabaseService {
     } else if (oldVersion == 14) {
       await createRt4(db);
       await createPpc8(db);
+    } else if (oldVersion == 15) {
+      for (final table in kDbTableList) {
+        await db.execute('ALTER TABLE $table ADD COLUMN updated_at TEXT');
+      }
     }
   }
 }
@@ -2349,6 +2388,21 @@ class databaseService {
     );
   }
 
+  /// Reads just the `updated_at` column for [id] in [dbTable], used by the
+  /// Firestore sync layer to decide which side of a conflict is newer
+  /// without reconstructing a full `Form` object.
+  static Future<String?> getUpdatedAt(String dbTable, String id) async {
+    final Database db = await database();
+    final rows = await db.query(
+      dbTable,
+      columns: ['updated_at'],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (rows.isEmpty) return null;
+    return rows.first['updated_at'] as String?;
+  }
+
   static Future<void> dbDelete(Form form, String dbName) async {
     final Database db = await database();
     await db.delete(
@@ -2369,8 +2423,11 @@ class databaseService {
     return input;
   }
 
-  ///Query from sql database into app's list
-  static Future<List<Form>> dbQuery() async {
+  ///Query from sql database into app's list.
+  ///[createBy] scopes the query to a single account's forms (matches the
+  ///`create_by` column) so a shared device never shows/syncs another
+  ///account's forms. Pass null to get everything (not used in normal flow).
+  static Future<List<Form>> dbQuery({String? createBy}) async {
     final Database db = await database();
     List<Form> _dbList = [];
 
@@ -2408,8 +2465,18 @@ class databaseService {
 
     bool isInitiated = false;
     for (int dbIndex = 0; dbIndex < kDbTableList.length; dbIndex++) {
-      final List<Map<String, dynamic>> maps =
-          await db.query(kDbTableList[dbIndex]);
+      // Also include rows with no/blank create_by: forms saved while
+      // Authen.user wasn't populated yet (e.g. before this account-scoping
+      // filter existed, or a login race) would otherwise become permanently
+      // invisible to everyone once a real account queries this table —
+      // the row is still safely there, just unattributed.
+      final List<Map<String, dynamic>> maps = await db.query(
+        kDbTableList[dbIndex],
+        where: createBy != null
+            ? "(create_by = ? OR create_by IS NULL OR create_by = '')"
+            : null,
+        whereArgs: createBy != null ? [createBy] : null,
+      );
       List.generate(maps.length, (i) {
         // late Form append;
         Form? append;
@@ -2418,53 +2485,53 @@ class databaseService {
         ///TODO: New form (8): Add new form query db
         print('initiate db: ${kDbTableList[dbIndex]}');
         if (kDbTableList[dbIndex] == kLineCheckTable) {
-          append = FormService.initLineCheck();
+          append = LineCheckForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kLineCheck5Table) {
-          append = FormService.initLineCheck5();
+          append = LineCheck5Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPPC5Table) {
-          append = FormService.initPpc5();
+          append = Ppc5Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPPC6Table) {
-          append = FormService.initPpc6();
+          append = Ppc6Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPPC8Table) {
-          append = FormService.initPpc8();
+          append = Ppc8Form.init();
           isInitiated = true;
         }  else if (kDbTableList[dbIndex] == kRt1Table) {
-          append = FormService.initRt1();
+          append = Rt1Form.init();
           isInitiated = true;
           // } else if (kDbTableList[dbIndex] == kRt5Table) {
           //   append = FormService.initRt5();
           // } else if (kDbTableList[dbIndex] == kRt6Table) {
           //   append = FormService.initRt6();
         } else if (kDbTableList[dbIndex] == kRt2Table) {
-          append = FormService.initRt2();
+          append = Rt2Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt22Table) {
-          append = FormService.initRt22();
+          append = Rt22Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt3Table) {
-          append = FormService.initRt3();
+          append = Rt3Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt4Table) {
-          append = FormService.initRt4();
+          append = Rt4Form.init();
           isInitiated = true;
         }  else if (kDbTableList[dbIndex] == kStdloftTable) {
-          append = FormService.initStdloft();
+          append = StdloftForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kLineTrainTable) {
-          append = FormService.initLineTrain();
+          append = LineTrainForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kCccTable) {
-          append = FormService.initCcc();
+          append = CccForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPscTable) {
-          append = FormService.initPsc();
+          append = PscForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kFcssTable) {
-          append = FormService.initFcss();
+          append = FcssForm.init();
           isInitiated = true;
         }
 
@@ -2518,7 +2585,7 @@ class databaseService {
     // final List<Map<String, dynamic>> lineCheckMaps =
     //     await db.query(kLineCheckTable);
     // List.generate(lineCheckMaps.length, (i) {
-    //   Form _new = FormService.initLineCheck();
+    //   Form _new = LineCheckForm.init();
     //
     //   //To get item value from database.
     //   // Field _replaceItemValue(Field field) {

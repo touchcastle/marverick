@@ -20,9 +20,14 @@ class Landing extends StatefulWidget {
 class _LandingState extends State<Landing> {
   ///Initialize app's variables
   void _appInitialize() async {
+    // Authen.user must be populated (and Firebase Auth's session restore
+    // actually finished, not just checked) before loading forms —
+    // loadFromDatabase scopes the local query to the signed-in account, so
+    // running it against a not-yet-resolved Authen.user would show an empty
+    // or wrongly-scoped list even though the data is still safely on disk.
+    await Authen.getCurrentUser();
     //Query stored form from database
     await context.read<FormService>().loadFromDatabase();
-    Authen.getCurrentUser();
     await Future.delayed(const Duration(milliseconds: 1500));
     Navigator.of(context).pushReplacement(PageRouteBuilder(
         settings: RouteSettings(

@@ -1,16 +1,15 @@
-// lib/services/form_definitions/line_check_form.dart
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
 import 'package:marverick/services/authen.dart';
 import 'package:marverick/utils/constants.dart';
 
-class LineCheckForm {
-  static const uuid = Uuid();
+class LineTrainForm {
+  static final uuid = Uuid();
 
   static f.Form init() {
     DateTime timeStamp = DateTime.now();
@@ -1351,5 +1350,146 @@ class LineCheckForm {
             posY: 638),
       ],
     );
+  }
+
+  static Map<String, dynamic> toMap(f.Form form) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': form.status.toString(),
+        'type': form.type.toString(),
+        'form_name': form.formName,
+        'create_at': form.createDateTime.toString(),
+        'submit_at': form.submitDateTime != null ? form.submitDateTime.toString() : '',
+        'create_by': form.createBy,
+        'file_path': form.filePath,
+        'id': form.id,
+        'font_size': form.fontSize.round().toString(),
+        'pdf_url': form.pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_name': form.getStrVal('pilot_name'),
+        'pilot_license_no': form.getStrVal('pilot_license_no'),
+        'pilot_id': form.getStrVal('pilot_id'),
+
+        ///Instructor info.
+        'instructor_name': form.getStrVal('instructor_name'),
+        'instructor_cert_no': form.getStrVal('instructor_cert_no'),
+        'instructor_id': form.getStrVal('instructor_id'),
+
+        ///Examiner / CAAT info.
+        'examiner_name': form.getStrVal('examiner_name'),
+        'examiner_license_no': form.getStrVal('examiner_license_no'),
+        'examiner_id': form.getStrVal('examiner_id'),
+
+        ///Check details
+        'course': form.getStrVal('course'),
+        'other_course': form.getStrVal('other_course'),
+        'check_type_0': form.getStrVal('check_type_0'),
+        'check_type_1': form.getStrVal('check_type_1'),
+        'check_type_2': form.getStrVal('check_type_2'),
+        'check_type_3': form.getStrVal('check_type_3'),
+        'check_type_4': form.getStrVal('check_type_4'),
+        'check_type_5': form.getStrVal('check_type_5'),
+        'check_type_6': form.getStrVal('check_type_6'),
+        // 'check_type_7': form.getStrVal('check_type_7'),
+        'other_type': form.getStrVal('other_type'),
+
+        ///Sector
+        'date_1': form.getStrVal('date_1'),
+        'ac_type_1': form.getStrVal('ac_type_1'),
+        'ac_reg_1': form.getStrVal('ac_reg_1'),
+        'flt_no_1': form.getStrVal('flt_no_1'),
+        'route_1': form.getStrVal('route_1'),
+        'duty_1': form.getStrVal('duty_1'),
+        'date_2': form.getStrVal('date_2'),
+        'ac_type_2': form.getStrVal('ac_type_2'),
+        'ac_reg_2': form.getStrVal('ac_reg_2'),
+        'flt_no_2': form.getStrVal('flt_no_2'),
+        'route_2': form.getStrVal('route_2'),
+        'duty_2': form.getStrVal('duty_2'),
+
+        'accum_pf': form.getStrVal('accum_pf'),
+        'accum_pm': form.getStrVal('accum_pm'),
+
+        ///Grading & Comment
+        'q1': form.getStrVal('q1'),
+        'q2': form.getStrVal('q2'),
+        'q3': form.getStrVal('q3'),
+        'q4': form.getStrVal('q4'),
+        'q5': form.getStrVal('q5'),
+        'q6': form.getStrVal('q6'),
+        'q7': form.getStrVal('q7'),
+        'q8': form.getStrVal('q8'),
+        'q9': form.getStrVal('q9'),
+        'q10': form.getStrVal('q10'),
+        'q11': form.getStrVal('q11'),
+        'q12': form.getStrVal('q12'),
+        'q13': form.getStrVal('q13'),
+        'q14': form.getStrVal('q14'),
+        'q15': form.getStrVal('q15'),
+        'q16': form.getStrVal('q16'),
+        'q17': form.getStrVal('q17'),
+        'q18': form.getStrVal('q18'),
+        'q19': form.getStrVal('q19'),
+        'q20': form.getStrVal('q20'),
+        'q21': form.getStrVal('q21'),
+        'q22': form.getStrVal('q22'),
+        'q23': form.getStrVal('q23'),
+        'q24': form.getStrVal('q24'),
+        'q25': form.getStrVal('q25'),
+        'q26': form.getStrVal('q26'),
+        'q27': form.getStrVal('q27'),
+        'q28': form.getStrVal('q28'),
+        'q29': form.getStrVal('q29'),
+        'q30': form.getStrVal('q30'),
+        'q31': form.getStrVal('q31'),
+        'q32': form.getStrVal('q32'),
+        'q33': form.getStrVal('q33'),
+        'q34': form.getStrVal('q34'),
+        'q35': form.getStrVal('q35'),
+        'q36': form.getStrVal('q36'),
+        'q37_detail': form.getStrVal('q37_detail'),
+        'q37': form.getStrVal('q37'),
+        'q38_detail': form.getStrVal('q38_detail'),
+        'q38': form.getStrVal('q38'),
+        'q39_detail': form.getStrVal('q39_detail'),
+        'q39': form.getStrVal('q39'),
+        'q40_detail': form.getStrVal('q40_detail'),
+        'q40': form.getStrVal('q40'),
+
+        'qa_comment': form.getStrVal('qa_comment'),
+        'qb_comment': form.getStrVal('qb_comment'),
+        'qc_comment': form.getStrVal('qc_comment'),
+        'qd_comment': form.getStrVal('qd_comment'),
+        'qe_comment': form.getStrVal('qe_comment'),
+        'qf_comment': form.getStrVal('qf_comment'),
+        'qg_comment': form.getStrVal('qg_comment'),
+
+        ///COMPETENCY
+        'comp_kno': form.getStrVal('comp_kno'),
+        'comp_pro': form.getStrVal('comp_pro'),
+        'comp_com': form.getStrVal('comp_com'),
+        'comp_fpa': form.getStrVal('comp_fpa'),
+        'comp_fpm': form.getStrVal('comp_fpm'),
+        'comp_ltw': form.getStrVal('comp_ltw'),
+        'comp_psd': form.getStrVal('comp_psd'),
+        'comp_saw': form.getStrVal('comp_saw'),
+        'comp_wlm': form.getStrVal('comp_wlm'),
+        'general_comment': form.getStrVal('general_comment'),
+        'additional_note': form.getStrVal('additional_note'),
+
+        ///RESULT
+        'result': form.getStrVal('result'),
+        'examiner_result': form.getStrVal('examiner_result'),
+        // 'pilot_sig_date': form.getStrVal('pilot_sig_date'),
+        // 'instructor_sig_date': form.getStrVal('instructor_sig_date'),
+        'examiner_sig_date': form.getStrVal('examiner_sig_date'),
+      };
   }
 }

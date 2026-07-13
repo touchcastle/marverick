@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Add this match block into your existing Storage rules in Firebase Console
+// -> Storage -> Rules (alongside whatever rule already governs the
+// submitted-PDF paths, e.g. the ppc/rt1/line_check/... folders used by
+// lib/services/form_submission.dart). This repo has no existing storage.rules
+// checked in, so merge this block into whatever is already deployed rather
+// than overwriting it wholesale.
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Signature images live under signatures/{uid}/{formId}_{fieldName}.png.
+    // Only the owning signed-in user may read or write their own signatures.
+    match /signatures/{uid}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

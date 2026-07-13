@@ -1,16 +1,15 @@
-// lib/services/form_definitions/line_check_form.dart
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
 import 'package:marverick/services/authen.dart';
 import 'package:marverick/utils/constants.dart';
 
-class LineCheckForm {
-  static const uuid = Uuid();
+class Rt4Form {
+  static final uuid = Uuid();
 
   static f.Form init() {
     DateTime timeStamp = DateTime.now();
@@ -23,7 +22,7 @@ class LineCheckForm {
     int defaultGrade() => Authen.isTjo() ? 2 : -1;
     bool defaultCheck = false;
 
-    String formName = 'forms/rt32.pdf';
+    String formName = 'forms/rt4.pdf';
     String defaultComment = '';
     // String defaultComment =
     //     'I am being a person authorized by TVJ and/or CAAT to conduct such training as indicated, have supervised the required session in accordance with the published';
@@ -31,13 +30,13 @@ class LineCheckForm {
     // bool defaultCheck = true;
 
     return f.Form(
-      type: f.FormType.rt3,
-      formName: 'RT3',
+      type: f.FormType.rt4,
+      formName: 'RT4',
       createDateTime: timeStamp,
       createBy: Authen.user != null ? Authen.user.email : '',
       id: uuid.v1(),
       filePath: formName,
-      dbTable: kRt3Table,
+      dbTable: kRt4Table,
       dateFormat: 'dd MMM yyyy',
       fontSize: 8,
       sectionLabel: [
@@ -60,9 +59,9 @@ class LineCheckForm {
         'LANDINGS AND AFTER LANDING PROCEDURES',
         'RIGHT HAND SEAT PROFICIENCY (for RHS Captains only))',
         'NON-TECHNICAL',
-        'EGPWS',
+        'ADDITIONAL EXERCISES / OTHERS',
       ],
-      formLabel: 'RT3',
+      formLabel: 'RT4',
       formLabelInfoField1: 'pilot_rank',
       formLabelInfoField2: 'pilot_name',
       fields: [
@@ -202,7 +201,7 @@ class LineCheckForm {
             stringValue: Authen.isTjo() ? 'VTBS-RCTP' : '',
             section: 2,
             posX: 368,
-            posY: 158),
+            posY: 157),
         Field(
             name: 'rhs',
             label: 'RHS',
@@ -211,7 +210,7 @@ class LineCheckForm {
             intValue: Authen.isTjo() ? 0 : -1,
             section: 2,
             posXList: [219, 1000],
-            posYList: [153, 1000]),
+            posYList: [152, 1000]),
         Field(
             name: 'loft_duty',
             label: 'LOFT Duty',
@@ -220,7 +219,7 @@ class LineCheckForm {
             intValue: Authen.isTjo() ? 1 : -1,
             section: 2,
             posXList: [492, 520],
-            posYList: [153, 153]),
+            posYList: [152, 152]),
 
         ///.....................................................................
         ///GRADING
@@ -236,10 +235,10 @@ class LineCheckForm {
             subSection: 1,
             gradeSection: 1,
             posXList: _gradePosX,
-            posY: 225),
+            posY: 223),
         Field(
             name: 'q2',
-            label: 'Drift Down Procedure and Diversion Strategy*',
+            label: 'Emergency: RTO / EMER DES / CREW INCAP / EMER EVAC',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -247,10 +246,10 @@ class LineCheckForm {
             subSection: 1,
             gradeSection: 1,
             posXList: _gradePosX,
-            posY: 238),
+            posY: 237),
         Field(
             name: 'q3',
-            label: 'RVSM and China RVSM Procedures*',
+            label: 'Glide Slope Interception from Above',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -258,7 +257,7 @@ class LineCheckForm {
             subSection: 1,
             gradeSection: 1,
             posXList: _gradePosX,
-            posY: 252),
+            posY: 250),
         Field(
             name: 'qa_comment',
             label: 'Comment',
@@ -269,7 +268,7 @@ class LineCheckForm {
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
-            posY: 225,
+            posY: 224,
             width: 115,
             fontSize: 8),
 
@@ -284,7 +283,7 @@ class LineCheckForm {
             subSection: 2,
             gradeSection: 2,
             posXList: _gradePosX,
-            posY: 279),
+            posY: 278),
         Field(
             name: 'q5_detail',
             label: 'Abnormal Engine Start …………………………',
@@ -294,7 +293,7 @@ class LineCheckForm {
             gradeSection: 2,
             stringValue: Authen.isTjo() ? 'HOT START' : '',
             posX: 200,
-            posY: 293),
+            posY: 292),
         Field(
             name: 'q5',
             label:
@@ -306,7 +305,7 @@ class LineCheckForm {
             subSection: 2,
             gradeSection: 2,
             posXList: _gradePosX,
-            posY: 293),
+            posY: 292),
         Field(
             name: 'q6',
             label:
@@ -318,7 +317,7 @@ class LineCheckForm {
             subSection: 2,
             gradeSection: 2,
             posXList: _gradePosX,
-            posY: 306),
+            posY: 305),
         Field(
             name: 'qb_comment',
             label: 'Comment',
@@ -329,7 +328,7 @@ class LineCheckForm {
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
-            posY: 280,
+            posY: 279,
             width: 115,
             fontSize: 8),
 
@@ -344,7 +343,7 @@ class LineCheckForm {
             subSection: 3,
             gradeSection: 3,
             posXList: _gradePosX,
-            posY: 334),
+            posY: 333),
         Field(
             name: 'q8',
             label: 'Cross Wind Takeoff / Gusty Wind',
@@ -355,7 +354,7 @@ class LineCheckForm {
             subSection: 3,
             gradeSection: 3,
             posXList: _gradePosX,
-            posY: 347),
+            posY: 346),
         Field(
             name: 'q9',
             label: 'Rejected Takeoff at a reasonable speed before reaching V1',
@@ -366,7 +365,7 @@ class LineCheckForm {
             subSection: 3,
             gradeSection: 3,
             posXList: _gradePosX,
-            posY: 361),
+            posY: 360),
         Field(
             name: 'q10',
             label: 'Takeoff with Simulated Engine Failure / Fire at V2',
@@ -377,7 +376,7 @@ class LineCheckForm {
             subSection: 3,
             gradeSection: 3,
             posXList: _gradePosX,
-            posY: 375),
+            posY: 374),
         Field(
             name: 'qc_comment',
             label: 'Comment',
@@ -388,7 +387,7 @@ class LineCheckForm {
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
-            posY: 335,
+            posY: 334,
             width: 115,
             fontSize: 8),
 
@@ -403,7 +402,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 402),
+            posY: 401),
         Field(
             name: 'q12',
             label:
@@ -415,7 +414,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 416),
+            posY: 415),
         Field(
             name: 'q13',
             label: '3D Approach to DH/A of 200 Feet or Higher',
@@ -426,7 +425,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 430),
+            posY: 429),
         Field(
             name: 'q14_check',
             label: '2D Approach.........down to the MDH/A',
@@ -442,7 +441,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: [119, 177, 212],
-            posY: 443),
+            posY: 442),
         Field(
             name: 'q14_check_0',
             type: FieldType.string,
@@ -483,7 +482,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 445),
+            posY: 444),
         Field(
             name: 'q15',
             label: 'Manual Fly with / without Flight Director',
@@ -494,7 +493,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 459),
+            posY: 458),
         Field(
             name: 'q16',
             label: 'Manual Fly with One Engine Inoperative',
@@ -505,7 +504,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 473),
+            posY: 472),
         Field(
             name: 'q17_check',
             label: 'Approach Maneuvering .........',
@@ -520,7 +519,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: [155, 219],
-            posY: 485),
+            posY: 484),
         Field(
             name: 'q17_check_0',
             type: FieldType.string,
@@ -551,7 +550,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 487),
+            posY: 486),
         Field(
             name: 'q18',
             label:
@@ -563,7 +562,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 501),
+            posY: 500),
         Field(
             name: 'q19',
             label: 'IR: Instrument Departure / Arrival / Approach',
@@ -574,7 +573,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 515),
+            posY: 514),
         Field(
             name: 'q20',
             label:
@@ -586,7 +585,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 529),
+            posY: 528),
         Field(
             name: 'q21',
             label: 'Weather Avoidance',
@@ -597,7 +596,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 543),
+            posY: 542),
         Field(
             name: 'q22',
             label: 'Approach Preparation / Briefing / TEM / NAVAIDS Setting',
@@ -608,7 +607,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 556),
+            posY: 555),
         Field(
             name: 'q23',
             label: 'Descent and Approach Management / Aircraft Configuration',
@@ -619,7 +618,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 570),
+            posY: 569),
         Field(
             name: 'q24',
             label: 'Stabilized Approach Criteria and Compliance',
@@ -630,7 +629,7 @@ class LineCheckForm {
             subSection: 4,
             gradeSection: 4,
             posXList: _gradePosX,
-            posY: 583),
+            posY: 582),
         Field(
             name: 'qd_comment',
             label: 'Comment',
@@ -641,24 +640,20 @@ class LineCheckForm {
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
-            posY: 403,
+            posY: 402,
             width: 115,
             fontSize: 8),
 
         ///------------------------------------
         Field(
             name: 'q25_check',
-            label: 'Auto Flight',
+            label: 'Flight Controls ',
             type: FieldType.checkbox,
             listValue: [
-              'A/P Inop',
-              'A/THR Inop',
-              'FAC Fault',
-              'FCU or MCP Fault',
+              'Slats/Flaps System',
+              'Control or Stick Fault',
             ],
             checkBoxValue: [
-              defaultCheck,
-              defaultCheck,
               defaultCheck,
               defaultCheck,
             ],
@@ -666,8 +661,8 @@ class LineCheckForm {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            posXList: [111, 158, 217, 270],
-            posY: 609),
+            posXList: [124, 210],
+            posY: 608),
         Field(
             name: 'q25_check_0',
             type: FieldType.string,
@@ -689,28 +684,8 @@ class LineCheckForm {
             gradeSection: 5,
             stringValue: 'FALSE'),
         Field(
-            name: 'q25_check_2',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 3,
-            subSection: 5,
-            gradeSection: 5,
-            stringValue: 'FALSE'),
-        Field(
-            name: 'q25_check_3',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 3,
-            subSection: 5,
-            gradeSection: 5,
-            stringValue: 'FALSE'),
-        Field(
             name: 'q25',
-            label: 'Auto Flight',
+            label: 'Flight Controls',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -718,12 +693,15 @@ class LineCheckForm {
             subSection: 5,
             gradeSection: 5,
             posXList: _gradePosX2,
-            posY: 612),
+            posY: 611),
         Field(
             name: 'q26_check',
-            label: 'Oxygen',
+            label: 'Ice and Rain',
             type: FieldType.checkbox,
-            listValue: ['Flight Crew Oxygen', 'Passenger Oxygen'],
+            listValue: [
+              'Anti-Ice System Fault',
+              'Pilot or Window Heat System Fault'
+            ],
             checkBoxValue: [
               defaultCheck,
               defaultCheck,
@@ -732,8 +710,8 @@ class LineCheckForm {
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            posXList: [100, 187],
-            posY: 624),
+            posXList: [117, 210],
+            posY: 623),
         Field(
             name: 'q26_check_0',
             type: FieldType.string,
@@ -756,7 +734,7 @@ class LineCheckForm {
             stringValue: 'FALSE'),
         Field(
             name: 'q26',
-            label: 'Oxygen',
+            label: 'Ice and Rain',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -764,29 +742,23 @@ class LineCheckForm {
             subSection: 5,
             gradeSection: 5,
             posXList: _gradePosX2,
-            posY: 626),
+            posY: 625),
         Field(
             name: 'q27_check',
-            label: 'APU',
+            label: 'Pneumatic',
             type: FieldType.checkbox,
             listValue: [
-              'Fault-Auto Shut Down',
-              'Low Oil Press',
-              'Overspeed',
-              'APU Fire'
+              'Bleed System Fault or Leak',
             ],
             checkBoxValue: [
-              defaultCheck,
-              defaultCheck,
-              defaultCheck,
               defaultCheck,
             ],
             isMandatory: false,
             section: 3,
             subSection: 5,
             gradeSection: 5,
-            posXList: [89, 184, 250, 306],
-            posY: 639),
+            posXList: [110],
+            posY: 638),
         Field(
             name: 'q27_check_0',
             type: FieldType.string,
@@ -798,38 +770,8 @@ class LineCheckForm {
             gradeSection: 5,
             stringValue: 'FALSE'),
         Field(
-            name: 'q27_check_1',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 3,
-            subSection: 5,
-            gradeSection: 5,
-            stringValue: 'FALSE'),
-        Field(
-            name: 'q27_check_2',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 3,
-            subSection: 5,
-            gradeSection: 5,
-            stringValue: 'FALSE'),
-        Field(
-            name: 'q27_check_3',
-            type: FieldType.string,
-            input: false,
-            writePdf: false,
-            isMandatory: false,
-            section: 3,
-            subSection: 5,
-            gradeSection: 5,
-            stringValue: 'FALSE'),
-        Field(
             name: 'q27',
-            label: 'APU',
+            label: 'Pneumatic',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -837,7 +779,7 @@ class LineCheckForm {
             subSection: 5,
             gradeSection: 5,
             posXList: _gradePosX2,
-            posY: 641),
+            posY: 640),
         Field(
             name: 'qe_comment',
             label: 'Comment',
@@ -848,7 +790,7 @@ class LineCheckForm {
             maxLength: gradeCommentMaxLen,
             stringValue: defaultComment,
             posX: 445,
-            posY: 612,
+            posY: 611,
             width: 115,
             fontSize: 8),
 
@@ -863,7 +805,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 670),
+            posY: 669),
         Field(
             name: 'q29',
             label: 'Engine Failures / Shutdown / Restart',
@@ -874,11 +816,10 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 683),
+            posY: 682),
         Field(
             name: 'q30',
-            label:
-                'Engine Failure in Cruise Drift Down Procedures and Diversion Strategy',
+            label: 'Emergency Descent',
             type: FieldType.radio,
             listValue: _gradeList,
             intValue: defaultGrade(),
@@ -886,7 +827,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 697),
+            posY: 696),
         Field(
             name: 'q31',
             label: 'Windshear at Takeoff / Landing',
@@ -897,7 +838,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 711),
+            posY: 710),
         Field(
             name: 'q32',
             label: 'TCAS TA Response (*)',
@@ -908,10 +849,11 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX2,
-            posY: 724),
+            posY: 723),
         Field(
             name: 'q33',
-            label: 'TCAS RAs - Maintain rate RAs / Weakening RAs (*)',
+            label:
+                'TCAS RAs - TCAS Altitude crossing RAs / at Maximum altitude (*)',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -919,7 +861,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX2,
-            posY: 738),
+            posY: 739),
         Field(
             name: 'q34_check',
             label: 'Approaches to Stalls Recovery.........',
@@ -934,7 +876,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: [179, 216],
-            posY: 750),
+            posY: 749),
         Field(
             name: 'q34_check_0',
             type: FieldType.string,
@@ -965,7 +907,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 754),
+            posY: 753),
         Field(
             name: 'q35',
             label: 'Pilot Incapacitation',
@@ -976,7 +918,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 767),
+            posY: 766),
         Field(
             name: 'q36',
             label: 'Declaration of Emergency or Urgency',
@@ -987,7 +929,7 @@ class LineCheckForm {
             subSection: 6,
             gradeSection: 6,
             posXList: _gradePosX,
-            posY: 781),
+            posY: 780),
         Field(
             name: 'qf_comment',
             label: 'Comment',
@@ -1277,7 +1219,7 @@ class LineCheckForm {
         ///------------------------------------
         Field(
             name: 'q54',
-            label: 'EGPWS Mode 1: Excessive Sink Rate',
+            label: 'One Engine Taxi Procedure (In and Out)',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -1289,7 +1231,7 @@ class LineCheckForm {
             posY: 399),
         Field(
             name: 'q55',
-            label: 'EGPWS Mode 2: Excessive Terrain Closure Rate',
+            label: 'Glide Slope Interception from Above',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -1301,7 +1243,7 @@ class LineCheckForm {
             posY: 413),
         Field(
             name: 'q56',
-            label: 'EGPWS Mode 3: Descent After Takeoff or Go-Around',
+            label: 'Overweight Landing',
             type: FieldType.radio,
             listValue: _gradeList2,
             intValue: defaultGrade(),
@@ -1311,6 +1253,58 @@ class LineCheckForm {
             gradeSection: 11,
             posXList: _gradePosX2,
             posY: 426),
+        Field(
+            name: 'q57_detail',
+            label: 'Additional Exercises 1',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 11,
+            gradeSection: 11,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 442),
+        Field(
+            name: 'q57',
+            label: 'Additional Exercises 1',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            isMandatory: false,
+            page: 2,
+            section: 3,
+            subSection: 11,
+            gradeSection: 11,
+            posXList: _gradePosX,
+            posY: 439),
+        Field(
+            name: 'q58_detail',
+            label: 'Additional Exercises 2',
+            type: FieldType.string,
+            page: 2,
+            section: 3,
+            subSection: 11,
+            gradeSection: 11,
+            isMandatory: false,
+            textCapitalization: TextCapitalization.sentences,
+            stringValue: Authen.isTjo() ? 'Additional...' : '',
+            posX: 64,
+            posY: 455),
+        Field(
+            name: 'q58',
+            label: 'Additional Exercises 2',
+            type: FieldType.radio,
+            listValue: _gradeList,
+            intValue: defaultGrade(),
+            isMandatory: false,
+            page: 2,
+            section: 3,
+            subSection: 11,
+            gradeSection: 11,
+            posXList: _gradePosX,
+            posY: 452),
         Field(
             name: 'qk_comment',
             label: 'Comment',
@@ -1340,7 +1334,7 @@ class LineCheckForm {
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '2' : '',
             posX: 230,
-            posY: 447),
+            posY: 473),
         Field(
             name: 'no_goaround',
             label: 'Number of Go-around',
@@ -1351,7 +1345,7 @@ class LineCheckForm {
             keyboardType: TextInputType.number,
             stringValue: Authen.isTjo() ? '2' : '',
             posX: 492,
-            posY: 447),
+            posY: 473),
 
         ///.....................................................................
         ///Competency Assessment and Comments
@@ -1366,7 +1360,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 493),
+            posY: 519),
         Field(
             name: 'comp_pro',
             label: 'PRO',
@@ -1377,7 +1371,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 506),
+            posY: 532),
         Field(
             name: 'comp_com',
             label: 'COM',
@@ -1388,7 +1382,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 519),
+            posY: 545),
         Field(
             name: 'comp_fpa',
             label: 'FPA',
@@ -1399,7 +1393,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 532),
+            posY: 558),
         Field(
             name: 'comp_fpm',
             label: 'FPM',
@@ -1410,7 +1404,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 543),
+            posY: 569),
         Field(
             name: 'comp_ltw',
             label: 'LTW',
@@ -1421,7 +1415,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 556),
+            posY: 582),
         Field(
             name: 'comp_psd',
             label: 'PSD',
@@ -1432,7 +1426,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 569),
+            posY: 595),
         Field(
             name: 'comp_saw',
             label: 'SAW',
@@ -1443,7 +1437,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 582),
+            posY: 608),
         Field(
             name: 'comp_wlm',
             label: 'WLM',
@@ -1454,7 +1448,7 @@ class LineCheckForm {
             section: 5,
             subSection: 1,
             posXList: _gradePosX,
-            posY: 595),
+            posY: 621),
         Field(
             name: 'general_comment',
             label: 'General Comment',
@@ -1466,7 +1460,7 @@ class LineCheckForm {
 // isMandatory: false,
             maxLength: 500,
             posX: 42,
-            posY: 495,
+            posY: 521,
             width: 260,
             height: 100,
             fontSize: 8),
@@ -1490,7 +1484,7 @@ class LineCheckForm {
             section: 6,
             subSection: 1,
             posXList: [138, 226, 339, 441, 505],
-            posY: 623),
+            posY: 650),
 
         ///.....................................................................
         ///Signature
@@ -1504,7 +1498,7 @@ class LineCheckForm {
             page: 2,
             section: 7,
             posX: 75,
-            posY: 712),
+            posY: 738),
         Field(
             duplicateFrom: 'pilot_name',
             isMandatory: false,
@@ -1513,7 +1507,7 @@ class LineCheckForm {
             page: 2,
             section: 7,
             posX: 70,
-            posY: 738),
+            posY: 764),
         Field(
 // name: 'pilot_sig_date',
 // label: 'Date',
@@ -1528,7 +1522,7 @@ class LineCheckForm {
 //     DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
 // dateTimeValue: DateTime.now(),
             posX: 70,
-            posY: 748),
+            posY: 774),
         Field(
             name: 'instructor_sig',
             label: 'Instructor\'s Signature',
@@ -1538,7 +1532,7 @@ class LineCheckForm {
             page: 2,
             section: 7,
             posX: 245,
-            posY: 712),
+            posY: 738),
         Field(
             duplicateFrom: 'instructor_name',
             isMandatory: false,
@@ -1547,7 +1541,7 @@ class LineCheckForm {
             page: 2,
             section: 7,
             posX: 245,
-            posY: 738),
+            posY: 764),
         Field(
 // name: 'instructor_sig_date',
 // label: 'Date',
@@ -1562,8 +1556,160 @@ class LineCheckForm {
 //     DateFormat('dd MMM yyyy').format(DateTime.now()).toUpperCase(),
             dateTimeValue: DateTime.now(),
             posX: 245,
-            posY: 748),
+            posY: 774),
       ],
     );
+  }
+
+  static Map<String, dynamic> toMap(f.Form form) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': form.status.toString(),
+        'type': form.type.toString(),
+        'form_name': form.formName,
+        'create_at': form.createDateTime.toString(),
+        'submit_at': form.submitDateTime != null ? form.submitDateTime.toString() : '',
+        'create_by': form.createBy,
+        'file_path': form.filePath,
+        'id': form.id,
+        'font_size': form.fontSize.round().toString(),
+        'pdf_url': form.pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_rank': form.getStrVal('pilot_rank'),
+        'pilot_name': form.getStrVal('pilot_name'),
+        'pilot_license_no': form.getStrVal('pilot_license_no'),
+        'pilot_id': form.getStrVal('pilot_id'),
+
+        ///Instructor info.
+        'instructor_rank': form.getStrVal('instructor_rank'),
+        'instructor_name': form.getStrVal('instructor_name'),
+        'instructor_cert_no': form.getStrVal('instructor_cert_no'),
+        'instructor_id': form.getStrVal('instructor_id'),
+
+        ///Check details
+        'check_date': form.getStrVal('check_date'),
+        'block_time': form.getStrVal('block_time'),
+        'fstd_no': form.getStrVal('fstd_no'),
+        'ac_type': form.getStrVal('ac_type'),
+        'route': form.getStrVal('route'),
+        'rhs': form.getStrVal('rhs'),
+        'loft_duty': form.getStrVal('loft_duty'),
+
+        ///Grading & Comment
+        ///A
+        'q1': form.getStrVal('q1'),
+        'q2': form.getStrVal('q2'),
+        'q3': form.getStrVal('q3'),
+        'q4': form.getStrVal('q4'),
+        'q5_detail': form.getStrVal('q5_detail'),
+        'q5': form.getStrVal('q5'),
+        'q6': form.getStrVal('q6'),
+        'q7': form.getStrVal('q7'),
+        'q8': form.getStrVal('q8'),
+        'q9': form.getStrVal('q9'),
+        'q10': form.getStrVal('q10'),
+        'q11': form.getStrVal('q11'),
+        'q12': form.getStrVal('q12'),
+        'q13': form.getStrVal('q13'),
+        'q14_check_0': form.getStrVal('q14_check_0'),
+        'q14_check_1': form.getStrVal('q14_check_1'),
+        'q14_check_2': form.getStrVal('q14_check_2'),
+        'q14': form.getStrVal('q14'),
+        'q15': form.getStrVal('q15'),
+        'q16': form.getStrVal('q16'),
+        'q17_check_0': form.getStrVal('q17_check_0'),
+        'q17_check_1': form.getStrVal('q17_check_1'),
+        'q17': form.getStrVal('q17'),
+        'q18': form.getStrVal('q18'),
+        'q19': form.getStrVal('q19'),
+        'q20': form.getStrVal('q20'),
+        'q21': form.getStrVal('q21'),
+        'q22': form.getStrVal('q22'),
+        'q23': form.getStrVal('q23'),
+        'q24': form.getStrVal('q24'),
+        'q25_check_0': form.getStrVal('q25_check_0'),
+        'q25_check_1': form.getStrVal('q25_check_1'),
+        'q25': form.getStrVal('q25'),
+        'q26_check_0': form.getStrVal('q26_check_0'),
+        'q26_check_1': form.getStrVal('q26_check_1'),
+        'q26': form.getStrVal('q26'),
+        'q27_check_0': form.getStrVal('q27_check_0'),
+        'q27': form.getStrVal('q27'),
+        'q28': form.getStrVal('q28'),
+        'q29': form.getStrVal('q29'),
+        'q30': form.getStrVal('q30'),
+        'q31': form.getStrVal('q31'),
+        'q32': form.getStrVal('q32'),
+        'q33': form.getStrVal('q33'),
+        'q34_check_0': form.getStrVal('q34_check_0'),
+        'q34_check_1': form.getStrVal('q34_check_1'),
+        'q34': form.getStrVal('q34'),
+        'q35': form.getStrVal('q35'),
+        'q36': form.getStrVal('q36'),
+        'q37': form.getStrVal('q37'),
+        'q38': form.getStrVal('q38'),
+        'q39': form.getStrVal('q39'),
+        'q40': form.getStrVal('q40'),
+        'q41': form.getStrVal('q41'),
+        'q42': form.getStrVal('q42'),
+        'q43': form.getStrVal('q43'),
+        'q44': form.getStrVal('q44'),
+        'q45': form.getStrVal('q45'),
+        'q46': form.getStrVal('q46'),
+        'q47': form.getStrVal('q47'),
+        'q48': form.getStrVal('q48'),
+        'q49': form.getStrVal('q49'),
+        'q50': form.getStrVal('q50'),
+        'q51': form.getStrVal('q51'),
+        'q52': form.getStrVal('q52'),
+        'q53': form.getStrVal('q53'),
+        'q54': form.getStrVal('q54'),
+        'q55': form.getStrVal('q55'),
+        'q56': form.getStrVal('q56'),
+        'q57_detail': form.getStrVal('q57_detail'),
+        'q57': form.getStrVal('q57'),
+        'q58_detail': form.getStrVal('q58_detail'),
+        'q58': form.getStrVal('q58'),
+
+        'qa_comment': form.getStrVal('qa_comment'),
+        'qb_comment': form.getStrVal('qb_comment'),
+        'qc_comment': form.getStrVal('qc_comment'),
+        'qd_comment': form.getStrVal('qd_comment'),
+        'qe_comment': form.getStrVal('qe_comment'),
+        'qf_comment': form.getStrVal('qf_comment'),
+        'qg_comment': form.getStrVal('qg_comment'),
+        'qh_comment': form.getStrVal('qh_comment'),
+        'qi_comment': form.getStrVal('qi_comment'),
+        'qj_comment': form.getStrVal('qj_comment'),
+        'qk_comment': form.getStrVal('qk_comment'),
+
+        ///LANDING AND GO-AROUND
+        'no_landing': form.getStrVal('no_landing'),
+        'no_goaround': form.getStrVal('no_goaround'),
+
+        ///COMPETENCY
+        'comp_kno': form.getStrVal('comp_kno'),
+        'comp_pro': form.getStrVal('comp_pro'),
+        'comp_com': form.getStrVal('comp_com'),
+        'comp_fpa': form.getStrVal('comp_fpa'),
+        'comp_fpm': form.getStrVal('comp_fpm'),
+        'comp_ltw': form.getStrVal('comp_ltw'),
+        'comp_psd': form.getStrVal('comp_psd'),
+        'comp_saw': form.getStrVal('comp_saw'),
+        'comp_wlm': form.getStrVal('comp_wlm'),
+        'general_comment': form.getStrVal('general_comment'),
+
+        ///RESULT
+        'result': form.getStrVal('result'),
+// 'pilot_sig_date': form.getStrVal('pilot_sig_date'),
+// 'instructor_sig_date': form.getStrVal('instructor_sig_date'),
+      };
   }
 }

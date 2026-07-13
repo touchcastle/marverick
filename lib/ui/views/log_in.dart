@@ -4,7 +4,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:marverick/services/authen.dart';
+import 'package:marverick/services/form_service.dart';
 import 'package:marverick/ui/views/main_menu.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
@@ -96,6 +98,12 @@ class _LoginState extends State<Login> {
     try {
       Utils.showInProgress(true);
       await Authen.signIn(email, password);
+      if (Authen.user != null) {
+        // Loads this account's local forms and kicks off pulling anything
+        // already in their Firestore account — without this, a fresh
+        // sign-in on a new device never sees forms created elsewhere.
+        await context.read<FormService>().loadFromDatabase();
+      }
       Utils.showInProgress(false);
       if (Authen.user != null) {
         if (widget.fromInside) {

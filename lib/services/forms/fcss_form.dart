@@ -1,16 +1,15 @@
-// lib/services/form_definitions/line_check_form.dart
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-
 import 'package:marverick/models/form.dart' as f;
 import 'package:marverick/models/field.dart';
 import 'package:marverick/services/authen.dart';
 import 'package:marverick/utils/constants.dart';
 
-class LineCheckForm {
-  static const uuid = Uuid();
+class FcssForm {
+  static final uuid = Uuid();
 
   static f.Form init() {
     DateTime timeStamp = DateTime.now();
@@ -938,5 +937,113 @@ class LineCheckForm {
             posY: 777),
       ],
     );
+  }
+
+  static Map<String, dynamic> toMap(f.Form form) {
+      return {
+        ///----------------------------------------------------------------------
+        ///HEADER
+        ///----------------------------------------------------------------------
+        ///Form info.
+        'status': form.status.toString(),
+        'type': form.type.toString(),
+        'form_name': form.formName,
+        'create_at': form.createDateTime.toString(),
+        'submit_at': form.submitDateTime != null ? form.submitDateTime.toString() : '',
+        'create_by': form.createBy,
+        'file_path': form.filePath,
+        'id': form.id,
+        'font_size': form.fontSize.round().toString(),
+        'pdf_url': form.pdfUrl ?? '',
+
+        ///----------------------------------------------------------------------
+        ///ITEM
+        ///----------------------------------------------------------------------
+        ///Pilot info.
+        'pilot_rank': form.getStrVal('pilot_rank'),
+        'pilot_name': form.getStrVal('pilot_name'),
+        'pilot_license_no': form.getStrVal('pilot_license_no'),
+        'pilot_id': form.getStrVal('pilot_id'),
+
+        ///Instructor info.
+        'evaluator_rank': form.getStrVal('evaluator_rank'),
+        'evaluator_name': form.getStrVal('evaluator_name'),
+        'evaluator_license_no': form.getStrVal('evaluator_license_no'),
+        'evaluator_id': form.getStrVal('evaluator_id'),
+
+        ///Check details
+        'check_date': form.getStrVal('check_date'),
+        'block_time': form.getStrVal('block_time'),
+        'fstd_no': form.getStrVal('fstd_no'),
+        'ac_type': form.getStrVal('ac_type'),
+        'check_type': form.getStrVal('check_type'),
+        'check_type_other': form.getStrVal('check_type_other'),
+
+        ///Grading & Comment
+        ///A
+        'q1': form.getStrVal('q1'),
+        'q2': form.getStrVal('q2'),
+        'q3': form.getStrVal('q3'),
+        'q4_check_0': form.getStrVal('q4_check_0'),
+        'q4_check_1': form.getStrVal('q4_check_1'),
+        'q4_check_2': form.getStrVal('q4_check_2'),
+        'q4_detail': form.getStrVal('q4_detail'),
+        'q4': form.getStrVal('q4'),
+        'q5': form.getStrVal('q5'),
+        'q6': form.getStrVal('q6'),
+        'q7': form.getStrVal('q7'),
+        'q8_check_0': form.getStrVal('q8_check_0'),
+        'q8_check_1': form.getStrVal('q8_check_1'),
+        'q8': form.getStrVal('q8'),
+        'q9': form.getStrVal('q9'),
+        'q10_check_0': form.getStrVal('q10_check_0'),
+        'q10_check_1': form.getStrVal('q10_check_1'),
+        'q10': form.getStrVal('q10'),
+        'q11_check_0': form.getStrVal('q11_check_0'),
+        'q11_check_1': form.getStrVal('q11_check_1'),
+        'q11_check_2': form.getStrVal('q11_check_2'),
+        'q11_check_3': form.getStrVal('q11_check_3'),
+        'q11_detail': form.getStrVal('q11_detail'),
+        'q11': form.getStrVal('q11'),
+        'q12_check_0': form.getStrVal('q12_check_0'),
+        'q12_check_1': form.getStrVal('q12_check_1'),
+        'q12': form.getStrVal('q12'),
+        'q13': form.getStrVal('q13'),
+        'q14': form.getStrVal('q14'),
+        'q15_check_0': form.getStrVal('q15_check_0'),
+        'q15_check_1': form.getStrVal('q15_check_1'),
+        'q15_check_2': form.getStrVal('q15_check_2'),
+        'q15': form.getStrVal('q15'),
+        'q16': form.getStrVal('q16'),
+        'q17': form.getStrVal('q17'),
+        'q18': form.getStrVal('q18'),
+        'q19': form.getStrVal('q19'),
+        'q20': form.getStrVal('q20'),
+
+
+        'qa_comment': form.getStrVal('qa_comment'),
+        'qb_comment': form.getStrVal('qb_comment'),
+        'qc_comment': form.getStrVal('qc_comment'),
+
+        ///LANDING AND GO-AROUND
+        'no_landing': form.getStrVal('no_landing'),
+        'no_goaround': form.getStrVal('no_goaround'),
+
+        ///COMPETENCY
+        'comp_kno': form.getStrVal('comp_kno'),
+        'comp_pro': form.getStrVal('comp_pro'),
+        'comp_com': form.getStrVal('comp_com'),
+        'comp_fpa': form.getStrVal('comp_fpa'),
+        'comp_fpm': form.getStrVal('comp_fpm'),
+        'comp_ltw': form.getStrVal('comp_ltw'),
+        'comp_psd': form.getStrVal('comp_psd'),
+        'comp_saw': form.getStrVal('comp_saw'),
+        'comp_wlm': form.getStrVal('comp_wlm'),
+        'general_comment': form.getStrVal('general_comment'),
+
+        ///RESULT
+        'result': form.getStrVal('result'),
+// 'instructor_sig_date': form.getStrVal('instructor_sig_date'),
+      };
   }
 }

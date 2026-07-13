@@ -368,6 +368,19 @@ class _FormListState extends State<FormList> {
   Text formStatus(f.Form form) =>
       Text(displayStatus(form.status), style: Utils.isIpad ? labelL() : labelS());
 
+  /// Shows whether [form]'s latest local save has reached Firestore yet.
+  /// Hidden in sample mode, since sample forms never sync.
+  Widget syncStatusIcon(f.Form form) {
+    // Sync temporarily disabled — icon hidden until re-enabled.
+    return const SizedBox.shrink();
+    // if (Authen.isSample) return const SizedBox.shrink();
+    // return Icon(
+    //   form.synced ? Icons.cloud_done : Icons.cloud_off,
+    //   size: Utils.isIpad ? 20 : 16,
+    //   color: form.synced ? Colors.black45 : kPrimary,
+    // );
+  }
+
   Widget formPercentCompleted(f.Form form, int index) {
     if (form.status == FormStatus.working) {
       return Text(
@@ -394,7 +407,8 @@ class _FormListState extends State<FormList> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     formStatus(form),
-                    // const SizedBox(width: 5),
+                    const SizedBox(width: 5),
+                    syncStatusIcon(form),
                     // formPercentCompleted(form, index),
                   ],
                 ),

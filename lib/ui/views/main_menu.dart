@@ -7,6 +7,16 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
+import 'package:marverick/services/forms/fcss_form.dart';
+import 'package:marverick/services/forms/line_check5_form.dart';
+import 'package:marverick/services/forms/line_check_form.dart';
+import 'package:marverick/services/forms/line_train_form.dart';
+import 'package:marverick/services/forms/ppc6_form.dart';
+import 'package:marverick/services/forms/ppc8_form.dart';
+import 'package:marverick/services/forms/rt3_form.dart';
+import 'package:marverick/services/forms/rt4_form.dart';
+import 'package:marverick/services/forms/sample_form.dart';
+import 'package:marverick/services/forms/stdloft_form.dart';
 import 'package:marverick/ui/views/log_in.dart';
 import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
@@ -123,6 +133,21 @@ class _MainMenuState extends State<MainMenu> {
                 },
               ),
             ),
+            // Sync temporarily disabled — button hidden until re-enabled.
+            const SizedBox.shrink(),
+            // Authen.user != null && !Authen.isSample
+            //     ? IconButton(
+            //         icon: const Icon(Icons.sync, color: Colors.white),
+            //         tooltip: 'Sync now',
+            //         onPressed: () async {
+            //           Utils.showInProgress(true);
+            //           final message =
+            //               await context.read<FormService>().manualSync();
+            //           Utils.showInProgress(false);
+            //           Snackbar.show(context, text: message, type: Type.info);
+            //         },
+            //       )
+            //     : const SizedBox.shrink(),
             Authen.user == null
                 ? TextButton(
                     child: const Text(
@@ -205,11 +230,11 @@ class _MainMenuState extends State<MainMenu> {
                 if (Authen.isSample) {
                   context
                       .read<FormService>()
-                      .newForm(context, FormService.initSample());
+                      .newForm(context, SampleForm.init());
                 } else {
                   context
                       .read<FormService>()
-                      .newForm(context, FormService.initLineCheck());
+                      .newForm(context, LineCheckForm.init());
                 }
               })
           : SpeedDial(
@@ -229,7 +254,7 @@ class _MainMenuState extends State<MainMenu> {
                 //   onTap: () {
                 //     context
                 //         .read<FormService>()
-                //         .newForm(context, FormService.initCcc());
+                //         .newForm(context, CccForm.init());
                 //   },
                 // ),
                 // SpeedDialChild(
@@ -239,7 +264,7 @@ class _MainMenuState extends State<MainMenu> {
                 //   onTap: () {
                 //     context
                 //         .read<FormService>()
-                //         .newForm(context, FormService.initPsc());
+                //         .newForm(context, PscForm.init());
                 //   },
                 // ),
                 SpeedDialChild(
@@ -249,7 +274,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initFcss());
+                        .newForm(context, FcssForm.init());
                   },
                 ),
                 // SpeedDialChild(
@@ -259,7 +284,7 @@ class _MainMenuState extends State<MainMenu> {
                 //   onTap: () {
                 //     context
                 //         .read<FormService>()
-                //         .newForm(context, FormService.initLineCheck());
+                //         .newForm(context, LineCheckForm.init());
                 //   },
                 // ),
                 SpeedDialChild(
@@ -269,7 +294,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initLineCheck5());
+                        .newForm(context, LineCheck5Form.init());
                   },
                 ),
                 // if ((DateTime.now().isBefore(kFirstJuly25)) || Authen.isAdmin())
@@ -280,7 +305,7 @@ class _MainMenuState extends State<MainMenu> {
                 //     onTap: () {
                 //       context
                 //           .read<FormService>()
-                //           .newForm(context, FormService.initPpc5());
+                //           .newForm(context, Ppc5Form.init());
                 //     },
                 //   ),
                 if ((DateTime.now().isBefore(k1Jul26)) || Authen.isAdmin())
@@ -293,7 +318,7 @@ class _MainMenuState extends State<MainMenu> {
                     onTap: () {
                       context
                           .read<FormService>()
-                          .newForm(context, FormService.initPpc6());
+                          .newForm(context, Ppc6Form.init());
                     },
                   ),
                 if ((DateTime.now().isAfter(k1Jul26)) || Authen.isAdmin())
@@ -304,7 +329,7 @@ class _MainMenuState extends State<MainMenu> {
                     onTap: () {
                       context
                           .read<FormService>()
-                          .newForm(context, FormService.initPpc8());
+                          .newForm(context, Ppc8Form.init());
                     },
                   ),
                 // if ((DateTime.now().isBefore(kFirstJuly25)) || Authen.isAdmin())
@@ -316,7 +341,7 @@ class _MainMenuState extends State<MainMenu> {
                 //     onTap: () {
                 //       context
                 //           .read<FormService>()
-                //           .newForm(context, FormService.initRt1());
+                //           .newForm(context, Rt1Form.init());
                 //     },
                 //   ),
                 // if ((DateTime.now().isBefore(k28July25)) || Authen.isAdmin())
@@ -328,7 +353,7 @@ class _MainMenuState extends State<MainMenu> {
                 //     onTap: () {
                 //       context
                 //           .read<FormService>()
-                //           .newForm(context, FormService.initRt2());
+                //           .newForm(context, Rt2Form.init());
                 //     },
                 //   ),
                 // if ((DateTime.now().isBefore(k1Jan26)) || Authen.isAdmin())
@@ -340,7 +365,7 @@ class _MainMenuState extends State<MainMenu> {
                 //     onTap: () {
                 //       context
                 //           .read<FormService>()
-                //           .newForm(context, FormService.initRt22());
+                //           .newForm(context, Rt22Form.init());
                 //     },
                 //   ),
                 if ((DateTime.now().isBefore(k1Jul26)) || Authen.isAdmin())
@@ -352,7 +377,7 @@ class _MainMenuState extends State<MainMenu> {
                     onTap: () {
                       context
                           .read<FormService>()
-                          .newForm(context, FormService.initRt3());
+                          .newForm(context, Rt3Form.init());
                     },
                   ),
                 if ((DateTime.now().isAfter(k1Jul26)) || Authen.isAdmin())
@@ -363,7 +388,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initRt4());
+                        .newForm(context, Rt4Form.init());
                   },
                 ),
                 SpeedDialChild(
@@ -375,7 +400,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initLineTrain());
+                        .newForm(context, LineTrainForm.init());
                   },
                 ),
                 SpeedDialChild(
@@ -385,7 +410,7 @@ class _MainMenuState extends State<MainMenu> {
                   onTap: () {
                     context
                         .read<FormService>()
-                        .newForm(context, FormService.initStdloft());
+                        .newForm(context, StdloftForm.init());
                   },
                 ),
                 // SpeedDialChild(

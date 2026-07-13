@@ -32,10 +32,15 @@ class Authen {
   static bool isSample = false;
   static int forceAdmin = 0;
 
-  static void getCurrentUser() {
-    if (auth.currentUser != null) {
-      user = auth.currentUser;
-    }
+  /// Waits for Firebase Auth to finish restoring any persisted session.
+  /// `auth.currentUser` can still be null immediately after app launch even
+  /// when a session is cached — `authStateChanges()`'s first event is the
+  /// point at which Firebase has actually determined the real signed-in
+  /// state, so callers that gate behavior on "is someone logged in" (like
+  /// loading this account's local forms) need to wait for it rather than
+  /// read `currentUser` synchronously on a cold start.
+  static Future<void> getCurrentUser() async {
+    user = await auth.authStateChanges().first;
   }
 
   static void forcingAdmin() {

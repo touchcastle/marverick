@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// Paste this into Firebase Console -> Firestore Database -> Rules.
+// There is no firebase.json/CLI project checked into this repo, so the
+// Console is the simplest way to apply it (no `firebase deploy` needed).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each user's forms live under users/{uid}/forms/{formId}. Only the
+    // owning signed-in user may read or write their own forms.
+    match /users/{uid}/forms/{formId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
