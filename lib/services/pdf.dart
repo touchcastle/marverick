@@ -132,8 +132,9 @@ class Pdf {
             ///Signature
             if (_field.type == FieldType.signature &&
                 _field.signature != null) {
-              // print(_field.name);
-              await _field.convertSignature((String response) {}, false);
+              // Use the already-confirmed bytes as-is — do not re-derive
+              // from the live drawing controller here, since it may hold a
+              // newer, unconfirmed re-signing the user never saved.
               final PdfBitmap image = PdfBitmap(_field.signature!);
               var _decodedImage = await decodeImageFromList(_field.signature!);
               var _width = _field.sigWidth;

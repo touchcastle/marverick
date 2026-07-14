@@ -27,7 +27,7 @@ class Ppc8Form {
 
     return f.Form(
       type: f.FormType.ppc8,
-      formName: 'PPC',
+      formName: 'PPC8',
       createDateTime: timeStamp,
       createBy: Authen.user != null ? Authen.user.email : '',
       id: uuid.v1(),

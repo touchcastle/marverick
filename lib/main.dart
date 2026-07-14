@@ -15,6 +15,11 @@ import 'package:upgrader/upgrader.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // Utils.isIpad defaults to true and drives every mobile-vs-tablet font
+  // size in the app (input screen, speed dial, file list) — without this,
+  // phones render with tablet-sized fonts since the default never gets
+  // corrected.
+  await Utils.checkIpad();
 
   Pdf pdf = Pdf();
   Authen authen = Authen();

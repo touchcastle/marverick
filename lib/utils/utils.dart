@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -11,6 +12,12 @@ class Utils {
   static bool isIpad = true;
 
   static Future<bool> checkIpad() async {
+    // deviceInfo.iosInfo throws on non-iOS platforms — an Android device is
+    // never an iPad, so short-circuit rather than call the iOS-only API.
+    if (!Platform.isIOS) {
+      isIpad = false;
+      return false;
+    }
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     IosDeviceInfo info = await deviceInfo.iosInfo;
     if (info.model.toLowerCase().contains("ipad")) {

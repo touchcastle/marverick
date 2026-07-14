@@ -232,10 +232,15 @@ class FormService extends ChangeNotifier {
           await databaseService.dbInsert(data, form.dbTable);
 
           ///Save signature
+          ///Only persists a signature that was already explicitly confirmed
+          ///via the signature pad's own save button (field.signature) —
+          ///must NOT re-derive from the live drawing controller here, since
+          ///the controller keeps whatever is currently drawn even if never
+          ///confirmed. Re-deriving on every autosave (e.g. the one that
+          ///fires when backing out of the input screen) would silently
+          ///commit an unconfirmed re-signing over the previously saved one.
           for (int i = 0; i < form.fields.length; i++) {
             if (form.fields[i].type == FieldType.signature) {
-              await form.fields[i]
-                  .convertSignature((String response) {}, false);
               if (form.fields[i].signature != null) {
                 await SignatureStorage.save('${form.id}${form.fields[i].name}',
                     form.fields[i].signature!);
