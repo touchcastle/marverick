@@ -134,28 +134,33 @@ class _InputScreenState extends State<InputScreen> {
           settings: const RouteSettings(name: kMainPageName),
           pageBuilder: (_, __, ___) => Login(fromInside: true)));
     } else {
-      ErrorType errorType = ErrorType.success;
+      // Default to an error type so any path that fails to produce a real
+      // result never renders as a green "success" snackbar.
+      ErrorType errorType = ErrorType.other;
+      indexPage = 2;
 
       Utils.showInProgress(true);
       try {
+        // No outer timeout race here: submitForm reports the true outcome
+        // (its network calls are individually time-bounded), so the message
+        // always matches what actually happened.
         await context.read<FormService>().submitForm(widget.form,
             (String response, ErrorType type) {
           errorType = type;
           if (response == kStatusSuccess) {
-            message = 'SUCCESS: form submitted';
+            message = 'Form submitted successfully.';
+            indexPage = 0;
           } else {
             message = response;
             errorType == ErrorType.noInternet ? indexPage = 1 : indexPage = 2;
           }
-        }).timeout(kSubmitTimeout);
-      } on TimeoutException {
+        });
+      } catch (e) {
         Utils.showInProgress(false);
         indexPage = 2;
-        message = 'Session timeout, please try again';
-      } on Error catch (e) {
-        Utils.showInProgress(false);
-        indexPage = 2;
-        print('Error [intput79]: $e');
+        errorType = ErrorType.other;
+        message = 'Couldn\'t submit — please try again.';
+        print('Error [input submit]: $e');
       }
       Utils.showInProgress(false);
       Snackbar.show(context,

@@ -9,7 +9,6 @@ import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
 import 'package:marverick/services/forms/fcss_form.dart';
 import 'package:marverick/services/forms/line_check5_form.dart';
-import 'package:marverick/services/forms/line_check_form.dart';
 import 'package:marverick/services/forms/line_train_form.dart';
 import 'package:marverick/services/forms/ppc6_form.dart';
 import 'package:marverick/services/forms/ppc8_form.dart';
@@ -22,7 +21,6 @@ import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
 import 'package:marverick/utils/utils.dart';
 import 'package:upgrader/upgrader.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 class MainMenu extends StatefulWidget {
   static const id = kMainMenuId; //for route.
@@ -37,42 +35,46 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   late StreamSubscription<ConnectivityResult> subscription;
-  bool wasDisconnected = false;
+  // Last *stable* connectivity state we've reflected to the user. Starts true
+  // so a normal online launch shows nothing.
+  bool _online = true;
+  Timer? _connDebounce;
 
   void _screenInit() async {
-    // print(await Connectivity().checkConnectivity());
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      // print(result);
-
-      if (result == ConnectivityResult.none &&
-          (await Connectivity().checkConnectivity() ==
-              ConnectivityResult.none)) {
-        wasDisconnected = true;
-        // showOfflineSnackbar();
-      } else if (result != ConnectivityResult.none &&
-          (await Connectivity().checkConnectivity() !=
-              ConnectivityResult.none) &&
-          wasDisconnected) {
-        wasDisconnected = false;
+    subscription =
+        Connectivity().onConnectivityChanged.listen((ConnectivityResult _) {
+      // The radio can flap none<->wifi<->cellular several times while
+      // (re)connecting, firing many events. Debounce: wait for ~2s of quiet,
+      // re-check the real state, and only announce a genuine online<->offline
+      // change — so the user never sees the message toggle repeatedly.
+      _connDebounce?.cancel();
+      _connDebounce = Timer(const Duration(seconds: 2), () async {
+        final current = await Connectivity().checkConnectivity();
+        final online = current != ConnectivityResult.none;
+        if (online == _online) return; // no real change → stay quiet
+        _online = online;
+        if (!mounted) return;
         Snackbar.show(context,
-            text: 'Connection restored.',
-            type: Type.info,
+            text: online
+                ? 'Back online.'
+                : 'No internet connection. You can keep filling in forms — they\'re saved on this device.',
+            type: online ? Type.info : Type.caution,
             isFixed: true,
-            duration: 2);
-      }
+            duration: online ? 2 : 5);
+      });
     });
   }
 
   void showOfflineSnackbar() async {
     await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    _online = false;
     Snackbar.show(context,
         text:
-            'NO INTERNET CONNECTION: You can create or edit form while offline.',
-        type: Type.info,
+            'No internet connection. You can keep filling in forms — they\'re saved on this device.',
+        type: Type.caution,
         isFixed: true,
-        duration: 10);
+        duration: 5);
   }
 
   @override
@@ -85,6 +87,7 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   void dispose() {
+    _connDebounce?.cancel();
     subscription.cancel();
     super.dispose();
   }
@@ -96,10 +99,6 @@ class _MainMenuState extends State<MainMenu> {
     //     DateTime.now().isAfter(DateTime.parse('2024-01-01 00:00:00.000'));
 
     // print('is ipad >> ${Utils.isIpad}');
-
-    String rtText() => DateTime.now().isAfter(kFirstMay25)
-        ? 'RECURRENT TRAINING RT1 (rev.01)'
-        : 'RECURRENT TRAINING RT1 (rev.00)';
 
     TextStyle headerL() => TextStyle(
         color: kPrimaryDarker, fontWeight: FontWeight.bold, fontSize: 18);
@@ -133,21 +132,19 @@ class _MainMenuState extends State<MainMenu> {
                 },
               ),
             ),
-            // Sync temporarily disabled — button hidden until re-enabled.
-            const SizedBox.shrink(),
-            // Authen.user != null && !Authen.isSample
-            //     ? IconButton(
-            //         icon: const Icon(Icons.sync, color: Colors.white),
-            //         tooltip: 'Sync now',
-            //         onPressed: () async {
-            //           Utils.showInProgress(true);
-            //           final message =
-            //               await context.read<FormService>().manualSync();
-            //           Utils.showInProgress(false);
-            //           Snackbar.show(context, text: message, type: Type.info);
-            //         },
-            //       )
-            //     : const SizedBox.shrink(),
+            Authen.user != null && !Authen.isSample
+                ? IconButton(
+                    icon: const Icon(Icons.sync, color: Colors.white),
+                    tooltip: 'Sync now',
+                    onPressed: () async {
+                      Utils.showInProgress(true);
+                      final message =
+                          await context.read<FormService>().manualSync();
+                      Utils.showInProgress(false);
+                      Snackbar.show(context, text: message, type: Type.info);
+                    },
+                  )
+                : const SizedBox.shrink(),
             Authen.user == null
                 ? TextButton(
                     child: const Text(
@@ -226,16 +223,9 @@ class _MainMenuState extends State<MainMenu> {
               elevation: 3,
               child: Icon(Icons.add),
               backgroundColor: kPrimaryAccent,
+              // This FAB only renders for the sample/demo account.
               onPressed: () {
-                if (Authen.isSample) {
-                  context
-                      .read<FormService>()
-                      .newForm(context, SampleForm.init());
-                } else {
-                  context
-                      .read<FormService>()
-                      .newForm(context, LineCheckForm.init());
-                }
+                context.read<FormService>().newForm(context, SampleForm.init());
               })
           : SpeedDial(
               buttonSize: Utils.isIpad ? Size(56.0, 56.0) : Size(36.0, 36.0),
@@ -246,6 +236,8 @@ class _MainMenuState extends State<MainMenu> {
               backgroundColor: kPrimaryAccent,
               spacing: 10,
               spaceBetweenChildren: 1,
+              // todo: New form step 10 — add a SpeedDialChild here that calls
+              // context.read<FormService>().newForm(context, <X>Form.init()).
               children: [
                 // SpeedDialChild(
                 //   child: Icon(Icons.add, color: kPrimaryDarker),
@@ -381,16 +373,16 @@ class _MainMenuState extends State<MainMenu> {
                     },
                   ),
                 if ((DateTime.now().isAfter(k1Jul26)) || Authen.isAdmin())
-                SpeedDialChild(
-                  child: Icon(Icons.add, color: kPrimaryDarker),
-                  label: 'RECURRENT TRAINING RT4 (rev.01)',
-                  labelStyle: Utils.isIpad ? headerL() : headerS(),
-                  onTap: () {
-                    context
-                        .read<FormService>()
-                        .newForm(context, Rt4Form.init());
-                  },
-                ),
+                  SpeedDialChild(
+                    child: Icon(Icons.add, color: kPrimaryDarker),
+                    label: 'RECURRENT TRAINING RT4 (rev.01)',
+                    labelStyle: Utils.isIpad ? headerL() : headerS(),
+                    onTap: () {
+                      context
+                          .read<FormService>()
+                          .newForm(context, Rt4Form.init());
+                    },
+                  ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: DateTime.now().isBefore(k1Jan26)

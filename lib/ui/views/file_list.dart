@@ -118,7 +118,9 @@ class _FormListState extends State<FormList> {
 
   Future _submitForm(BuildContext c, f.Form form) async {
     String message = '';
-    ErrorType errorType = ErrorType.success;
+    // Default to an error type so a failed/never-completed submit never shows
+    // as a green "success" snackbar.
+    ErrorType errorType = ErrorType.other;
 
     if (Authen.user == null) {
       await Navigator.of(context).push(PageRouteBuilder(
@@ -127,21 +129,22 @@ class _FormListState extends State<FormList> {
     } else {
       Utils.showInProgress(true);
       try {
+        // submitForm reports the true outcome (its network calls are
+        // individually time-bounded), so no outer timeout race is needed.
         await context.read<FormService>().submitForm(form,
             (String response, ErrorType type) {
           errorType = type;
-          if (response == 'SUCCESS') {
-            message = 'SUCCESS: form submitted';
+          if (response == kStatusSuccess) {
+            message = 'Form submitted successfully.';
           } else {
             message = response;
           }
-        }).timeout(kSubmitTimeout);
-      } on TimeoutException {
+        });
+      } catch (e) {
         Utils.showInProgress(false);
-        message = 'Session timeout, please try again';
-      } on Error catch (e) {
-        Utils.showInProgress(false);
-        print('Error [file_list137]: $e');
+        errorType = ErrorType.other;
+        message = 'Couldn\'t submit — please try again.';
+        print('Error [file_list submit]: $e');
       }
 
       Utils.showInProgress(false);
@@ -363,22 +366,21 @@ class _FormListState extends State<FormList> {
   }
 
   // Text formName(f.Form form) => Text(form.formLabel, style: header());
-  Text formName(f.Form form) => Text(form.formLabel, style: Utils.isIpad ? headerL() : headerS());
+  Text formName(f.Form form) =>
+      Text(form.formLabel, style: Utils.isIpad ? headerL() : headerS());
 
-  Text formStatus(f.Form form) =>
-      Text(displayStatus(form.status), style: Utils.isIpad ? labelL() : labelS());
+  Text formStatus(f.Form form) => Text(displayStatus(form.status),
+      style: Utils.isIpad ? labelL() : labelS());
 
   /// Shows whether [form]'s latest local save has reached Firestore yet.
   /// Hidden in sample mode, since sample forms never sync.
   Widget syncStatusIcon(f.Form form) {
-    // Sync temporarily disabled — icon hidden until re-enabled.
-    return const SizedBox.shrink();
-    // if (Authen.isSample) return const SizedBox.shrink();
-    // return Icon(
-    //   form.synced ? Icons.cloud_done : Icons.cloud_off,
-    //   size: Utils.isIpad ? 20 : 16,
-    //   color: form.synced ? Colors.black45 : kPrimary,
-    // );
+    if (Authen.isSample) return const SizedBox.shrink();
+    return Icon(
+      form.synced ? Icons.cloud_done : Icons.cloud_off,
+      size: Utils.isIpad ? 20 : 16,
+      color: form.synced ? Colors.black45 : kPrimary,
+    );
   }
 
   Widget formPercentCompleted(f.Form form, int index) {
@@ -430,7 +432,7 @@ class _FormListState extends State<FormList> {
                     form.submitDateTime != null
                         ? Text(
                             'Submitted on: ${dateTimeText(form.submitDateTime!)}',
-                      style: Utils.isIpad ? labelL() : labelS(),
+                            style: Utils.isIpad ? labelL() : labelS(),
                           )
                         : const SizedBox.shrink(),
                   ],

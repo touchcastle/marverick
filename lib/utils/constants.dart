@@ -20,11 +20,17 @@ import 'package:marverick/ui/views/file_list.dart';
 ///                               disappear.
 /// 1.15.0        18.06.2026    - Add form RT4 & PPC8
 /// 1.15.1        06.07.2026    - Claude refractor
+/// 1.15.2        15.07.2026    - Fix mapping to auto.
+///                             - Fix error message.
+///                             - Fix PPC8 checkbox value bug.
+/// 1.15.3        15.07.2026    - Delete old unused forms. (keep DB for save)
+///                             - Fix DB logic. automation.
+/// 1.16.0        14.08.2026    - Cloud function.
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.15.1';
+const String kVersion = '1.16.0';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -60,6 +66,10 @@ const String kRt6Table = 'rt6_table';
 const String kLineTrainTable = 'line_train_table';
 const String kCccTable = 'ccc_table';
 const String kPscTable = 'psc_table';
+// todo: New form step 4 — add `const String k<X>Table = '<x>_table';` and a
+// `k<X>SheetUrl` above, then add the new table name to this list.
+// todo: New form step 12 — (external) create the Google Sheet + deploy its
+// Apps Script, then paste its /exec URL into the k<X>SheetUrl above.
 const List<String> kDbTableList = [
   'line_check_table',
   'line_check5_table',
@@ -129,40 +139,20 @@ const String kStatusSuccess = 'SUCCESS';
 const String kStatusError = 'ERROR';
 const String kAdminMail = 'admin@vietjetair.com';
 const String kTjoMail = 'teerachart.j@gmail.com';
-const String kLineChekSheetUrl =
-    "https://script.google.com/macros/s/AKfycbwteVnV0IZq-R4a_c6EyM9d4ucL-PriLZLlKdzr2-M56w8-DMA/exec";
 const String kLineChek5SheetUrl =
     "https://script.google.com/macros/s/AKfycbysw5Bs4sPh6kmavwYbi83m6r4bZfGnfSS7J6jAdZnUStSEpyGVuMciOCJyNVmLFHSToA/exec";
-const String kPPCSheetUrl =
-    "https://script.google.com/macros/s/AKfycbz8y3I6TpZAEdaG0PC1IZ2HwxyqgkbNN95Qnf2QUAcKWQ_eePlY1lcTXYvu2Vne6Jgt1A/exec";
-const String kPPC5SheetUrl =
-    "https://script.google.com/macros/s/AKfycbyjXvXQ2PpTxksZ4WSaqqL2OBZkf3zxwAzbht7opSPhoDBgyl9PTbz1gYO7IXbv-8yABA/exec";
 const String kPPC6SheetUrl =
     "https://script.google.com/macros/s/AKfycbx0xpbZiQQ7JYGXAtMUZemP4BWbS0Sila0QkxiypKadW9f8-HqnDPKdBzV_2BLddRK1/exec";
 const String kPPC8SheetUrl =
-    "https://script.google.com/macros/s/AKfycbxmbcxCX5eOGEaf-b_YxZy_GU8m047F53LzrWG4RdyyKYTDy1qoYGA9-UTvojNruRfiUw/exec";
-const String kRt1SheetUrl =
-    "https://script.google.com/macros/s/AKfycbzJn79oV2eX_lIavKZQNK-XJ_j5CNlJKG6DG23ugZ87j5wBrwCMRbtDwG2ZLn2Ed6vUUw/exec";
-const String kRt2SheetUrl =
-    "https://script.google.com/macros/s/AKfycby5iYo_sJdyPfKrv_PMuqSSn8wROycmxB7ADcLbDKUpGTPKvh6jKVickMyuJgvv4Wix/exec";
+    "https://script.google.com/macros/s/AKfycbx3uqHytxcj5TxfWi518imLODHfd4AylgKJnY63Q26fFCvnCYL4mxxbx3GwI5sFkqkRlQ/exec";
 const String kRt3SheetUrl =
     "https://script.google.com/macros/s/AKfycbwCr7dhHFQu7sl-x-PsjoE92WGvLPZv8RK5Eo0bCGsnoxEm7N9Dq3m7W1V3FFwpVe8/exec";
 const String kRt4SheetUrl =
     "https://script.google.com/macros/s/AKfycbxGJC8fsTIkVOiJHB7l5aikMCnAWwliegqsuxczkp9ihY-Z1pAEIdpvO0rhSl4ti34O/exec";
 const String kStdloftSheetUrl =
     "https://script.google.com/macros/s/AKfycby05meqvQZEv_00At1yy5zAnKMsCGSnBxXfEr60f9coKUW2MTOFylWXwle_EOxGIKr0/exec";
-const String kRt22SheetUrl =
-    "https://script.google.com/macros/s/AKfycbzLvZZ1ueJ4S9KsFptnbCk19IPMdpjdqLoXn7C2eKdIYVqEFB2ZNLgpSzOZqUcFCKjB/exec";
-const String kRt5SheetUrl =
-    "https://script.google.com/macros/s/AKfycbyJYqi4u1gckKSMOzDv-cAVmphX3WAPRUDfmXSYmCs1xymbdOWTK-EJb-L-Kgu1gNq2cg/exec";
-const String kRt6SheetUrl =
-    "https://script.google.com/macros/s/AKfycbwEsW4ET4tUVciS2gap91ryhWGTWr9ZWobT2dQuE7nypxg_NDWjlcjK647PYZCt1Ib70w/exec";
 const String kLineTrainSheetUrl =
     "https://script.google.com/macros/s/AKfycbynCthDqbLzUwv0rh3aaJY6knx4JiVOfE-Mh36wReCNYkyys1jNt_V1RqKnu1oHnv1y8A/exec";
-const String kCccSheetUrl =
-    "https://script.google.com/macros/s/AKfycbzQVesyQtUt6nHc4Yr1njkTfeeK3aC-Gh6SHxA8MY7r1FZL-WtsTRBrBH5qx7C64O1WcA/exec";
-const String kPscSheetUrl =
-    "https://script.google.com/macros/s/AKfycbz4j9ackoBVrtHktlWTXxLBYHShwWb724A5rL6UyywG3i-7qlDFR-6U4p5_ZEHMQ2rhHw/exec";
 const String kFcssSheetUrl =
     "https://script.google.com/macros/s/AKfycbw75Yr_CI7nioOGqIE4qn4RDJt5al_1yVp2aUHspUru2ihi5yGrblI8z18Vw_PgngiGeQ/exec";
 const String kSampleMail = 'sample';
@@ -171,6 +161,12 @@ const String kBlankText = '          ';
 // const String kBeamMail = 'beamtjo';
 // const String kBeamPassword = 'qwerty';
 const Duration kSubmitTimeout = Duration(seconds: 15);
+// Per-network-call limits used inside form_submission. These bound the actual
+// upload / sheet-post calls (rather than racing a single wall-clock timer
+// against the whole submit, which could report "timeout" while the work was
+// still succeeding in the background).
+const Duration kUploadTimeout = Duration(seconds: 60);
+const Duration kSheetTimeout = Duration(seconds: 30);
 const String kAdminEmail = 'teerachart.j@gmail.com';
 final DateTime kFirstMay25 = DateTime.parse('2025-05-01 00:00:00.000');
 final DateTime kFirstJune25 = DateTime.parse('2025-06-01 00:00:00.000');

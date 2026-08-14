@@ -2,45 +2,68 @@ import 'package:flutter/cupertino.dart';
 import 'package:marverick/models/field.dart';
 import 'package:marverick/utils/constants.dart';
 import 'package:marverick/services/log.dart';
-import 'package:marverick/services/forms/ccc_form.dart';
-import 'package:marverick/services/forms/fcss_form.dart';
-import 'package:marverick/services/forms/line_check5_form.dart';
-import 'package:marverick/services/forms/line_check_form.dart';
-import 'package:marverick/services/forms/line_train_form.dart';
-import 'package:marverick/services/forms/ppc5_form.dart';
-import 'package:marverick/services/forms/ppc6_form.dart';
-import 'package:marverick/services/forms/ppc8_form.dart';
-import 'package:marverick/services/forms/psc_form.dart';
-import 'package:marverick/services/forms/rt1_form.dart';
-import 'package:marverick/services/forms/rt22_form.dart';
-import 'package:marverick/services/forms/rt2_form.dart';
-import 'package:marverick/services/forms/rt3_form.dart';
-import 'package:marverick/services/forms/rt4_form.dart';
-import 'package:marverick/services/forms/stdloft_form.dart';
 import 'package:intl/intl.dart';
 
-///TODO: New form (1): Add new type
-///TODO: New form (13): Add new form in Google Sheet + macro
+/// ============================================================================
+/// HOW TO ADD A NEW FORM  (current process — search "New form: step N")
+/// ============================================================================
+/// Most of the old boilerplate is now automated (submission mapping + table
+/// creation), so a new form is mainly: define its fields, register it, and
+/// show it in the menu. Steps, in order:
+///
+///  1. models/form.dart          — add the type to the [FormType] enum (below).
+///  2. services/forms/<x>_form.dart — new file with `static Form init()`
+///                                 defining the fields + `filePath`. No toMap()
+///                                 needed; the generic mapper handles it.
+///  3. assets/forms/<x>.pdf       — add the template PDF and point init()'s
+///                                 `filePath` at it (also list it under
+///                                 `flutter: assets:` if it's a new folder).
+///  4. utils/constants.dart       — add `k<X>Table` and `k<X>SheetUrl`, and add
+///                                 `k<X>Table` to `kDbTableList`.
+///  5. services/form_type_config.dart — add one `_formConfig` entry (name,
+///                                 folder fn, url, dbTable).
+///  6. models/form.dart          — add the type to the `defaultMap()` group in
+///                                 [formMap] (see "New form: step 6").
+///  7. services/database.dart    — table create + migration:
+///                                 (a) add `createFormTable(db, k<X>Table,
+///                                     <X>Form.init())` to `onCreateTable`;
+///                                 (b) add the same call in a new
+///                                     `oldVersion == N` block of
+///                                     `onUpdateTable` AND bump the `version:`
+///                                     in `openDB()`.
+///  8. services/database.dart    — add the load branch in `dbQuery` (see
+///                                 "New form: step 8").
+///  9. services/pdf_name_resolver.dart — add the type to a filename group only
+///                                 if it needs a custom PDF name (else it uses
+///                                 the default `<id>.pdf`).
+/// 10. ui/views/main_menu.dart   — add a `SpeedDialChild` that calls
+///                                 `newForm(context, <X>Form.init())`.
+/// 11. models/form.dart          — (optional) add cross-field checks in
+///                                 [validate] if the form needs them.
+/// 12. (external) Create the Google Sheet + deploy its Apps Script, then put
+///     the /exec URL in `k<X>SheetUrl`.
+///
+/// Note: save & delete need NO per-form work — they route through
+/// `form.dbTable` (from form_type_config) generically.
+/// ============================================================================
+///
+/// Only the forms offered in the main menu (plus [sample] for the demo account)
+/// remain. Retired form types and their per-form files were removed; their
+/// SQLite tables are intentionally kept in database.dart for upgrade safety.
 enum FormType {
-  loe,
-  lineCheck,
-  lineCheck5,
+  // todo: New form step 1 — add the new type to this enum.
+  // todo: New form step 2 — create lib/services/forms/<x>_form.dart with a
+  //       `static Form init()` defining the fields (+ filePath). No toMap().
+  // todo: New form step 3 — add the template PDF to assets/forms/<x>.pdf and
+  //       point init()'s filePath at it (list a new folder under flutter:assets).
   sample,
-  ppc,
-  ppc5,
+  lineCheck5,
   ppc6,
   ppc8,
   stdloft, //Standard LOFT (a320/b737)
-  rt1,
-  rt2,
-  rt22,
   rt3,
   rt4,
-  rt5,
-  rt6,
   lineTrain,
-  ccc, //Cabin Crew Line Train/Check
-  psc, //Purser Upgrade Train/Check
   fcss, //Flight Crew Simulator Screening
 }
 
@@ -101,7 +124,10 @@ class Form extends ChangeNotifier {
   });
 
   int allRequired() =>
-      fields.where((c) => c.isMandatory == true).toList().length;
+      fields
+          .where((c) => c.isMandatory == true)
+          .toList()
+          .length;
 
   int filledRequired() {
     int count = 0;
@@ -130,7 +156,10 @@ class Form extends ChangeNotifier {
   }
 
   double percentFilled() {
-    int allRequired = fields.where((c) => c.isMandatory).toList().length;
+    int allRequired = fields
+        .where((c) => c.isMandatory)
+        .toList()
+        .length;
     // int filledRequired = fields
     //     .where(
     //       (c) =>
@@ -178,51 +207,68 @@ class Form extends ChangeNotifier {
     }
   }
 
+  /// Generic field→map builder used by every current (main-menu) form type.
+  ///
+  /// Every hand-written `toMap()` was really just: a constant header block,
+  /// plus one `'<name>': getStrVal('<name>')` line per field. This reproduces
+  /// that mechanically, so new/edited forms don't need a hand-written mapping.
+  ///
+  /// Fields are skipped when they have no [Field.name] (display-only
+  /// `duplicateFrom` fields), or are a [FieldType.checkbox] (whose data is
+  /// carried by their `<name>_N` string mirror fields, which are emitted), or
+  /// are a [FieldType.signature] (uploaded as an image, never a sheet column).
+  Map<String, dynamic> defaultMap() {
+    final Map<String, dynamic> map = {
+      'status': status.toString(),
+      'type': type.toString(),
+      'form_name': formName,
+      'create_at': createDateTime.toString(),
+      'submit_at': submitDateTime != null ? submitDateTime.toString() : '',
+      'create_by': createBy,
+      'file_path': filePath,
+      'id': id,
+      'font_size': fontSize.round().toString(),
+      'pdf_url': pdfUrl ?? '',
+    };
+    for (final field in fields) {
+      if (field.name.isEmpty) continue;
+      if (field.type == FieldType.checkbox) continue;
+      if (field.type == FieldType.signature) continue;
+      map[field.name] = getStrVal(field.name);
+    }
+    return map;
+  }
+
   ///Convert field values into a mapping table for database and Google Sheet.
-  ///TODO: New form (4): Add new mapping in services/forms/<type>_form.dart
+  ///todo: New form step 6 — add the new FormType to the group below so it uses
+  ///the generic [defaultMap]. No hand-written mapping needed; only add a
+  ///special case if the form genuinely can't be expressed by the generic rule.
   Map<String, dynamic> formMap() {
     switch (type) {
-      case FormType.lineCheck:
-        return LineCheckForm.toMap(this);
-      case FormType.lineCheck5:
-        return LineCheck5Form.toMap(this);
-      case FormType.ppc5:
-        return Ppc5Form.toMap(this);
-      case FormType.ppc6:
-        return Ppc6Form.toMap(this);
-      case FormType.ppc8:
-        return Ppc8Form.toMap(this);
-      case FormType.rt1:
-        return Rt1Form.toMap(this);
-      case FormType.rt2:
-        return Rt2Form.toMap(this);
-      case FormType.rt22:
-        return Rt22Form.toMap(this);
-      case FormType.rt3:
-        return Rt3Form.toMap(this);
-      case FormType.rt4:
-        return Rt4Form.toMap(this);
-      case FormType.stdloft:
-        return StdloftForm.toMap(this);
-      case FormType.lineTrain:
-        return LineTrainForm.toMap(this);
-      case FormType.ccc:
-        return CccForm.toMap(this);
-      case FormType.psc:
-        return PscForm.toMap(this);
+    // Active (main-menu) forms use the generic mapper — no hand-written
+    // toMap() to maintain.
       case FormType.fcss:
-        return FcssForm.toMap(this);
+      case FormType.lineCheck5:
+      case FormType.ppc6:
+      case FormType.ppc8:
+      case FormType.rt3:
+      case FormType.rt4:
+      case FormType.lineTrain:
+      case FormType.stdloft:
+        return defaultMap();
+
+    // sample: demo account, never submitted.
       default:
         return {};
     }
   }
 
-  ///TODO: New form (10): Add validation (if any)
+  ///todo: New form step 11 (optional) — add cross-field validation here if needed.
   String validate() {
     String result = '';
 
     ///validate field input
-    if (type == FormType.lineCheck || type == FormType.lineTrain) {
+    if (type == FormType.lineTrain) {
       fields[fields.indexWhere((e) => e.name == 'ac_reg_1')].stringValue =
           fields[fields.indexWhere((e) => e.name == 'ac_reg_1')]
               .stringValue
@@ -257,7 +303,8 @@ class Form extends ChangeNotifier {
     if (type == FormType.lineTrain) {
       print('validating line train form');
       //Check if examiner signature is required and missing?
-      if ((fields[fields.indexWhere((e) => e.name == 'check_type_5')].stringValue ==
+      if ((fields[fields.indexWhere((e) => e.name == 'check_type_5')]
+          .stringValue ==
           'true' ||
           fields[fields.indexWhere((e) => e.name == 'check_type_6')]
               .stringValue ==

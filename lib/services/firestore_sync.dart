@@ -15,6 +15,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:marverick/models/field.dart';
@@ -39,8 +40,15 @@ class FirestoreSync {
 
   bool get _enabled => !Authen.isSample && Authen.user != null;
 
+  // The project's `(default)` database was created in legacy Datastore mode,
+  // which the Firestore mobile SDK can't talk to — a Native-mode database
+  // can't be created in its place, so sync uses this separate named database
+  // instead.
+  FirebaseFirestore get _db =>
+      FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: 'marverick');
+
   CollectionReference<Map<String, dynamic>> _forms(String uid) =>
-      FirebaseFirestore.instance.collection('users/$uid/forms');
+      _db.collection('users/$uid/forms');
 
   DateTime _parseTime(String? value) =>
       value == null ? DateTime.fromMillisecondsSinceEpoch(0) : DateTime.parse(value);

@@ -60,8 +60,8 @@ class FormService extends ChangeNotifier {
     int _i = forms.indexWhere((e) => e.id == form.id);
     forms[_i].status = f.FormStatus.completed;
     save(form);
-    // Sync temporarily disabled.
-    // _sync.pushForm(form, immediate: true, onSettled: (ok) => _markSynced(form, ok));
+    _sync.pushForm(form,
+        immediate: true, onSettled: (ok) => _markSynced(form, ok));
     Log.clear();
     countPending();
     notifyListeners();
@@ -73,8 +73,8 @@ class FormService extends ChangeNotifier {
       forms[_i].status = f.FormStatus.pending;
       Log.add("Form ${form.id} moved to pending");
       save(form);
-      // Sync temporarily disabled.
-      // _sync.pushForm(form, immediate: true, onSettled: (ok) => _markSynced(form, ok));
+      _sync.pushForm(form,
+          immediate: true, onSettled: (ok) => _markSynced(form, ok));
       countPending();
       notifyListeners();
     } catch (e) {}
@@ -134,8 +134,7 @@ class FormService extends ChangeNotifier {
     // Cloud sync happens strictly in the background: it can take a while or
     // fail entirely offline, and must never block startup or hold up the
     // forms list the user is already looking at.
-    // Sync temporarily disabled.
-    // _syncInBackground();
+    _syncInBackground();
   }
 
   Future<void> _syncInBackground() async {
@@ -206,59 +205,57 @@ class FormService extends ChangeNotifier {
     }
   }
 
-  /// TODO: New form (3) add exclusion of new form for test
-  /// TODO: New form (5) remove exclusion
+  /// Save/delete need no per-form work: they route through `form.dbTable`
+  /// (from form_type_config) generically.
   Future save(f.Form form, {bool showLoad = false}) async {
     // if (form.type != f.FormType.rt4 || form.type != f.FormType.ppc8) {
-      print(form.dbTable);
-      if (!Authen.isSample) {
-        showLoad ? Utils.showInProgress(true) : null;
-        try {
-          // Claims a legacy/orphaned form (created before create_by was
-          // populated, e.g. an old login race) for the current account, so
-          // it converges to properly attributed instead of staying
-          // unattributed indefinitely.
-          if (form.createBy.isEmpty && _currentAccountKey != null) {
-            form.createBy = _currentAccountKey!;
-          }
-          final data = form.formMap();
-          if (data.isNotEmpty) {
-            data['updated_at'] = DateTime.now().toIso8601String();
-            // A local change just landed that Firestore hasn't seen yet —
-            // reflect that immediately; pushForm's onSettled flips it back
-            // once the (possibly debounced) push actually succeeds.
-            form.synced = false;
-          }
-          await databaseService.dbInsert(data, form.dbTable);
+    print(form.dbTable);
+    if (!Authen.isSample) {
+      showLoad ? Utils.showInProgress(true) : null;
+      try {
+        // Claims a legacy/orphaned form (created before create_by was
+        // populated, e.g. an old login race) for the current account, so
+        // it converges to properly attributed instead of staying
+        // unattributed indefinitely.
+        if (form.createBy.isEmpty && _currentAccountKey != null) {
+          form.createBy = _currentAccountKey!;
+        }
+        final data = form.formMap();
+        if (data.isNotEmpty) {
+          data['updated_at'] = DateTime.now().toIso8601String();
+          // A local change just landed that Firestore hasn't seen yet —
+          // reflect that immediately; pushForm's onSettled flips it back
+          // once the (possibly debounced) push actually succeeds.
+          form.synced = false;
+        }
+        await databaseService.dbInsert(data, form.dbTable);
 
-          ///Save signature
-          ///Only persists a signature that was already explicitly confirmed
-          ///via the signature pad's own save button (field.signature) —
-          ///must NOT re-derive from the live drawing controller here, since
-          ///the controller keeps whatever is currently drawn even if never
-          ///confirmed. Re-deriving on every autosave (e.g. the one that
-          ///fires when backing out of the input screen) would silently
-          ///commit an unconfirmed re-signing over the previously saved one.
-          for (int i = 0; i < form.fields.length; i++) {
-            if (form.fields[i].type == FieldType.signature) {
-              if (form.fields[i].signature != null) {
-                await SignatureStorage.save('${form.id}${form.fields[i].name}',
-                    form.fields[i].signature!);
-              }
+        ///Save signature
+        ///Only persists a signature that was already explicitly confirmed
+        ///via the signature pad's own save button (field.signature) —
+        ///must NOT re-derive from the live drawing controller here, since
+        ///the controller keeps whatever is currently drawn even if never
+        ///confirmed. Re-deriving on every autosave (e.g. the one that
+        ///fires when backing out of the input screen) would silently
+        ///commit an unconfirmed re-signing over the previously saved one.
+        for (int i = 0; i < form.fields.length; i++) {
+          if (form.fields[i].type == FieldType.signature) {
+            if (form.fields[i].signature != null) {
+              await SignatureStorage.save('${form.id}${form.fields[i].name}',
+                  form.fields[i].signature!);
             }
           }
-          // Sync temporarily disabled.
-          // await _sync.pushForm(form, onSettled: (ok) => _markSynced(form, ok));
-        } catch (e) {
-          print(e);
         }
-        showLoad ? Utils.showInProgress(false) : null;
-        notifyListeners();
+        await _sync.pushForm(form, onSettled: (ok) => _markSynced(form, ok));
+      } catch (e) {
+        print(e);
       }
+      showLoad ? Utils.showInProgress(false) : null;
+      notifyListeners();
+    }
     // }
   }
 
-  ///TODO: New form (9): Add new form delete db
   void delete(f.Form form, void Function(String) callback) async {
     try {
       forms.removeWhere((e) => e.id == form.id);
@@ -266,13 +263,11 @@ class FormService extends ChangeNotifier {
       // Not awaited: the local delete is what the user is waiting on, and
       // Firestore deletes don't resolve until the server acknowledges them
       // — that must never hold up the local delete when offline.
-      // Sync temporarily disabled.
-      // _sync.deleteForm(form.id);
+      _sync.deleteForm(form.id);
       notifyListeners();
       callback(kStatusSuccess);
     } catch (e) {
       callback('$e');
     }
   }
-
 }

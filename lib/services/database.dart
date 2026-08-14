@@ -4,18 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/models/field.dart';
-import 'package:marverick/services/forms/ccc_form.dart';
 import 'package:marverick/services/forms/fcss_form.dart';
 import 'package:marverick/services/forms/line_check5_form.dart';
-import 'package:marverick/services/forms/line_check_form.dart';
 import 'package:marverick/services/forms/line_train_form.dart';
-import 'package:marverick/services/forms/ppc5_form.dart';
 import 'package:marverick/services/forms/ppc6_form.dart';
 import 'package:marverick/services/forms/ppc8_form.dart';
-import 'package:marverick/services/forms/psc_form.dart';
-import 'package:marverick/services/forms/rt1_form.dart';
-import 'package:marverick/services/forms/rt22_form.dart';
-import 'package:marverick/services/forms/rt2_form.dart';
 import 'package:marverick/services/forms/rt3_form.dart';
 import 'package:marverick/services/forms/rt4_form.dart';
 import 'package:marverick/services/forms/stdloft_form.dart';
@@ -2199,7 +2192,56 @@ class DatabaseService {
     print('create fcss complete');
   }
 
-  ///TODO: New form (11): Add new database version
+  /// Fixed columns every form table has, regardless of its own fields.
+  static const List<String> _formTableHeaderColumns = [
+    'id TEXT PRIMARY KEY NOT NULL',
+    'status TEXT NOT NULL',
+    'type TEXT NOT NULL',
+    'form_name TEXT NOT NULL',
+    'create_at TEXT NOT NULL',
+    'submit_at TEXT NOT NULL',
+    'create_by TEXT NOT NULL',
+    'file_path TEXT NOT NULL',
+    'font_size TEXT',
+    'pdf_url TEXT',
+    'updated_at TEXT',
+  ];
+
+  /// Builds a new form table's column list from its field definitions —
+  /// the header columns above, plus one `<name> TEXT` per field, using the
+  /// same skip rules as [Form.defaultMap]: unnamed (duplicateFrom display)
+  /// fields are skipped, checkbox fields themselves are skipped (their data
+  /// lives in separately-named `_0`/`_1`/... mirror fields, which — being
+  /// plain named string fields — are included automatically), and signature
+  /// fields are skipped (stored via SignatureStorage, not SQL).
+  ///
+  /// Only intended for a brand-new form type's very first table — existing
+  /// tables keep whatever columns they already have (including any that no
+  /// longer match a current field, which is normal schema history) and are
+  /// never regenerated from this.
+  static List<String> formTableColumns(Form form) {
+    final columns = [..._formTableHeaderColumns];
+    final seen = <String>{};
+    for (final field in form.fields) {
+      if (field.name.isEmpty) continue;
+      if (field.type == FieldType.checkbox) continue;
+      if (field.type == FieldType.signature) continue;
+      if (!seen.add(field.name)) continue;
+      columns.add('${field.name} TEXT');
+    }
+    return columns;
+  }
+
+  /// Creates a new form type's table from its field definitions. Adding a
+  /// new form is now one call — e.g. `await createFormTable(db, kNewFormTable,
+  /// NewForm.init());` — instead of a hand-written CREATE TABLE column list.
+  static Future<void> createFormTable(
+      Database db, String table, Form form) async {
+    await db.execute('CREATE TABLE $table (${formTableColumns(form).join(', ')})');
+  }
+
+  ///todo: New form step 7a — add `await createFormTable(db, k<X>Table,
+  ///<X>Form.init());` here (no hand-written createXxx() method needed).
   static Future onCreateTable(Database db, int version) async {
     await createLineCheck(db);
     await createLineCheck5(db);
@@ -2221,7 +2263,10 @@ class DatabaseService {
     await createFcss(db);
   }
 
-  ///TODO: New form (12): Add new database version update
+  ///todo: New form step 7b — bump the `version:` in openDB(), then add a new
+  ///`else if (oldVersion == <previous>)` block at the END of this chain calling
+  ///`await createFormTable(db, k<X>Table, <X>Form.init());` so existing installs
+  ///gain the new table on upgrade.
   static Future onUpdateTable(
       Database db, int oldVersion, int newVersion) async {
     if (oldVersion == 1) {
@@ -2482,35 +2527,21 @@ class databaseService {
         Form? append;
         isInitiated = false;
 
-        ///TODO: New form (8): Add new form query db
+        // todo: New form step 8 — add an `else if (table == k<X>Table) {
+        // append = <X>Form.init(); isInitiated = true; }` branch below so saved
+        // rows of the new form load back into the app.
+        ///Only the current (main-menu) form types are reconstructed. Rows from
+        ///retired form tables (if any exist on older installs) are simply
+        ///skipped — their tables are kept in the schema but no longer loaded.
         print('initiate db: ${kDbTableList[dbIndex]}');
-        if (kDbTableList[dbIndex] == kLineCheckTable) {
-          append = LineCheckForm.init();
-          isInitiated = true;
-        } else if (kDbTableList[dbIndex] == kLineCheck5Table) {
+        if (kDbTableList[dbIndex] == kLineCheck5Table) {
           append = LineCheck5Form.init();
-          isInitiated = true;
-        } else if (kDbTableList[dbIndex] == kPPC5Table) {
-          append = Ppc5Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPPC6Table) {
           append = Ppc6Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kPPC8Table) {
           append = Ppc8Form.init();
-          isInitiated = true;
-        }  else if (kDbTableList[dbIndex] == kRt1Table) {
-          append = Rt1Form.init();
-          isInitiated = true;
-          // } else if (kDbTableList[dbIndex] == kRt5Table) {
-          //   append = FormService.initRt5();
-          // } else if (kDbTableList[dbIndex] == kRt6Table) {
-          //   append = FormService.initRt6();
-        } else if (kDbTableList[dbIndex] == kRt2Table) {
-          append = Rt2Form.init();
-          isInitiated = true;
-        } else if (kDbTableList[dbIndex] == kRt22Table) {
-          append = Rt22Form.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kRt3Table) {
           append = Rt3Form.init();
@@ -2523,12 +2554,6 @@ class databaseService {
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kLineTrainTable) {
           append = LineTrainForm.init();
-          isInitiated = true;
-        } else if (kDbTableList[dbIndex] == kCccTable) {
-          append = CccForm.init();
-          isInitiated = true;
-        } else if (kDbTableList[dbIndex] == kPscTable) {
-          append = PscForm.init();
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kFcssTable) {
           append = FcssForm.init();
@@ -2580,97 +2605,6 @@ class databaseService {
     }
 
     _dbList.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
-
-    ///LINE CHECK
-    // final List<Map<String, dynamic>> lineCheckMaps =
-    //     await db.query(kLineCheckTable);
-    // List.generate(lineCheckMaps.length, (i) {
-    //   Form _new = LineCheckForm.init();
-    //
-    //   //To get item value from database.
-    //   // Field _replaceItemValue(Field field) {
-    //   //   Field _result = field;
-    //   //   String _name = field.name;
-    //   //   if (lineCheckMaps[i][_name] != null && lineCheckMaps[i][_name] != '') {
-    //   //     _result.stringValue = lineCheckMaps[i][_name];
-    //   //     if (_result.type == FieldType.radio) {
-    //   //       _result.intValue = _result.listValue
-    //   //           .indexWhere((e) => e == lineCheckMaps[i][_name]);
-    //   //     }
-    //   //   }
-    //   //   return _result;
-    //   // }
-    //
-    //   ///Move data from database mapping into list
-    //   _new.status = FormStatus.values
-    //       .firstWhere((e) => e.toString() == lineCheckMaps[i]['status']);
-    //   _new.type = FormType.lineCheck;
-    //   _new.formName = lineCheckMaps[i]['form_name'];
-    //   _new.createDateTime = DateTime.parse(lineCheckMaps[i]['create_at']);
-    //   if (lineCheckMaps[i]['submit_at'] != null &&
-    //       lineCheckMaps[i]['submit_at'] != '') {
-    //     _new.submitDateTime = DateTime.parse(lineCheckMaps[i]['submit_at']);
-    //   }
-    //   _new.createBy = lineCheckMaps[i]['create_by'];
-    //   _new.filePath = lineCheckMaps[i]['file_path'];
-    //   _new.id = lineCheckMaps[i]['id'];
-    //   _new.fontSize = double.parse(lineCheckMaps[i]['font_size']);
-    //
-    //   for (int _i = 0; _i < _new.fields.length; _i++) {
-    //     _new.fields[_i] = _replaceItemValue(_new.fields[_i], lineCheckMaps, i);
-    //   }
-    //
-    //   _dbList.add(_new);
-    // });
-
-    ///PPC
-    // final List<Map<String, dynamic>> ppcMaps = await db.query(kPPCTable);
-    // List.generate(ppcMaps.length, (i) {
-    //   Form _new = FormService.initPpcCheck();
-    //
-    //   //To get item value from database.
-    //   // Field _replaceItemValue(Field field) {
-    //   //   Field _result = field;
-    //   //   String _name = field.name;
-    //   //   if (ppcMaps[i][_name] != null && ppcMaps[i][_name] != '') {
-    //   //     _result.stringValue = ppcMaps[i][_name];
-    //   //     if (_result.type == FieldType.radio) {
-    //   //       _result.intValue =
-    //   //           _result.listValue.indexWhere((e) => e == ppcMaps[i][_name]);
-    //   //     }
-    //   //   }
-    //   //   return _result;
-    //   // }
-    //
-    //   ///Move data from database mapping into list
-    //   _new.status = FormStatus.values
-    //       .firstWhere((e) => e.toString() == ppcMaps[i]['status']);
-    //   _new.type = FormType.ppc;
-    //   _new.formName = ppcMaps[i]['form_name'];
-    //   _new.createDateTime = DateTime.parse(ppcMaps[i]['create_at']);
-    //   if (ppcMaps[i]['submit_at'] != null && ppcMaps[i]['submit_at'] != '') {
-    //     _new.submitDateTime = DateTime.parse(ppcMaps[i]['submit_at']);
-    //   }
-    //   _new.createBy = ppcMaps[i]['create_by'];
-    //   _new.filePath = ppcMaps[i]['file_path'];
-    //   _new.id = ppcMaps[i]['id'];
-    //   _new.fontSize = double.parse(ppcMaps[i]['font_size']);
-    //
-    //   for (int _i = 0; _i < _new.fields.length; _i++) {
-    //     _new.fields[_i] = _replaceItemValue(_new.fields[_i], ppcMaps, i);
-    //
-    //     ///Add case for transfer checkbox data
-    //     if (_new.fields[_i].type == FieldType.checkbox) {
-    //       for (int _c = 0; _c < _new.fields[_i].checkBoxValue.length; _c++) {
-    //         String _name = _new.fields[_i].name + '_' + _c.toString();
-    //         _new.fields[_i].checkBoxValue[_c] =
-    //             bool.parse(ppcMaps[i][_name].toLowerCase());
-    //       }
-    //     }
-    //   }
-    //
-    //   _dbList.add(_new);
-    // });
     return _dbList;
   }
 }

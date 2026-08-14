@@ -89,8 +89,11 @@ class _LoginState extends State<Login> {
     } catch (e) {
       Utils.showInProgress(false);
       FocusManager.instance.primaryFocus?.unfocus();
-      Snackbar.show(context, text: '$e');
-      // if (widget.fromInputPage) Navigator.of(context).pop();
+      Snackbar.show(context,
+          text: e.toString().toLowerCase().contains('network')
+              ? 'Can\'t reach the server. Please check your internet connection.'
+              : 'Couldn\'t send the reset email. Please check the email address and try again.');
+      print('reset password error: $e');
     }
   }
 
@@ -127,13 +130,15 @@ class _LoginState extends State<Login> {
           );
         }
       } else {
-        Snackbar.show(context, text: 'Login error');
-        // if (widget.fromInputPage) Navigator.of(context).pop();
+        Snackbar.show(context, text: 'Sign in failed. Please try again.');
       }
     } catch (e) {
       Utils.showInProgress(false);
-      Snackbar.show(context, text: '$e');
-      // if (widget.fromInputPage) Navigator.of(context).pop();
+      Snackbar.show(context,
+          text: e.toString().toLowerCase().contains('network')
+              ? 'Can\'t reach the server. Please check your internet connection.'
+              : 'Sign in failed. Please check your username and password.');
+      print('login error: $e');
     }
   }
 

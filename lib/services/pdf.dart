@@ -27,6 +27,18 @@ class Pdf {
     final ByteData markBytes = await rootBundle.load('assets/icons/mark.png');
     final Uint8List markPng = markBytes.buffer.asUint8List();
     final PdfBitmap mark = PdfBitmap(markPng);
+
+    // Unicode font for field text. The built-in PdfStandardFont (Helvetica)
+    // only has Latin glyphs and throws "character is not supported by the
+    // font" on Thai (and other non-Latin) input. Sarabun covers Thai + Latin.
+    // Loaded once here; PdfTrueTypeFont instances are cached per size below
+    // since field font sizes vary.
+    final ByteData sarabunData =
+        await rootBundle.load('assets/fonts/Sarabun-Regular.ttf');
+    final Uint8List sarabunBytes = sarabunData.buffer.asUint8List();
+    final Map<double, PdfTrueTypeFont> fontCache = {};
+    PdfTrueTypeFont fieldFont(double size) =>
+        fontCache.putIfAbsent(size, () => PdfTrueTypeFont(sarabunBytes, size));
     //Get the pages count
     int pageCount = document.pages.count;
     //Create the PDF standard font
@@ -198,8 +210,7 @@ class Pdf {
               try {
                 PdfTextElement(
                   text: _field.stringValue,
-                  font: PdfStandardFont(PdfFontFamily.helvetica,
-                      _field.fontSize ?? form.fontSize),
+                  font: fieldFont(_field.fontSize ?? form.fontSize),
                   format: PdfStringFormat(lineSpacing: 0),
                 ).draw(
                   page: document.pages[page - 1],
