@@ -17,11 +17,19 @@ class Snackbar {
     bool isFixed = false,
     int? duration,
   }) {
+    // Guarantee the message actually shown to the user lands in the log,
+    // regardless of whether the call site also logged its own reason —
+    // upstream code has repeatedly forgotten to (e.g. the missing-required-
+    // fields path in FormSubmission.submit never called Log.add), leaving
+    // "Send Log" with nothing to show for the error the user just saw.
+    if (type != Type.info) {
+      Log.add('SNACKBAR (${type.name}): $text');
+    }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       behavior: isFixed ? SnackBarBehavior.fixed : SnackBarBehavior.floating,
       // elevation: 0,
       backgroundColor: type == Type.info
-          ? Colors.green
+          ? Colors.green.shade700
           : type == Type.caution
               ? Colors.orangeAccent
               : Colors.red,

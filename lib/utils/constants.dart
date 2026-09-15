@@ -26,11 +26,13 @@ import 'package:marverick/ui/views/file_list.dart';
 /// 1.15.3        15.07.2026    - Delete old unused forms. (keep DB for save)
 ///                             - Fix DB logic. automation.
 /// 1.16.0        14.08.2026    - Cloud function.
+/// 1.16.1        14.08.2026    - Add form DIFF.
+/// 1.16.2        10.09.2026    - Fix send log function.
 ///
 ///=============================================================================
 
 ///Version number
-const String kVersion = '1.16.0';
+const String kVersion = '1.16.2';
 
 ///PageID
 const String kLandingId = 'landing_screen';
@@ -66,6 +68,7 @@ const String kRt6Table = 'rt6_table';
 const String kLineTrainTable = 'line_train_table';
 const String kCccTable = 'ccc_table';
 const String kPscTable = 'psc_table';
+const String kDiffTable = 'diff_table';
 // todo: New form step 4 — add `const String k<X>Table = '<x>_table';` and a
 // `k<X>SheetUrl` above, then add the new table name to this list.
 // todo: New form step 12 — (external) create the Google Sheet + deploy its
@@ -89,6 +92,7 @@ const List<String> kDbTableList = [
   'ccc_table',
   'psc_table',
   'fcss_table',
+  'diff_table',
 ];
 
 List<Widget> widgetOptions = <Widget>[
@@ -155,6 +159,11 @@ const String kLineTrainSheetUrl =
     "https://script.google.com/macros/s/AKfycbynCthDqbLzUwv0rh3aaJY6knx4JiVOfE-Mh36wReCNYkyys1jNt_V1RqKnu1oHnv1y8A/exec";
 const String kFcssSheetUrl =
     "https://script.google.com/macros/s/AKfycbw75Yr_CI7nioOGqIE4qn4RDJt5al_1yVp2aUHspUru2ihi5yGrblI8z18Vw_PgngiGeQ/exec";
+const String kDiffSheetUrl =
+    "https://script.google.com/macros/s/AKfycbxc47WyVlkbypLGLBXBy53EJflOGMNbsro7CkS3D_4llZKppsanq3hjhV5AjLjVTJP_/exec";
+// todo: DIFF form step 12 — create the Google Sheet + deploy its Apps Script,
+// then paste its /exec URL here. Until then, submission is blocked with a
+// friendly error (see form_submission.dart).
 const String kSampleMail = 'sample';
 const String kSamplePassword = 'qwerty';
 const String kBlankText = '          ';

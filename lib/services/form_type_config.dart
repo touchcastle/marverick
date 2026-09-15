@@ -76,6 +76,12 @@ const Map<FormType, _FormConfig> _formConfig = {
     url: kFcssSheetUrl,
     dbTable: kFcssTable,
   ),
+  FormType.diff: _FormConfig(
+    name: 'diff',
+    folder: _diffFolder,
+    url: kDiffSheetUrl,
+    dbTable: kDiffTable,
+  ),
   FormType.sample: _FormConfig(
     name: 'sample',
     folder: _sampleFolder,
@@ -94,6 +100,7 @@ String _rt3Folder() => 'rt3';
 String _rt4Folder() => 'rt4';
 String _lineTrainFolder() => 'line_train';
 String _fcssFolder() => 'fcss';
+String _diffFolder() => 'diff';
 String _sampleFolder() => 'sample';
 
 extension FormTypeConfig on FormType {

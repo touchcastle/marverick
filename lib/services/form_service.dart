@@ -11,8 +11,18 @@ import 'package:marverick/services/form_submission.dart';
 import 'package:marverick/services/log.dart';
 import 'package:marverick/services/signature_storage.dart';
 import 'package:marverick/ui/views/input.dart';
+import 'package:marverick/ui/widgets/snackbar.dart';
 import 'package:marverick/utils/constants.dart';
 import 'package:marverick/utils/utils.dart';
+
+/// Pairs [manualSync]'s status message with the snackbar [Type] it should
+/// render as, so callers don't have to re-derive success/failure from the
+/// message text.
+class SyncResult {
+  final String message;
+  final Type type;
+  const SyncResult(this.message, this.type);
+}
 
 class FormService extends ChangeNotifier {
   Authen authen;
@@ -160,11 +170,14 @@ class FormService extends ChangeNotifier {
 
   /// Triggers an immediate reconcile with Firestore instead of waiting for
   /// the background pass, for the manual "sync now" button. Returns a short
-  /// status message for the UI to show.
-  Future<String> manualSync() async {
-    if (Authen.isSample) return 'Sample mode does not sync';
+  /// status message plus the snackbar [Type] it should render as, so a
+  /// partial/total failure never shows as the same green as a real success.
+  Future<SyncResult> manualSync() async {
+    if (Authen.isSample) {
+      return SyncResult('Sample mode does not sync', Type.caution);
+    }
     final createBy = _currentAccountKey;
-    if (createBy == null) return 'Not signed in';
+    if (createBy == null) return SyncResult('Not signed in', Type.caution);
 
     print('[FormService] Manual sync requested for $createBy');
     final results = await _sync.reconcile(createBy);
@@ -180,14 +193,14 @@ class FormService extends ChangeNotifier {
 
     if (results.isEmpty) {
       print('[FormService] Manual sync: nothing to reconcile');
-      return 'Nothing to sync';
+      return SyncResult('Nothing to sync', Type.info);
     }
     final failed = results.values.where((ok) => !ok).length;
     final message = failed == 0
         ? 'Synced ${results.length} form${results.length == 1 ? '' : 's'}'
         : '$failed of ${results.length} form${results.length == 1 ? '' : 's'} failed to sync';
     print('[FormService] Manual sync result: $message');
-    return message;
+    return SyncResult(message, failed == 0 ? Type.info : Type.error);
   }
 
   Future<void> _loadSignatures(List<f.Form> list) async {

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:marverick/models/form.dart';
 import 'package:marverick/models/field.dart';
+import 'package:marverick/services/forms/diff_form.dart';
 import 'package:marverick/services/forms/fcss_form.dart';
 import 'package:marverick/services/forms/line_check5_form.dart';
 import 'package:marverick/services/forms/line_train_form.dart';
@@ -19,7 +20,7 @@ class DatabaseService {
     // proceed before the database file exists and before onCreate/onUpgrade
     // (schema migrations) have actually finished running.
     return openDatabase(join(await getDatabasesPath(), kDbName),
-        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 16);
+        onCreate: onCreateTable, onUpgrade: onUpdateTable, version: 17);
   }
 
   static Future createLineCheck(Database db) async {
@@ -2261,6 +2262,7 @@ class DatabaseService {
     await createCcc(db);
     await createPsc(db);
     await createFcss(db);
+    await createFormTable(db, kDiffTable, DiffForm.init());
   }
 
   ///todo: New form step 7b — bump the `version:` in openDB(), then add a new
@@ -2409,8 +2411,12 @@ class DatabaseService {
       await createPpc8(db);
     } else if (oldVersion == 15) {
       for (final table in kDbTableList) {
+        if (table == kDiffTable) continue;
         await db.execute('ALTER TABLE $table ADD COLUMN updated_at TEXT');
       }
+      await createFormTable(db, kDiffTable, DiffForm.init());
+    } else if (oldVersion == 16) {
+      await createFormTable(db, kDiffTable, DiffForm.init());
     }
   }
 }
@@ -2557,6 +2563,9 @@ class databaseService {
           isInitiated = true;
         } else if (kDbTableList[dbIndex] == kFcssTable) {
           append = FcssForm.init();
+          isInitiated = true;
+        } else if (kDbTableList[dbIndex] == kDiffTable) {
+          append = DiffForm.init();
           isInitiated = true;
         }
 

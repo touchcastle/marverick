@@ -47,6 +47,8 @@ class FormSubmission {
     }
 
     if (form.percentFilled() < 100 && !Authen.isAdmin()) {
+      Log.add(
+          '${form.id} missing required fields (${form.percentFilled()}% filled)');
       onResult('Please fill in all required fields before submitting.',
           ErrorType.missingRequired);
       return;

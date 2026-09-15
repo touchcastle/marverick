@@ -78,7 +78,8 @@ class _LoginState extends State<Login> {
   Future resetPassword() async {
     try {
       if(email == ''){
-        Snackbar.show(context, text: 'Please input username / email');
+        Snackbar.show(context,
+            text: 'Please input username / email', type: Type.caution);
       } else {
         Utils.showInProgress(true);
         await Authen.resetPassword(email);

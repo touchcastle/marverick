@@ -65,6 +65,7 @@ enum FormType {
   rt4,
   lineTrain,
   fcss, //Flight Crew Simulator Screening
+  diff, //B737 Difference Training
 }
 
 enum FormStatus { working, completed, pending }
@@ -255,6 +256,7 @@ class Form extends ChangeNotifier {
       case FormType.rt4:
       case FormType.lineTrain:
       case FormType.stdloft:
+      case FormType.diff:
         return defaultMap();
 
     // sample: demo account, never submitted.

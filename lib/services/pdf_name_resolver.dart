@@ -19,6 +19,7 @@ class PdfNameResolver {
       case f.FormType.rt3:
       case f.FormType.rt4:
       case f.FormType.stdloft:
+      case f.FormType.diff:
         final id = form.getStrVal('pilot_id');
         final rank = form.getStrVal('pilot_rank').toUpperCase();
         final name = form.getStrVal('pilot_name').toUpperCase();

@@ -7,6 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:marverick/services/form_service.dart';
 import 'package:marverick/services/authen.dart';
+import 'package:marverick/services/forms/diff_form.dart';
 import 'package:marverick/services/forms/fcss_form.dart';
 import 'package:marverick/services/forms/line_check5_form.dart';
 import 'package:marverick/services/forms/line_train_form.dart';
@@ -138,10 +139,13 @@ class _MainMenuState extends State<MainMenu> {
                     tooltip: 'Sync now',
                     onPressed: () async {
                       Utils.showInProgress(true);
-                      final message =
+                      final result =
                           await context.read<FormService>().manualSync();
                       Utils.showInProgress(false);
-                      Snackbar.show(context, text: message, type: Type.info);
+                      Snackbar.show(context,
+                          text: result.message,
+                          type: result.type,
+                          isFixed: true);
                     },
                   )
                 : const SizedBox.shrink(),
@@ -383,6 +387,14 @@ class _MainMenuState extends State<MainMenu> {
                           .newForm(context, Rt4Form.init());
                     },
                   ),
+                SpeedDialChild(
+                  child: Icon(Icons.add, color: kPrimaryDarker),
+                  label: 'B737 DIFFERENCE TRAINING (rev.00)',
+                  labelStyle: Utils.isIpad ? headerL() : headerS(),
+                  onTap: () {
+                    context.read<FormService>().newForm(context, DiffForm.init());
+                  },
+                ),
                 SpeedDialChild(
                   child: Icon(Icons.add, color: kPrimaryDarker),
                   label: DateTime.now().isBefore(k1Jan26)

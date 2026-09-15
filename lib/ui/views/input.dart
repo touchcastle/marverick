@@ -337,7 +337,11 @@ class _InputScreenState extends State<InputScreen> {
                       (String response, ErrorType type) {
                     if (response != kStatusSuccess) {
                       Snackbar.show(context,
-                          text: response, type: Type.info, isFixed: true);
+                          text: response,
+                          type: type == ErrorType.noInternet
+                              ? Type.caution
+                              : Type.error,
+                          isFixed: true);
                     }
                   });
                 },
